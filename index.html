@@ -1,0 +1,1266 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>노선생 역사 학습실</title>
+  <style>
+    :root{
+      --bg:#f4f6fb;
+      --card:#ffffff;
+      --ink:#182033;
+      --muted:#6f7788;
+      --line:#e6e9f1;
+      --accent:#654bff;
+      --accent2:#8b5cf6;
+      --ok:#2aa879;
+      --warn:#d99a2b;
+      --shadow:0 8px 28px rgba(31,42,68,.08);
+      --radius:22px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Pretendard, "Noto Sans KR", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:linear-gradient(180deg,#f7f8fd 0%,var(--bg) 100%);
+      color:var(--ink);
+    }
+    button,input{font:inherit}
+    .wrap{max-width:1180px;margin:0 auto;padding:28px 20px 48px}
+    .hero{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      padding:26px 28px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:24px;
+    }
+    .brand{display:flex;gap:16px;align-items:center}
+    .logo{
+      width:58px;height:58px;border-radius:18px;
+      display:grid;place-items:center;
+      background:linear-gradient(135deg,#ff8b5d,#ff4b88 48%,#6c4dff);
+      color:#fff;font-weight:900;font-size:20px;
+      box-shadow:0 8px 20px rgba(103,77,255,.22);
+    }
+    h1{margin:0 0 6px;font-size:30px;letter-spacing:-.6px}
+    .sub{color:var(--muted);font-size:15px}
+    .user-pill{
+      display:flex;align-items:center;gap:10px;
+      border:1px solid #e8e5ff;background:#faf9ff;
+      color:#5c49cf;border-radius:999px;padding:10px 14px;
+      font-weight:800;white-space:nowrap
+    }
+    .section{margin-top:24px}
+    .login-card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:24px;
+    }
+    .section-title{font-size:20px;font-weight:900;margin:0 0 8px}
+    .section-desc{color:var(--muted);font-size:14px;margin-bottom:18px}
+    .login-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr auto;
+      gap:12px;
+      align-items:end;
+    }
+    label{display:block;font-size:13px;font-weight:800;margin:0 0 7px;color:#4e566a}
+    input{
+      width:100%;height:48px;border-radius:13px;border:1px solid #dfe3ee;
+      padding:0 14px;background:#fff;outline:none;
+    }
+    input:focus{border-color:#8a78ff;box-shadow:0 0 0 3px rgba(101,75,255,.10)}
+    .btn{
+      height:48px;border:0;border-radius:13px;padding:0 22px;font-weight:900;cursor:pointer;
+      transition:.18s ease;
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn-primary{background:linear-gradient(135deg,var(--accent),#7359ff);color:#fff}
+    .btn-soft{background:#f1efff;color:#5f4adb}
+    .btn-ghost{background:#f3f5f9;color:#5d6574}
+    .login-msg{margin-top:12px;font-size:13px;font-weight:700}
+    .login-msg.ok{color:var(--ok)}
+    .login-msg.err{color:#d65353}
+    .dashboard{display:none}
+    .dashboard.show{display:block}
+    .hello{
+      display:flex;align-items:flex-start;justify-content:space-between;gap:16px;
+      margin-bottom:14px
+    }
+    .hello h2{margin:0 0 6px;font-size:24px}
+    .flow{
+      color:var(--muted);font-size:14px;line-height:1.6
+    }
+    .flow b{color:#5147aa}
+    .apps{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:16px;
+      margin-top:18px
+    }
+    .app-card{
+      position:relative;background:var(--card);
+      border:1px solid var(--line);
+      border-radius:22px;padding:20px;
+      min-height:190px;box-shadow:var(--shadow);
+      display:flex;flex-direction:column;gap:12px;
+      overflow:hidden;
+    }
+    .app-card::after{
+      content:"";position:absolute;right:-28px;top:-28px;width:110px;height:110px;
+      border-radius:50%;background:var(--tone,#eee);opacity:.35
+    }
+    .app-head{display:flex;align-items:center;gap:12px;z-index:1}
+    .app-icon{
+      width:48px;height:48px;border-radius:15px;display:grid;place-items:center;
+      background:var(--tone,#eee);font-size:24px
+    }
+    .app-title{font-size:18px;font-weight:900}
+    .app-desc{color:var(--muted);font-size:13px;line-height:1.5;min-height:38px}
+    .app-progress-detail{font-size:12px;font-weight:800;color:#596074;background:#f6f7fb;border:1px solid #eceef5;border-radius:10px;padding:8px 10px}
+    .status-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto}
+    .badge{
+      font-size:12px;font-weight:900;border-radius:999px;padding:6px 9px;
+      background:#eef8f3;color:#20805e
+    }
+    .badge.wait{background:#fff6e7;color:#b57915}
+    .go{
+      border:0;border-radius:12px;padding:10px 13px;font-weight:900;cursor:pointer;
+      background:#181b22;color:#fff
+    }
+    .go[disabled]{cursor:not-allowed;opacity:.45}
+    .mini{
+      margin-top:18px;background:#f8f7ff;border:1px solid #ebe8ff;
+      border-radius:18px;padding:15px 17px;color:#625c83;font-size:13px;line-height:1.6
+    }
+    .footer-note{margin-top:20px;text-align:center;color:#9298a6;font-size:12px}
+    @media(max-width:900px){
+      .apps{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .login-grid{grid-template-columns:1fr 1fr}
+      .login-grid .btn{grid-column:1/-1}
+      .hero{align-items:flex-start}
+    }
+    @media(max-width:640px){
+      .wrap{padding:16px 12px 34px}
+      .hero{padding:20px;flex-direction:column}
+      h1{font-size:24px}
+      .login-grid{grid-template-columns:1fr}
+      .apps{grid-template-columns:1fr}
+      .hello{flex-direction:column}
+    }
+  
+    .app-progress-wrap{
+      margin-top:2px;
+      padding:0 1px;
+    }
+    .app-progress-meta{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:5px;
+      font-size:11px;
+      color:#7a8194;
+      font-weight:800;
+    }
+    .app-progress-meta b{
+      color:#2f3545;
+      font-size:11px;
+    }
+    .app-progress-bar{
+      height:7px;
+      overflow:hidden;
+      border-radius:999px;
+      background:#eceef4;
+    }
+    .app-progress-bar>div{
+      height:100%;
+      border-radius:999px;
+      background:var(--tone);
+      transition:width .35s ease;
+    }
+    .app-recent{
+      font-size:11px;
+      line-height:1.45;
+      color:#6e7485;
+      font-weight:750;
+      padding:2px 2px 0;
+      min-height:18px;
+    }
+
+
+    .class-mode-banner{
+      margin:0 0 16px;
+      padding:14px 16px;
+      border-radius:16px;
+      border:1px solid #e6e8f0;
+      background:#fff;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      flex-wrap:wrap;
+      box-shadow:0 5px 18px rgba(34,43,67,.04);
+    }
+    .class-mode-banner b{font-size:14px}
+    .class-mode-banner span{font-size:12px;line-height:1.55;color:#697083}
+    .class-mode-banner.class{background:#fffaf0;border-color:#f0dfb7}
+    .class-mode-banner.free{background:#f3fbf6;border-color:#d7ecde}
+    .class-mode-banner.open{background:#f6f5ff;border-color:#e4e0ff}
+    .app-lock-reason{
+      min-height:18px;
+      font-size:11px;
+      line-height:1.45;
+      color:#9a6b18;
+      font-weight:800;
+      padding:1px 2px 0;
+    }
+
+
+    .lesson-flow{
+      display:flex!important;
+      align-items:center;
+      gap:7px;
+      flex-wrap:wrap;
+      width:100%;
+      margin-top:2px;
+    }
+    .lesson-flow i{
+      font-style:normal;
+      padding:6px 9px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:900;
+      border:1px solid #e5e7eb;
+      background:#fff;
+      color:#6b7280;
+    }
+    .lesson-flow i.done{background:#edf9f1;border-color:#cfe9d8;color:#23824a}
+    .lesson-flow i.now{background:#fff4d8;border-color:#f1d797;color:#9a6410}
+    .lesson-flow i.lock{background:#f5f6f8;color:#9aa0aa}
+    .lesson-flow>b{font-size:11px;color:#9aa0aa}
+    .step-tag{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:4px 8px;
+      border-radius:999px;
+      background:#f4f1ff;
+      color:#6c55d9;
+      font-size:10px;
+      font-weight:950;
+      margin-left:auto;
+    }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="brand">
+      <div class="logo">역사</div>
+      <div>
+        <h1>노선생 역사 학습실</h1>
+        <div class="sub">학번과 이름으로 한 번 로그인하고, 원하는 역사 학습앱으로 이동하세요.</div>
+      </div>
+    </div>
+    <div id="userPill" class="user-pill" style="display:none">👤 <span id="pillText"></span></div>
+  </header>
+
+  <section id="loginSection" class="section login-card">
+    <h2 class="section-title">학생 로그인</h2>
+    <div class="section-desc">학생명단에서 학번과 이름을 확인한 뒤 로그인하며, 확인된 정보는 이 브라우저에 저장되어 각 역사 학습앱에서 공통으로 사용됩니다.</div>
+    <div class="login-grid">
+      <div>
+        <label for="studentNo">학번</label>
+        <input id="studentNo" inputmode="numeric" autocomplete="off" placeholder="예: 31301" maxlength="10">
+      </div>
+      <div>
+        <label for="studentName">이름</label>
+        <input id="studentName" autocomplete="off" placeholder="예: 홍길동" maxlength="20">
+      </div>
+      <button id="loginBtn" class="btn btn-primary">학습 시작</button>
+    </div>
+    <div id="loginMsg" class="login-msg"></div>
+  </section>
+
+  <main id="dashboard" class="section dashboard">
+    <div class="hello">
+      <div>
+        <h2><span id="helloName"></span> 학생, 오늘도 역사 속으로!</h2>
+        <div class="flow">
+          추천 흐름: <b>학습지 → 시간탐험대 → 역사 탐정사무소 → 역사 DM</b><br>로그인할 때 불러온 진행정보로 완료율과 최근 활동을 바로 확인할 수 있어요.<br>
+          남는 시간에는 역사 디펜스와 역사 살아남기를 이용할 수 있어요.
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button id="changeUserBtn" class="btn btn-soft">학생 정보 변경</button>
+        <button id="logoutBtn" class="btn btn-ghost">로그아웃</button>
+      </div>
+    </div>
+
+    <section>
+      <div class="apps" id="appsGrid"></div>
+      <div class="mini">
+        <b>확장형 구조</b>로 제작되어 있습니다. 앞으로 새 역사 앱을 추가할 때는
+        아래 JavaScript의 <code>APPS</code> 배열에 앱 항목 하나만 추가하면 카드가 자동으로 생성됩니다.
+      </div>
+    </section>
+  </main>
+
+  <div class="footer-note">노선생 역사 수업앱 통합 로비 · 학생 공통 로그인 기반</div>
+</div>
+
+<script>
+/*
+  =========================================================
+  앱 등록 영역
+  ---------------------------------------------------------
+  새 앱 추가 시 이 배열에 객체 하나만 추가하세요.
+  enabled: true  -> 입장 버튼 활성화
+  enabled: false -> 준비 중 표시
+  =========================================================
+*/
+const APPS = [
+  {
+    id: "time_explorer",
+    name: "시간탐험대",
+    icon: "⏳",
+    description: "학습지에서 배운 내용을 빠르게 확인하고 복습하는 시간여행 퀴즈",
+    url: "time_explorer/index.html",
+    enabled: true,
+    tone: "#dbeafe"
+  },
+  {
+    id: "detective",
+    name: "역사 탐정사무소",
+    icon: "🔎",
+    description: "단서와 사료를 조사하며 역사 사건을 해결하는 탐정형 학습",
+    url: "detective/index.html",
+    enabled: true,
+    tone: "#fdecc8"
+  },
+  {
+    id: "history_dm",
+    name: "역사 DM",
+    icon: "💬",
+    description: "학습지의 사실·개념·논쟁 질문을 역사 인물·해설자와 대화하며 탐구",
+    url: "history_dm_topics.html",
+    enabled: true,
+    tone: "#eee7ff"
+  },
+  {
+    id: "history_defense",
+    name: "역사 디펜스",
+    icon: "🛡️",
+    description: "퀴즈와 병력 운용으로 역사 속 전투를 방어하는 전략 학습 게임",
+    url: "",
+    enabled: false,
+    tone: "#fee2e2"
+  },
+  {
+    id: "history_survival",
+    name: "역사 살아남기",
+    icon: "🗺️",
+    description: "역사 지식을 활용하며 진행하는 반복 플레이형 생존 학습 게임",
+    url: "",
+    enabled: false,
+    tone: "#dcfce7"
+  }
+];
+
+const el = (id) => document.getElementById(id);
+
+function getStudent(){
+  return {
+    studentNo: localStorage.getItem("studentNo") || "",
+    studentName: localStorage.getItem("studentName") || "",
+    studentId: localStorage.getItem("studentId") || ""
+  };
+}
+
+function saveStudent(studentNo, studentName){
+  const no = studentNo.trim();
+  const name = studentName.trim();
+  const id = no + "_" + name;
+
+  localStorage.setItem("studentNo", no);
+  localStorage.setItem("studentName", name);
+  localStorage.setItem("studentId", id);
+
+  return {studentNo:no, studentName:name, studentId:id};
+}
+
+function clearStudent(){
+  localStorage.removeItem("studentNo");
+  localStorage.removeItem("studentName");
+  localStorage.removeItem("studentId");
+  localStorage.removeItem("historyHubStateV1");
+  localStorage.removeItem("historyHubStateStudentId");
+  sessionStorage.removeItem("historyHubLoginSessionV1");
+}
+
+function validateStudent(no, name){
+  if(!no || !name) return "학번과 이름을 모두 입력해주세요.";
+  if(!/^[0-9]{4,10}$/.test(no)) return "학번은 숫자로 입력해주세요.";
+  if(name.length < 2) return "이름을 확인해주세요.";
+  return "";
+}
+
+
+function readHubState(){
+  try{
+    const hub = JSON.parse(localStorage.getItem("historyHubStateV1") || "null");
+    const studentId = localStorage.getItem("studentId") || "";
+    if(!hub || !hub.student || hub.student.studentId !== studentId) return null;
+    return hub;
+  }catch(e){
+    return null;
+  }
+}
+
+
+function getClassOperation(){
+  const hub = readHubState();
+  return hub && hub.classOperation ? hub.classOperation : {
+    mode:"OPEN",
+    worksheetId:"",
+    worksheetTitle:"",
+    requiredApps:["time_explorer","detective","history_dm"],
+    unlockGamesAfterCore:true,
+    enabled:false
+  };
+}
+
+
+const WORKSHEET_BUNDLES = {
+  "1-1": {
+    title:"선사 문화의 전개, 청동기 문화",
+    timeExplorer:{era:"ancient",stage:1},
+    detective:{ws:"1-1"},
+    historyDM:{topicId:"sem1_topic1_prehistory"}
+  },
+  "1-2": {
+    title:"고조선 및 여러 나라의 성장",
+    timeExplorer:{era:"ancient",stage:2},
+    detective:{ws:"1-2"},
+    historyDM:{topicId:"sem1_topic2_gojoseon"}
+  },
+  "1-3": {
+    title:"삼국과 가야의 성장",
+    timeExplorer:{era:"ancient",stage:3},
+    detective:{ws:"1-3"},
+    historyDM:{topicId:"sem1_topic3_three_kingdoms_growth"}
+  },
+  "1-4": {
+    title:"삼국의 경쟁과 발전",
+    timeExplorer:{era:"ancient",stage:4},
+    detective:{ws:"1-4"},
+    historyDM:{topicId:"sem1_topic4_three_kingdoms_competition"}
+  },
+  "1-5": {
+    title:"삼국의 문화와 대외 교류",
+    timeExplorer:{era:"ancient",stage:5},
+    detective:{ws:"1-5"},
+    historyDM:{topicId:"sem1_topic5_culture_exchange"}
+  },
+  "1-6": {
+    title:"고구려와 수·당 전쟁, 삼국 통일 전쟁",
+    timeExplorer:{era:"ancient",stage:6},
+    detective:{ws:"1-6"},
+    historyDM:{topicId:"sem1_topic6_wars_alliance"}
+  },
+  "2-7": {
+    title:"신라의 삼국 통일과 발해의 성립",
+    timeExplorer:{era:"northsouth",stage:1},
+    detective:{ws:"2-7"},
+    historyDM:{topicId:"sem1_topic7_unification_balhae"}
+  },
+  "2-8": {
+    title:"통일 신라의 통치 제도와 발해의 발전",
+    timeExplorer:{era:"northsouth",stage:2},
+    detective:{ws:"2-8"},
+    historyDM:{topicId:"sem1_topic8_unified_silla_balhae"}
+  },
+  "2-9": {
+    title:"신라 사회의 동요와 후삼국의 성립",
+    timeExplorer:{era:"northsouth",stage:3},
+    detective:{ws:"2-9"},
+    historyDM:{topicId:"sem1_topic9_late_silla"}
+  },
+  "2-10": {
+    title:"통일 신라와 발해의 불교문화 및 대외 교류",
+    timeExplorer:{era:"northsouth",stage:4},
+    detective:{ws:"2-10"},
+    historyDM:{topicId:"sem1_topic10_buddhism_trade"}
+  },
+  "3-11": {
+    title:"고려의 후삼국 통일",
+    timeExplorer:{era:"goryeo",stage:1},
+    detective:{ws:"3-11"},
+    historyDM:{topicId:"sem1_topic11_goryeo_foundation"}
+  },
+  "3-12": {
+    title:"통치 체제의 정비",
+    timeExplorer:{era:"goryeo",stage:2},
+    detective:{ws:"3-12"},
+    historyDM:{topicId:"sem1_topic12_goryeo_system"}
+  },
+  "3-13": {
+    title:"무신 정권의 성립과 변천",
+    timeExplorer:{era:"goryeo",stage:3},
+    detective:{ws:"3-13"},
+    historyDM:{topicId:"sem1_topic13_military_rule"}
+  },
+  "3-14": {
+    title:"고려 전기의 대외 관계와 고려의 대몽 항쟁",
+    timeExplorer:{era:"goryeo",stage:4},
+    detective:{ws:"3-14"},
+    historyDM:{topicId:"sem1_topic14_foreign_relations"}
+  },
+  "3-15": {
+    title:"원의 간섭과 공민왕의 개혁, 새로운 세력의 등장",
+    timeExplorer:{era:"goryeo",stage:5},
+    detective:{ws:"3-15"},
+    historyDM:{topicId:"sem1_topic15_yuan_reform"}
+  },
+  "3-16": {
+    title:"고려의 사회 모습과 사상, 불교문화와 예술",
+    timeExplorer:{era:"goryeo",stage:6},
+    detective:{ws:"3-16"},
+    historyDM:{topicId:"sem1_topic16_goryeo_culture"}
+  },
+  "5-9": {
+    title:"제도의 개편과 붕당 정치의 전개",
+    timeExplorer:{era:"joseon_change",stage:1},
+    detective:{ws:"5-9"},
+    historyDM:{topicId:"topic9_bungdang"}
+  },
+  "5-10": {
+    title:"탕평 정치의 시행",
+    timeExplorer:{era:"joseon_change",stage:2},
+    detective:{ws:"5-10"},
+    historyDM:{topicId:"topic10_tangpyeong"}
+  },
+  "5-11": {
+    title:"세도 정치의 전개 및 농민 봉기의 발생",
+    timeExplorer:{era:"joseon_change",stage:3},
+    detective:{ws:"5-11"},
+    historyDM:{topicId:"topic11_sedo_samjeong"}
+  },
+  "5-12": {
+    title:"상품 화폐 경제의 발달",
+    timeExplorer:{era:"joseon_change",stage:4},
+    detective:{ws:"5-12"},
+    historyDM:{topicId:"topic12_commercial_economy"}
+  },
+  "5-13": {
+    title:"생활 문화 및 사회 구조 변화",
+    timeExplorer:{era:"joseon_change",stage:5},
+    detective:{ws:"5-13"},
+    historyDM:{topicId:"topic13_family_change"}
+  },
+  "5-14": {
+    title:"서양 문물의 수용과 세계관의 변화, 그리고 실학",
+    timeExplorer:{era:"joseon_change",stage:6},
+    detective:{ws:"5-14"},
+    historyDM:{topicId:"topic14_silhak"}
+  },
+  "5-15": {
+    title:"문화의 새로운 경향",
+    timeExplorer:{era:"joseon_change",stage:7},
+    detective:{ws:"5-15"},
+    historyDM:{topicId:"topic15_cultural_trends"}
+  }
+};
+
+function getWorksheetBundle(){
+  const op = getClassOperation();
+  return WORKSHEET_BUNDLES[String(op.worksheetId || "").trim()] || null;
+}
+
+function worksheetStepComplete(appId){
+  const hub = readHubState();
+  const bundle = getWorksheetBundle();
+  if(!hub || !bundle) return false;
+
+  if(appId === "time_explorer"){
+    const route = bundle.timeExplorer;
+    const state = hub.timeExplorer && hub.timeExplorer.state;
+    const era = state && state.eras && state.eras[route.era];
+    const done = era && Array.isArray(era.completedStages) ? era.completedStages : [];
+    return done.includes(route.stage);
+  }
+
+  if(appId === "detective"){
+    const st = hub.detective && hub.detective.state;
+    const done = st && Array.isArray(st.sourceSolved) ? st.sourceSolved : [];
+    return done.includes(bundle.detective.ws);
+  }
+
+  if(appId === "history_dm"){
+    const dm = hub.historyDM || {};
+    const topic = dm.topics && dm.topics[bundle.historyDM.topicId];
+    const submitted = topic && Array.isArray(topic.submittedQuestions)
+      ? topic.submittedQuestions
+      : [];
+    return ["Q1","Q2","Q3"].every(q => submitted.includes(q));
+  }
+
+  return false;
+}
+
+function worksheetStepNumber(appId){
+  return {
+    time_explorer:1,
+    detective:2,
+    history_dm:3
+  }[appId] || null;
+}
+
+function worksheetStepStatus(appId){
+  const hub=readHubState(); const op=getClassOperation(); const done=worksheetStepComplete(appId);
+  if(!hub||op.mode!=="CLASS") return done?"current_done":"pending";
+  const session=hub.lessonSession||{};
+  if(!session.active||String(session.worksheetId||"")!==String(op.worksheetId||"")) return done?"current_done":"pending";
+  const base=session.baseline||{};
+  const key={time_explorer:"timeDone",detective:"detectiveDone",history_dm:"dmDone"}[appId];
+  if(done&&key&&base[key]) return "existing";
+  if(done) return "session_done";
+  return "pending";
+}
+function worksheetStepStatusLabel(appId){
+  const s=worksheetStepStatus(appId);
+  if(s==="existing") return "기존 완료";
+  if(s==="session_done") return "이번 수업 완료";
+  if(s==="current_done") return "완료";
+  return "미완료";
+}
+
+function classAppUrl(app){
+  const op = getClassOperation();
+  const bundle = getWorksheetBundle();
+
+  if(op.mode !== "CLASS" || !bundle) return app.url;
+
+  const ws = encodeURIComponent(op.worksheetId || "");
+
+  if(app.id === "time_explorer"){
+    return `time_explorer/index.html?hubWorksheet=${ws}`;
+  }
+
+  if(app.id === "detective"){
+    return `detective/index.html?hubWorksheet=${ws}`;
+  }
+
+  if(app.id === "history_dm"){
+    return `history_dm.html?topic=${encodeURIComponent(bundle.historyDM.topicId)}&hubWorksheet=${ws}`;
+  }
+
+  return app.url;
+}
+
+function coreLearningComplete(){
+  const op = getClassOperation();
+
+  if(op.mode === "CLASS" && getWorksheetBundle()){
+    return (
+      worksheetStepComplete("time_explorer") &&
+      worksheetStepComplete("detective") &&
+      worksheetStepComplete("history_dm")
+    );
+  }
+
+  const te = summarizeAppProgress("time_explorer");
+  const det = summarizeAppProgress("detective");
+  const dm = summarizeAppProgress("history_dm");
+  return !!(te.started && det.started && dm.started);
+}
+
+function appAccessState(app){
+  const op = getClassOperation();
+
+  if(!app.enabled){
+    return {enabled:false, reason:"연결 준비 중"};
+  }
+
+  if(op.mode === "OPEN"){
+    return {enabled:true, reason:""};
+  }
+
+  if(op.mode === "FREE"){
+    const isGame = app.id === "history_defense" || app.id === "history_survival";
+    return {
+      enabled:isGame && app.enabled,
+      reason:isGame ? "" : "자유 이용 시간에는 게임 앱만 이용할 수 있어요."
+    };
+  }
+
+  const bundle = getWorksheetBundle();
+
+  if(!bundle){
+    const required = ["time_explorer","detective","history_dm"];
+    if(required.includes(app.id)){
+      return {
+        enabled:true,
+        reason:"현재 학습지는 세부 콘텐츠 연결 전이라 앱 첫 화면으로 이동해요."
+      };
+    }
+    return {enabled:false, reason:"오늘의 학습지 연결이 완료되면 열려요."};
+  }
+
+  if(app.id === "time_explorer"){
+    return {enabled:true, reason:""};
+  }
+
+  if(app.id === "detective"){
+    const ok = worksheetStepComplete("time_explorer");
+    return {
+      enabled:ok,
+      reason:ok ? "" : "① 시간탐험대의 오늘 미션을 먼저 완료하세요."
+    };
+  }
+
+  if(app.id === "history_dm"){
+    const ok = worksheetStepComplete("detective");
+    return {
+      enabled:ok,
+      reason:ok ? "" : "② 역사 탐정사무소의 오늘 사료 수사를 먼저 완료하세요."
+    };
+  }
+
+  const isGame = app.id === "history_defense" || app.id === "history_survival";
+  if(isGame){
+    const unlocked = !!op.unlockGamesAfterCore && coreLearningComplete();
+    return {
+      enabled:unlocked && app.enabled,
+      reason:unlocked ? "" : "①~③ 오늘의 필수 학습을 모두 마치면 열려요."
+    };
+  }
+
+  return {enabled:false, reason:"오늘 수업에서 사용하지 않는 앱이에요."};
+}
+
+function renderClassModeBanner(){
+  const host = document.getElementById("classModeBanner");
+  if(!host) return;
+
+  const op = getClassOperation();
+  const bundle = getWorksheetBundle();
+  const ws = op.worksheetTitle || (bundle && bundle.title) || op.worksheetId || "오늘의 학습지";
+
+  if(op.mode === "FREE"){
+    host.className = "class-mode-banner free";
+    host.innerHTML = `<b>🎮 자유 이용 모드</b><span>수업 외 시간에는 역사 디펜스와 역사 살아남기를 이용할 수 있어요.</span>`;
+    return;
+  }
+
+  if(op.mode === "CLASS"){
+    if(bundle){
+      const s1 = worksheetStepComplete("time_explorer");
+      const s2 = worksheetStepComplete("detective");
+      const s3 = worksheetStepComplete("history_dm");
+
+      host.className = "class-mode-banner class";
+      host.innerHTML = `
+        <b>📘 오늘의 수업 · ${op.worksheetId} ${ws}</b>
+        <span class="lesson-flow">
+          <i class="${s1?'done':'now'}">① 시간탐험대 ${s1?'✓':''}</i>
+          <b>→</b>
+          <i class="${s2?'done':(s1?'now':'lock')}">② 역사 탐정사무소 ${s2?'✓':''}</i>
+          <b>→</b>
+          <i class="${s3?'done':(s2?'now':'lock')}">③ 역사 DM ${s3?'✓':''}</i>
+          <b>→</b>
+          <i class="${s1&&s2&&s3?'done':'lock'}">🎮 자유 게임</i>
+        </span>`;
+    }else{
+      host.className = "class-mode-banner class";
+      host.innerHTML = `<b>📘 오늘의 수업 · ${ws}</b><span>현재 학습지는 세부 앱 연결표를 준비 중이에요.</span>`;
+    }
+    return;
+  }
+
+  host.className = "class-mode-banner open";
+  host.innerHTML = `<b>🔓 전체 이용 모드</b><span>현재는 연결된 학습 앱을 자유롭게 이용할 수 있어요.</span>`;
+}
+
+function summarizeAppProgress(appId){
+  const hub = readHubState();
+
+  if(!hub){
+    return {
+      label:"정보 없음",
+      detail:"로그인 후 진행정보를 확인합니다.",
+      tone:"wait",
+      percent:null,
+      recent:"",
+      started:false
+    };
+  }
+
+  if(appId === "time_explorer"){
+    const te = hub.timeExplorer || {};
+    const state = te.state || {};
+    const eras = state.eras || {};
+    let completed = 0;
+    let xp = 0;
+
+    Object.keys(eras).forEach(id=>{
+      const era = eras[id] || {};
+      completed += Array.isArray(era.completedStages) ? era.completedStages.length : 0;
+      xp += Number(era.xp || 0);
+    });
+
+    const started = !(te.status === "not_found" || (!completed && !xp));
+    const recentEra =
+      state.currentEra ||
+      state.currentEraId ||
+      state.activeEra ||
+      "";
+
+    return started
+      ? {
+          label:"진행 중",
+          detail:`완료 미션 ${completed}개 · 경험치 ${xp}`,
+          tone:"ok",
+          percent:null,
+          recent: recentEra ? `최근 활동 · ${recentEra}단원 탐험` : "최근 진행정보가 저장되어 있어요.",
+          started:true
+        }
+      : {
+          label:"시작 전",
+          detail:"아직 저장된 시간탐험대 기록이 없어요.",
+          tone:"wait",
+          percent:0,
+          recent:"",
+          started:false
+        };
+  }
+
+  if(appId === "detective"){
+    const det = hub.detective || {};
+    const st = det.state || {};
+    const solved = Array.isArray(st.solvedCases) ? st.solvedCases.length : 0;
+    const sourceSolved = Array.isArray(st.sourceSolved) ? st.sourceSolved.length : 0;
+    const stampCount =
+      (Array.isArray(st.stamps) ? st.stamps.length : 0) +
+      (Array.isArray(st.sourceStamps) ? st.sourceStamps.length : 0);
+
+    const totalDone = solved + sourceSolved;
+    const percent = Math.max(0, Math.min(100, Math.round(totalDone / 75 * 100)));
+    const started = !(det.status === "not_found" || (!solved && !sourceSolved && !stampCount));
+
+    let recent = "";
+    if(st.lastCase){
+      recent = `최근 사건 · CASE ${st.lastCase}`;
+    }else if(st.lastSourceCase){
+      recent = `최근 대표 사료 · ${st.lastSourceCase}`;
+    }
+
+    return started
+      ? {
+          label:"진행 중",
+          detail:`추가 수사 ${solved}/44 · 대표 사료 ${sourceSolved}/31`,
+          tone:"ok",
+          percent,
+          recent,
+          started:true
+        }
+      : {
+          label:"시작 전",
+          detail:"아직 저장된 수사 기록이 없어요.",
+          tone:"wait",
+          percent:0,
+          recent:"",
+          started:false
+        };
+  }
+
+  if(appId === "history_dm"){
+    const dm = hub.historyDM || {};
+    const count = Number(dm.submittedCount || 0);
+    const percent = Math.max(0, Math.min(100, Math.round(count / 69 * 100)));
+    const started = count > 0;
+
+    let recent = "";
+    if(started && dm.topics){
+      const topics = Object.values(dm.topics);
+      topics.sort((a,b)=>{
+        const ta = new Date(a.lastUpdatedAt || 0).getTime();
+        const tb = new Date(b.lastUpdatedAt || 0).getTime();
+        return tb - ta;
+      });
+      if(topics[0]){
+        recent = `최근 제출 · ${topics[0].topicTitle || topics[0].topicId}`;
+      }
+    }
+
+    return started
+      ? {
+          label:"진행 중",
+          detail:`제출 답안 ${count}/69`,
+          tone:"ok",
+          percent,
+          recent,
+          started:true
+        }
+      : {
+          label:"시작 전",
+          detail:"아직 제출한 역사 DM 답안이 없어요.",
+          tone:"wait",
+          percent:0,
+          recent:"",
+          started:false
+        };
+  }
+
+  return {
+    label: appId === "history_defense" || appId === "history_survival" ? "연결 준비 중" : "이용 가능",
+    detail:"",
+    tone: appId === "history_defense" || appId === "history_survival" ? "wait" : "ok",
+    percent:null,
+    recent:"",
+    started:false
+  };
+}
+
+function renderApps(){
+  const grid = el("appsGrid");
+  grid.innerHTML = "";
+  renderClassModeBanner();
+
+  const op = getClassOperation();
+
+  APPS.forEach(app => {
+    const progress = summarizeAppProgress(app.id);
+    const access = appAccessState(app);
+    const actuallyEnabled = !!access.enabled;
+    const stepNo = op.mode === "CLASS" ? worksheetStepNumber(app.id) : null;
+    const stepDone = stepNo ? worksheetStepComplete(app.id) : false;
+    const stepStatus = stepNo ? worksheetStepStatus(app.id) : null;
+
+    const card = document.createElement("article");
+    card.className = "app-card" + (actuallyEnabled ? "" : " locked");
+    card.style.setProperty("--tone", app.tone || "#eee");
+
+    let statusLabel = actuallyEnabled ? progress.label : (app.enabled ? "잠김" : "연결 준비 중");
+    if(stepNo) statusLabel = worksheetStepStatusLabel(app.id);
+
+    const statusTone = stepDone ? "ok" : (actuallyEnabled ? progress.tone : "wait");
+
+    const detail = app.enabled && progress.detail
+      ? `<div class="app-progress-detail">${progress.detail}</div>`
+      : "";
+
+    const recent = app.enabled && progress.recent
+      ? `<div class="app-recent">${progress.recent}</div>`
+      : "";
+
+    const progressBar =
+      app.enabled && typeof progress.percent === "number"
+        ? `<div class="app-progress-wrap">
+             <div class="app-progress-meta">
+               <span>전체 진행률</span><b>${progress.percent}%</b>
+             </div>
+             <div class="app-progress-bar"><div style="width:${progress.percent}%"></div></div>
+           </div>`
+        : "";
+
+    const lockReason = !actuallyEnabled && access.reason
+      ? `<div class="app-lock-reason">${access.reason}</div>`
+      : "";
+
+    const stepTag = stepNo
+      ? `<span class="step-tag">${stepNo}단계${stepDone ? ' · ' + worksheetStepStatusLabel(app.id) : ''}</span>`
+      : "";
+
+    const goText = !actuallyEnabled
+      ? (app.enabled ? "잠김" : "준비 중")
+      : (stepDone ? "복습하기 →" : (progress.started ? "이어하기 →" : "시작하기 →"));
+
+    card.innerHTML = `
+      <div class="app-head">
+        <div class="app-icon">${app.icon}</div>
+        <div class="app-title">${app.name}</div>
+        ${stepTag}
+      </div>
+      <div class="app-desc">${app.description}</div>
+      ${detail}
+      ${progressBar}
+      ${recent}
+      ${lockReason}
+      <div class="status-row">
+        <span class="badge ${statusTone === "wait" ? "wait" : ""}">${statusLabel}</span>
+        <button class="go" ${actuallyEnabled ? "" : "disabled"}>${goText}</button>
+      </div>
+    `;
+
+    const button = card.querySelector(".go");
+    if(actuallyEnabled){
+      button.addEventListener("click", () => {
+        if(!getStudent().studentId){
+          showLogin("메인페이지에서 먼저 로그인해주세요.", false);
+          return;
+        }
+        window.location.href = classAppUrl(app);
+      });
+    }
+
+    grid.appendChild(card);
+  });
+}
+function showLogin(message="", ok=true){
+  el("loginSection").style.display = "block";
+  el("dashboard").classList.remove("show");
+  el("userPill").style.display = "none";
+  el("loginMsg").textContent = message;
+  el("loginMsg").className = "login-msg " + (message ? (ok ? "ok":"err") : "");
+}
+
+function showDashboard(student){
+  el("loginSection").style.display = "none";
+  el("dashboard").classList.add("show");
+  el("userPill").style.display = "flex";
+  el("pillText").textContent = `${student.studentNo} ${student.studentName}`;
+  el("helloName").textContent = student.studentName;
+  renderApps();
+  startClassOperationPolling();
+}
+
+const RECORD_SERVER_URL = "https://script.google.com/macros/s/AKfycbxjSzjvqHbrKpCjwnUbsGzYvqDvTdfVB8DUxkki5TXp-jX0wqfmlydpC7DWOIB14oLF2A/exec";
+let loginJsonpCounter = 0;
+
+function setLoginBusy(isBusy){
+  const btn = el("loginBtn");
+  btn.disabled = isBusy;
+  btn.textContent = isBusy ? "확인 중..." : "학습 시작";
+}
+
+function verifyLoginWithServer(studentNo, studentName){
+  return new Promise((resolve, reject) => {
+    const callbackName = "__historyLoginCb_" + Date.now() + "_" + (++loginJsonpCounter);
+    const script = document.createElement("script");
+    let finished = false;
+
+    const cleanup = () => {
+      if(finished) return;
+      finished = true;
+      clearTimeout(timer);
+      try { delete window[callbackName]; } catch(e) { window[callbackName] = undefined; }
+      if(script.parentNode) script.parentNode.removeChild(script);
+    };
+
+    window[callbackName] = (payload) => {
+      if(finished) return;
+      cleanup();
+      resolve(payload);
+    };
+
+    const timer = setTimeout(() => {
+      if(finished) return;
+      cleanup();
+      reject(new Error("로그인 서버 응답 시간이 초과되었습니다."));
+    }, 12000);
+
+    const params = new URLSearchParams({
+      action: "loginHub",
+      studentNo: studentNo,
+      studentName: studentName,
+      callback: callbackName,
+      _: Date.now().toString()
+    });
+
+    script.src = RECORD_SERVER_URL + "?" + params.toString();
+    script.async = true;
+    script.onerror = () => {
+      if(finished) return;
+      cleanup();
+      reject(new Error("로그인 서버에 연결하지 못했습니다."));
+    };
+
+    document.head.appendChild(script);
+  });
+}
+
+el("loginBtn").addEventListener("click", async () => {
+  const no = el("studentNo").value.trim();
+  const name = el("studentName").value.trim();
+  const error = validateStudent(no, name);
+
+  if(error){
+    el("loginMsg").textContent = error;
+    el("loginMsg").className = "login-msg err";
+    return;
+  }
+
+  setLoginBusy(true);
+  el("loginMsg").textContent = "학생명단과 학습 진행정보를 불러오고 있습니다.";
+  el("loginMsg").className = "login-msg";
+
+  try{
+    const result = await verifyLoginWithServer(no, name);
+
+    if(!result || result.status !== "ok" || !result.student){
+      throw new Error((result && result.message) || "학번과 이름을 확인해주세요.");
+    }
+
+    const verified = result.student;
+    const student = saveStudent(
+      String(verified.studentNo || no),
+      String(verified.studentName || name)
+    );
+
+    if(verified.studentId){
+      localStorage.setItem("studentId", String(verified.studentId));
+      student.studentId = String(verified.studentId);
+    }
+
+    // 로그인 상태 자체는 이 브라우저 탭/창을 닫을 때 끝납니다.
+    // 진행 캐시는 localStorage에 남지만 다음 접속 때 서버에서 다시 최신 정보를 불러옵니다.
+    sessionStorage.setItem("historyHubLoginSessionV1", student.studentId);
+
+    if(result.hubState){
+      const hubState = Object.assign({}, result.hubState, {
+        loadedAt: Date.now()
+      });
+      localStorage.setItem("historyHubStateV1", JSON.stringify(hubState));
+      localStorage.setItem("historyHubStateStudentId", student.studentId);
+    }else{
+      localStorage.removeItem("historyHubStateV1");
+      localStorage.removeItem("historyHubStateStudentId");
+    }
+
+    el("loginMsg").textContent = "로그인과 학습정보 불러오기가 완료되었습니다.";
+    el("loginMsg").className = "login-msg ok";
+    showDashboard(student);
+  }catch(err){
+    el("loginMsg").textContent = err.message || "로그인 확인에 실패했습니다.";
+    el("loginMsg").className = "login-msg err";
+  }finally{
+    setLoginBusy(false);
+  }
+});
+
+el("studentName").addEventListener("keydown", e => {
+  if(e.key === "Enter") el("loginBtn").click();
+});
+el("studentNo").addEventListener("keydown", e => {
+  if(e.key === "Enter") el("loginBtn").click();
+});
+
+el("changeUserBtn").addEventListener("click", () => {
+  const s = getStudent();
+  el("studentNo").value = s.studentNo;
+  el("studentName").value = s.studentName;
+  showLogin("학생 정보를 수정한 뒤 다시 학습 시작을 눌러주세요.", true);
+});
+
+el("logoutBtn").addEventListener("click", () => {
+  clearStudent();
+  el("studentNo").value = "";
+  el("studentName").value = "";
+  showLogin("로그아웃되었습니다.", true);
+});
+
+
+let classOperationPollTimer = null;
+let classOperationJsonpSeq = 0;
+
+function refreshClassOperationFromServer(){
+  const hub = readHubState();
+  if(!hub || !hub.student || !hub.student.classNo) return Promise.resolve(false);
+
+  return new Promise(resolve => {
+    const callbackName = "__classOpCb_" + Date.now() + "_" + (++classOperationJsonpSeq);
+    const script = document.createElement("script");
+    let finished = false;
+
+    const cleanup = () => {
+      if(finished) return;
+      finished = true;
+      clearTimeout(timer);
+      try{ delete window[callbackName]; }catch(e){ window[callbackName] = undefined; }
+      if(script.parentNode) script.parentNode.removeChild(script);
+    };
+
+    window[callbackName] = payload => {
+      if(finished) return;
+      cleanup();
+
+      if(payload && payload.status === "ok" && payload.operation){
+        const latestHub = readHubState();
+        if(latestHub){
+          latestHub.classOperation = payload.operation;
+          latestHub.loadedAt = Date.now();
+          localStorage.setItem("historyHubStateV1", JSON.stringify(latestHub));
+          renderApps();
+        }
+        resolve(true);
+      }else{
+        resolve(false);
+      }
+    };
+
+    const timer = setTimeout(() => {
+      cleanup();
+      resolve(false);
+    }, 7000);
+
+    const params = new URLSearchParams({
+      action:"classOperation",
+      classNo:String(hub.student.classNo),
+      callback:callbackName,
+      _:Date.now().toString()
+    });
+
+    script.src = RECORD_SERVER_URL + "?" + params.toString();
+    script.async = true;
+    script.onerror = () => {
+      cleanup();
+      resolve(false);
+    };
+    document.head.appendChild(script);
+  });
+}
+
+function startClassOperationPolling(){
+  if(classOperationPollTimer) clearInterval(classOperationPollTimer);
+  refreshClassOperationFromServer();
+  classOperationPollTimer = setInterval(() => {
+    if(document.visibilityState === "visible"){
+      refreshClassOperationFromServer();
+    }
+  }, 10000);
+}
+
+window.addEventListener("focus", () => {
+  refreshClassOperationFromServer();
+});
+
+(function init(){
+  const s = getStudent();
+  const activeSessionId = sessionStorage.getItem("historyHubLoginSessionV1") || "";
+
+  // 이전 수업에서 창을 닫지 않고 localStorage만 남아 있는 경우
+  // 자동 로그인하지 않고 다시 학생 인증부터 시작합니다.
+  if(
+    s.studentNo &&
+    s.studentName &&
+    s.studentId &&
+    activeSessionId === s.studentId
+  ){
+    showDashboard(s);
+  }else{
+    if(s.studentNo || s.studentName || s.studentId){
+      clearStudent();
+    }
+    showLogin();
+  }
+})();
+</script>
+</body>
+</html>

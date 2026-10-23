@@ -1,0 +1,1594 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>역사 탐정사무소 v5.0.4</title>
+<style>
+:root{
+  --ink:#2f251f; --paper:#fff8e9; --paper2:#ead5b2;
+  --wood:#65412c; --red:#93463c; --green:#4b6655;
+  --gold:#c49549; --line:#b8946c; --shadow:rgba(28,17,10,.28);
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:"Pretendard","Noto Sans KR",system-ui,sans-serif;color:var(--ink)}
+body{
+  background:
+    radial-gradient(circle at 50% -20%,rgba(255,232,190,.20),transparent 45%),
+    linear-gradient(180deg,#3b2a20,#5b3c2b 45%,#3d2a20);
+}
+button{font:inherit}
+.app{max-width:1480px;margin:auto;padding:14px 16px 42px}
+
+.topbar{
+  position:sticky;top:8px;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:10px 14px;border-radius:17px;
+  background:rgba(255,247,231,.96);border:1px solid #b99570;
+  box-shadow:0 9px 26px rgba(0,0,0,.24);backdrop-filter:blur(9px)
+}
+.brand{display:flex;align-items:center;gap:11px}
+.seal{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:#463126;color:#fff;border:4px double #d4b16e;font-weight:950;font-size:21px}
+.brand-title{font-size:19px;font-weight:950} .small{font-size:12px;color:#75675a}
+.stats{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.chip{background:#ead9bd;border:1px solid #c2a17c;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:900}
+.top-btn{border:1px solid #b89570;background:#fff9ed;border-radius:999px;padding:8px 11px;font-weight:900;cursor:pointer;color:#4e3628}
+
+.office-frame{
+  margin-top:16px;position:relative;width:100%;aspect-ratio:2048/1143;
+  border:1px solid #8e684a;border-radius:22px;overflow:hidden;
+  box-shadow:0 18px 45px rgba(0,0,0,.34);background:#6a4a36
+}
+.office-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;user-select:none}
+
+.office-title{
+  position:absolute;left:2.2%;top:2.8%;z-index:4;
+  padding:10px 14px;border-radius:8px;
+  background:rgba(52,36,28,.87);color:#f4e0b7;
+  border:2px solid rgba(221,190,128,.88);
+  box-shadow:0 5px 13px rgba(0,0,0,.22)
+}
+.office-title b{display:block;font-size:clamp(14px,1.55vw,23px)} .office-title span{font-size:clamp(8px,.72vw,11px);letter-spacing:.11em;color:#d9c6a7}
+
+.hotspot{
+  position:absolute;z-index:5;border:2px solid transparent;background:transparent;border-radius:12px;cursor:pointer;
+  transition:.15s;outline:none
+}
+.hotspot:hover,.hotspot:focus-visible{
+  border-color:rgba(255,215,120,.95);
+  background:rgba(255,218,124,.11);
+  box-shadow:0 0 0 3px rgba(91,58,30,.18),0 0 25px rgba(255,209,103,.52)
+}
+.hotspot .tag{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  white-space:nowrap;background:rgba(255,247,226,.94);border:1px solid #9a744c;border-radius:999px;
+  padding:5px 8px;font-size:clamp(8px,.74vw,12px);font-weight:950;color:#523a29;
+  box-shadow:0 3px 8px rgba(0,0,0,.18);transition:.15s
+}
+.hotspot:hover .tag{transform:translate(-50%,-50%) scale(1.06)}
+.hotspot .done-stamp{
+  display:none;position:absolute;right:-3px;top:-4px;transform:rotate(10deg);
+  width:43px;height:43px;border:2px solid #94463d;color:#94463d;border-radius:50%;
+  background:rgba(255,244,223,.88);place-items:center;text-align:center;
+  font-size:9px;line-height:1;font-weight:950
+}
+.hotspot.done .done-stamp{display:grid}
+
+.folder-1{left:25.8%;top:66.6%;width:17.0%;height:10.5%}
+.folder-2{left:36.0%;top:61.8%;width:12.2%;height:8.5%}
+.folder-3{left:44.1%;top:61.1%;width:12.2%;height:8.6%}
+.folder-4{left:52.3%;top:62.0%;width:12.1%;height:8.4%}
+.folder-5{left:37.0%;top:69.0%;width:14.4%;height:8.8%}
+.folder-6{left:47.5%;top:71.4%;width:14.5%;height:9.1%}
+
+.notebook-hot{left:68.3%;top:75.0%;width:14.8%;height:13.0%}
+.phone-hot{left:68.1%;top:59.0%;width:10.5%;height:13.0%}
+.board-hot{left:48.8%;top:18.5%;width:34.0%;height:41.5%}
+
+.special .tag{background:rgba(61,48,39,.89);color:#fff3d9;border-color:#c19b64}
+.board-hot .tag{top:9%;left:14%;transform:none}
+.board-hot:hover .tag{transform:scale(1.04)}
+
+.board-progress{
+  position:absolute;z-index:4;
+  /* 뒤 게시판의 오른쪽 지도 영역 안에 자연스럽게 들어오도록 크기 재조정 */
+  left:70.9%;top:24.1%;width:11.1%;height:25.8%;
+  background:
+    linear-gradient(rgba(255,248,226,.99),rgba(247,229,194,.99)),
+    repeating-linear-gradient(0deg,rgba(126,91,53,.018) 0 1px,transparent 1px 5px);
+  border:2px solid rgba(126,91,53,.78);
+  border-radius:7px;
+  padding:9px 9px 9px;
+  box-shadow:0 4px 12px rgba(0,0,0,.16), inset 0 0 0 1px rgba(255,255,255,.55);
+  transform:rotate(-0.15deg);
+  pointer-events:none;
+  display:flex;flex-direction:column;justify-content:flex-start;align-items:center;
+  text-align:center;
+}
+.board-progress::before,.board-progress::after{
+  content:"";position:absolute;width:7px;height:7px;border-radius:50%;
+  background:#8d5b35;box-shadow:inset 0 1px 1px rgba(255,255,255,.45),0 1px 2px rgba(0,0,0,.28);top:6px
+}
+.board-progress::before{left:7px}.board-progress::after{right:7px}
+.board-progress b{
+  display:inline-block;font-size:clamp(8px,.72vw,11px);line-height:1.15;margin:1px 0 8px;
+  padding:4px 7px;border-radius:999px;background:#5a3d2d;color:#fff4dc;
+  box-shadow:0 2px 5px rgba(0,0,0,.13)
+}
+.board-progress .count-large{
+  font-size:clamp(17px,1.42vw,23px);font-weight:950;color:#4e3b2c;line-height:1;margin-bottom:6px
+}
+.board-progress .bar{
+  width:86%;height:6px;background:#d8c4a7;border-radius:999px;overflow:hidden;margin:1px 0 6px
+}
+.board-progress .fill{
+  height:100%;width:0;background:#a96d2c;border-radius:999px;transition:.3s
+}
+.board-progress span{
+  font-size:clamp(6px,.55vw,8.5px);color:#625447;line-height:1.25
+}
+
+.board-message{
+  width:90%;margin-top:auto;padding:7px 2px 0;
+  border-top:1px solid rgba(126,91,53,.42);
+  color:#4f392b;font-size:clamp(7px,.63vw,10px);line-height:1.25;font-weight:950
+}
+
+.hint{
+  margin:10px auto 0;width:max-content;max-width:100%;padding:8px 12px;border-radius:999px;
+  background:rgba(255,244,224,.9);border:1px solid #b48d66;color:#5d4737;font-size:12px;font-weight:850
+}
+
+.page{display:none;margin-top:16px} .page.show{display:block}
+.paper-page{background:#f7ead5;border:1px solid #ad8c68;border-radius:20px;padding:20px;box-shadow:0 12px 28px rgba(0,0,0,.22)}
+.page-head{display:flex;justify-content:space-between;gap:12px;align-items:center;border-bottom:2px dashed #c3a681;padding-bottom:13px}
+.page-head h2{margin:0;font-size:25px} .back{border:1px solid #b89b78;background:#fff8e9;border-radius:9px;padding:8px 11px;font-weight:900;cursor:pointer}
+
+.case-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.case-file{
+  border:1px solid #c0a17b;background:#fff9ec;border-radius:12px;padding:14px;
+  display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;
+  cursor:pointer;text-align:left;box-shadow:0 5px 12px rgba(75,49,30,.08)
+}
+.case-file:hover{transform:translateY(-2px);border-color:#9a754e}
+.case-no{font-size:11px;font-weight:950;color:#6e4933;background:#ead6b7;border:1px solid #c2a17d;border-radius:8px;padding:7px}
+.case-title{font-weight:900;line-height:1.4}
+.case-state{font-size:11px;font-weight:950;border-radius:999px;padding:6px 8px;background:#e7dbc9;color:#76695e}
+.case-file.solved{border-color:#94a78f;background:#fbf8ec} .case-file.solved .case-state{background:#dfe9da;color:#3d5b3e}
+
+.notebook-page{background:linear-gradient(90deg,#ead0a6 0 14px,transparent 14px),#fff8e8}
+.stamp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:15px}
+.record{border:1px dashed #c4a47b;border-radius:12px;padding:11px;min-height:110px;background:#fbf2e4;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer}
+.record.got{border-style:solid;background:#f2e7d3} .record .mark{font-size:11px;font-weight:950;color:#8e473e}
+.stamp-img-wrap{display:flex;align-items:center;justify-content:center;min-height:84px;margin:6px 0 8px}
+.stamp-img{width:80px;height:80px;object-fit:contain;opacity:.20;filter:grayscale(1);transition:.18s}
+.record.got .stamp-img{opacity:1;filter:none;transform:rotate(-2deg)}
+.record .stamp-caption{font-size:10px;font-weight:900;color:#7d6d5f;text-align:center;margin-top:4px}
+.record.got .stamp-caption{color:#8e473e}
+
+
+
+.notebook-summary{
+  margin:15px 0 18px;padding:14px 16px;border-radius:14px;
+  background:#fffaf0;border:1px solid #cfb18b;display:grid;grid-template-columns:repeat(3,1fr);gap:10px
+}
+.notebook-summary .summary-box{padding:9px 10px;border-radius:10px;background:#f4e7d4;text-align:center;color:#5e4939}
+.notebook-summary .summary-box b{display:block;font-size:20px;color:#412f24;margin-bottom:3px}
+.notebook-summary .summary-box span{font-size:10px;font-weight:850}
+.notebook-section{margin-top:18px;border-radius:15px;padding:14px}
+.notebook-section.required{background:#fffaf2;border:2px solid #9f744e}
+.notebook-section.extra{background:#f2e5d3;border:1px solid #c3a27d}
+.notebook-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.notebook-section-head>div{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.notebook-section-head b{font-size:16px;color:#3f2e24}
+.notebook-section-head span{font-size:11px;color:#776454;font-weight:750}
+.notebook-section-head strong{padding:6px 9px;border-radius:999px;background:#5b3a27;color:#fff5e7;font-size:11px;white-space:nowrap}
+.source-stamp-grid .record{background:#fffdf8;border-color:#c89b70;min-height:175px}
+.source-stamp-grid .record.got{background:#fbfdf8;border-color:#769073}
+.source-stamp-grid .stamp-img-wrap{min-height:104px}
+.source-stamp-grid .stamp-img{width:100px;height:100px}
+.source-stamp-grid .source-record-title{font-weight:900;line-height:1.35;font-size:12px;color:#3d3028}
+.source-stamp-grid .source-record-meta{font-size:10px;color:#7c6b5c;margin-top:3px;line-height:1.35}
+@media(max-width:650px){
+  .notebook-summary{grid-template-columns:1fr 1fr}.notebook-summary .summary-box:last-child{grid-column:1/-1}
+  .notebook-section-head{align-items:flex-start}
+}
+.modal{display:none;position:fixed;inset:0;z-index:900;background:rgba(31,23,18,.58);padding:20px;place-items:center}
+.modal.show{display:grid}
+.modal-card{width:min(760px,94vw);max-height:84vh;overflow:auto;background:#fff7e8;border:1px solid #aa8862;border-radius:18px;padding:18px;box-shadow:0 20px 50px rgba(0,0,0,.35)}
+.modal-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px}
+.modal-head h2{margin:0} .close{border:1px solid #bea07b;background:#f2e2c8;border-radius:9px;padding:7px 10px;font-weight:900;cursor:pointer}
+.overview-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.overview-item{border:1px solid #c6a984;border-radius:12px;padding:12px;background:#fffaf0}
+.overview-item b{display:block;margin-bottom:5px} .mini-bar{height:7px;background:#e0cfb8;border-radius:999px;overflow:hidden} .mini-fill{height:100%;background:#668069;border-radius:999px}
+
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);z-index:1200;background:#352820;color:#fff4df;padding:10px 14px;border-radius:999px;opacity:0;pointer-events:none;transition:.2s;box-shadow:0 8px 20px rgba(0,0,0,.25);font-size:13px;font-weight:850}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.viewer{display:none;position:fixed;inset:0;background:#201915;z-index:1000;height:100vh;height:100dvh;overflow:hidden} .viewer.show{display:block}
+.viewerbar{height:58px;background:#f4e6ce;border-bottom:1px solid #b4926a;display:flex;align-items:center;justify-content:space-between;padding:8px 12px;gap:10px}
+.viewer-left{display:flex;align-items:center;gap:10px;min-width:0} .viewer-title{font-weight:950;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vbtn{border:1px solid #bea07d;background:#fff9ed;border-radius:9px;padding:8px 10px;font-weight:900;cursor:pointer;white-space:nowrap}
+.viewer iframe{width:100%;height:calc(100vh - 58px);height:calc(100dvh - 58px);border:0;background:#fff;display:block;overflow:auto;-webkit-overflow-scrolling:touch}
+.footer{text-align:center;color:#d7c4ae;font-size:12px;margin-top:16px}
+
+@media(max-width:900px){
+  .case-grid{grid-template-columns:1fr} .stamp-grid{grid-template-columns:repeat(3,1fr)}
+  .board-progress{left:70.6%;top:23.7%;width:11.4%;height:26.4%;padding:8px 7px 8px}
+}
+@media(max-width:650px){
+  .app{padding-left:8px;padding-right:8px} .topbar{align-items:flex-start}
+  .stats .hide-sm{display:none} .office-title{padding:6px 8px}
+  .hotspot .tag{padding:3px 5px;font-size:7px}
+  .board-progress{padding:5px 5px 6px} .board-progress .bar{height:4px} .board-progress b{margin:0 0 5px;padding:3px 5px} .board-progress .count-large{margin-bottom:4px} .board-message{padding-top:5px;font-size:clamp(6px,.62vw,8.5px)}
+  .stamp-grid{grid-template-columns:repeat(2,1fr)}
+  .case-file{grid-template-columns:auto 1fr} .case-state{grid-column:2}
+}
+
+/* v4.0 transparent stamp polish */
+.stamp-img-wrap{min-height:104px!important;margin:5px 0 8px!important}
+.stamp-img{
+  width:98px!important;height:98px!important;object-fit:contain!important;
+  background:transparent!important;border:0!important;
+  opacity:.17!important;filter:grayscale(1)!important;
+}
+.record.got .stamp-img{
+  opacity:1!important;filter:none!important;
+  transform:rotate(-2deg) scale(1.02)!important;
+}
+
+
+.ui-mini-icon{width:20px;height:20px;object-fit:contain;vertical-align:-5px;margin-right:5px}.ui-tag-icon{width:22px;height:22px;object-fit:contain;vertical-align:-6px;margin-right:5px}.ui-head-icon{width:24px;height:24px;object-fit:contain;vertical-align:-7px;margin-right:6px}.case-type-icon{width:42px;height:42px;object-fit:contain;flex:0 0 auto}.source-card-top{display:flex;align-items:center;gap:8px;justify-content:flex-start}.source-card-top .case-state{margin-left:auto}
+</style>
+<meta name="history-detective-version" content="final-source-v2-2026-10-10">
+<meta name="history-detective-consistency-fix" content="v1">
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="seal">史</div>
+      <div><div class="brand-title">역사 탐정사무소</div><div class="small">학습지 연계 수사 · 필수 39개 + 선택 사건</div></div>
+    </div>
+    <div class="stats">
+      <div class="chip">필수 해결 <span id="solvedTop">0</span>/39</div>
+      <div class="chip hide-sm">진행률 <span id="percentTop">0</span>%</div>
+      <button class="top-btn" onclick="showNotebook()"><img class="ui-mini-icon" src="assets/ui_icons/notebook.png" alt="">탐정 수첩</button>
+    </div>
+  </header>
+
+  <main id="home">
+    <section class="office-frame">
+      <img class="office-bg" src="assets/office-bg.png" alt="역사 탐정사무소 내부">
+
+      <div class="office-title">
+        <b>역사 탐정사무소</b>
+        <span>HISTORY DETECTIVE OFFICE</span>
+      </div>
+
+      <div class="board-progress">
+        <b><img class="ui-mini-icon" src="assets/ui_icons/source-analysis.png" alt="">전체 수사 현황</b>
+        <div class="count-large" id="boardCount">0 / 39</div>
+        <div class="bar"><div class="fill" id="boardFill"></div></div>
+        <span id="boardText">필수 수사 해결 · 0%</span>
+        <div class="board-message">이제 모든 수수께끼가 풀렸어!</div>
+      </div>
+
+      <button class="hotspot folder-1" id="unitHot1" onclick="openUnit(1)" aria-label="1단원">
+        <span class="tag">Ⅰ단원 <span id="u1count"></span></span><span class="done-stamp">수사<br>완료</span>
+      </button>
+      <button class="hotspot folder-2" id="unitHot2" onclick="openUnit(2)" aria-label="2단원">
+        <span class="tag">Ⅱ단원 <span id="u2count"></span></span><span class="done-stamp">수사<br>완료</span>
+      </button>
+      <button class="hotspot folder-3" id="unitHot3" onclick="openUnit(3)" aria-label="3단원">
+        <span class="tag">Ⅲ단원 <span id="u3count"></span></span><span class="done-stamp">수사<br>완료</span>
+      </button>
+      <button class="hotspot folder-4" id="unitHot4" onclick="openUnit(4)" aria-label="4단원">
+        <span class="tag">Ⅳ단원 <span id="u4count"></span></span><span class="done-stamp">수사<br>완료</span>
+      </button>
+      <button class="hotspot folder-5" id="unitHot5" onclick="openUnit(5)" aria-label="5단원">
+        <span class="tag">Ⅴ단원 <span id="u5count"></span></span><span class="done-stamp">수사<br>완료</span>
+      </button>
+      <button class="hotspot folder-6" id="unitHot6" onclick="openUnit(6)" aria-label="6단원">
+        <span class="tag">Ⅵ단원 <span id="u6count"></span></span><span class="done-stamp">수사<br>완료</span>
+      </button>
+
+      <button class="hotspot special notebook-hot" onclick="showNotebook()" aria-label="탐정 수첩">
+        <span class="tag"><img class="ui-mini-icon" src="assets/ui_icons/notebook.png" alt="">탐정 수첩</span>
+      </button>
+
+      <button class="hotspot special phone-hot" onclick="continueLast()" aria-label="최근 사건 이어하기">
+        <span class="tag"><img class="ui-tag-icon" src="assets/ui_icons/detective-case.png" alt="">최근 사건</span>
+      </button>
+
+      <button class="hotspot special board-hot" onclick="showOverview()" aria-label="전체 수사 현황"></button>
+    </section>
+
+    <div class="hint">책상 위 사건 서류철을 클릭해 단원을 선택하세요. 전화기는 최근 사건 이어하기, 갈색 수첩은 탐정 수첩입니다.</div>
+  </main>
+
+  <section class="page" id="unitPage">
+    <div class="paper-page">
+      <div class="page-head">
+        <div><div class="small" id="unitNo"></div><h2 id="unitTitle"></h2></div>
+        <button class="back" onclick="showHome()">← 탐정사무소</button>
+      </div>
+      <div class="case-grid" id="caseGrid"></div>
+    </div>
+  </section>
+
+  <section class="page" id="notebookPage">
+    <div class="paper-page notebook-page">
+      <div class="page-head">
+        <div><div class="small">DETECTIVE NOTEBOOK</div><h2>탐정 수첩 · 수사 기록</h2></div>
+        <button class="back" onclick="showHome()">← 탐정사무소</button>
+      </div>
+
+      <div class="notebook-summary" id="notebookSummary"></div>
+
+      <div class="notebook-section required">
+        <div class="notebook-section-head">
+          <div><b><img class="ui-head-icon" src="assets/ui_icons/scroll-search.png" alt="">학습지 연계 수사 스탬프</b><span>필수 사건 중심 · 추가 사건은 보너스 스탬프</span></div>
+          <strong id="sourceStampCount">0 / 39</strong>
+        </div>
+        <div class="stamp-grid source-stamp-grid" id="sourceStampGrid"></div>
+      </div>
+
+      <div class="notebook-section extra">
+        <div class="notebook-section-head">
+          <div><b><img class="ui-head-icon" src="assets/ui_icons/detective-case.png" alt="">보너스 스탬프 보관함</b><span>각 필수 사건 아래에 표시됩니다.</span></div>
+          <strong id="extraStampCount">0 / 44</strong>
+        </div>
+        <div class="stamp-grid" id="stampGrid"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer">역사 탐정소 · 학습지 연계 필수 수사 + 선택 추가 사건</div>
+</div>
+
+<div class="modal" id="overviewModal" onclick="if(event.target===this)hideOverview()">
+  <div class="modal-card">
+    <div class="modal-head"><h2><img class="ui-mini-icon" src="assets/ui_icons/source-analysis.png" alt="">전체 수사 현황</h2><button class="close" onclick="hideOverview()">닫기</button></div>
+    <div class="overview-grid" id="overviewGrid"></div>
+  </div>
+</div>
+
+<div class="viewer" id="viewer">
+  <div class="viewerbar">
+    <div class="viewer-left">
+      <button class="vbtn" id="viewerBackBtn" onclick="closeCase()">← 이전 화면</button>
+      <div class="viewer-title" id="viewerTitle"></div>
+    </div>
+    <button class="vbtn" onclick="refreshCase()">↻ 사건 다시 열기</button>
+  </div>
+  <iframe id="caseFrame" title="역사 탐정 사건"></iframe>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const UNITS = {"1": {"roman": "Ⅰ", "name": "선사 문화와 고대 국가의 형성", "desc": "선사 시대부터 삼국의 성장과 문화까지", "icon": "🏺"}, "2": {"roman": "Ⅱ", "name": "남북국 시대의 전개", "desc": "신라의 통일과 발해, 남북국의 발전", "icon": "⚔️"}, "3": {"roman": "Ⅲ", "name": "고려의 성립과 변천", "desc": "고려 건국부터 원 간섭기와 고려 문화까지", "icon": "🐉"}, "4": {"roman": "Ⅳ", "name": "조선의 성립과 발전", "desc": "조선 건국부터 붕당 정치와 양란까지", "icon": "🏯"}, "5": {"roman": "Ⅴ", "name": "조선 사회의 변동", "desc": "탕평 정치, 경제·신분 변화, 실학과 농민 봉기", "icon": "📜"}, "6": {"roman": "Ⅵ", "name": "근현대 사회의 전개", "desc": "개항부터 독립운동, 분단과 현대 사회까지", "icon": "🕯️"}};
+const CASES = [{"code": "1-01", "unit": 1, "title": "강가에서 발견된 수상한 움집", "solveKey": "history_case_1_01_solved", "stampKey": "history_stamp_1_01_neolithic"}, {"code": "1-02", "unit": 1, "title": "무덤 하나가 마을보다 거대하다", "solveKey": "history_case_1_02_solved", "stampKey": "history_stamp_1_02_dolmen"}, {"code": "1-03", "unit": 1, "title": "단 세 개의 법으로 사회를 밝혀라", "solveKey": "history_case_1_03_solved", "stampKey": "history_stamp_1_03_bronze_dagger"}, {"code": "1-04", "unit": 1, "title": "나라별 풍습이 너무 다르다", "solveKey": "history_case_1_04_solved", "stampKey": "history_stamp_1_04_sodo"}, {"code": "1-05", "unit": 1, "title": "고구려의 이름이 왜 신라 무덤에서 발견됐을까", "solveKey": "history_case_1_05_solved", "stampKey": "history_stamp_1_05_hou"}, {"code": "1-06", "unit": 1, "title": "동맹국의 왕이 왜 전장에서 죽었을까", "solveKey": "history_case_1_06_solved", "stampKey": "history_stamp_1_06_jinheung"}, {"code": "1-07", "unit": 1, "title": "삼국의 문화재에는 왜 서로 다른 흔적이 남아 있을까", "solveKey": "history_case_1_07_solved", "stampKey": "history_stamp_1_07_incense_burner"}, {"code": "2-01", "unit": 2, "title": "신라는 왜 먼 당나라와 손을 잡았을까", "solveKey": "history_case_2_01_solved", "stampKey": "history_stamp_2_01_mu-yeol"}, {"code": "2-02", "unit": 2, "title": "어제의 동맹이 오늘의 적이 되었다", "solveKey": "history_case_2_02_solved", "stampKey": "history_stamp_2_02_munmu"}, {"code": "2-03", "unit": 2, "title": "고구려는 멸망했는데 왜 다시 나타났을까", "solveKey": "history_case_2_03_solved", "stampKey": "history_stamp_2_03_balhae_tile"}, {"code": "2-04", "unit": 2, "title": "왕은 왜 수도 밖에 작은 수도를 다섯 곳이나 만들었을까", "solveKey": "history_case_2_04_solved", "stampKey": "history_stamp_2_04_five_secondary_capitals"}, {"code": "2-05", "unit": 2, "title": "관리는 왜 마을 사람과 소까지 기록했을까", "solveKey": "history_case_2_05_solved", "stampKey": "history_stamp_2_05_village_document"}, {"code": "2-06", "unit": 2, "title": "발해는 왜 고구려를 계승한 나라로 볼 수 있을까", "solveKey": "history_case_2_06_solved", "stampKey": "history_stamp_2_06_sanggyeong"}, {"code": "2-07", "unit": 2, "title": "청해진에는 왜 여러 나라의 배가 모였을까", "solveKey": "history_case_2_07_solved", "stampKey": "history_stamp_2_07_cheonghaejin"}, {"code": "3-01", "unit": 3, "title": "후삼국의 세 왕 중 왕건이 승리한 이유는?", "solveKey": "history_case_3_01_solved", "stampKey": "history_stamp_3_01_taejo_wanggeon"}, {"code": "3-02", "unit": 3, "title": "왕은 왜 노비를 다시 양인으로 만들었을까", "solveKey": "history_case_3_02_solved", "stampKey": "history_stamp_3_02_gwageo"}, {"code": "3-03", "unit": 3, "title": "지방에 관리와 학교를 함께 보낸 이유는?", "solveKey": "history_case_3_03_solved", "stampKey": "history_stamp_3_03_hyanggyo"}, {"code": "3-04", "unit": 3, "title": "시험을 보지 않고도 관리가 될 수 있었다?", "solveKey": "history_case_3_04_solved", "stampKey": "history_stamp_3_04_eumseo"}, {"code": "3-05", "unit": 3, "title": "무신들은 왜 칼을 들었을까?", "solveKey": "history_case_3_05_solved", "stampKey": "history_stamp_3_05_military_coup"}, {"code": "3-06", "unit": 3, "title": "고려 왕은 왜 섬으로 수도를 옮겼을까?", "solveKey": "history_case_3_06_solved", "stampKey": "history_stamp_3_06_ganghwa"}, {"code": "3-07", "unit": 3, "title": "왕의 이름 앞에 왜 몽골식 이름이 붙었을까?", "solveKey": "history_case_3_07_solved", "stampKey": "history_stamp_3_07_gongmin"}, {"code": "3-08", "unit": 3, "title": "팔만 장의 나무판과 푸른 그릇은 무엇을 말할까?", "solveKey": "history_case_3_08_solved", "stampKey": "history_stamp_3_08_celadon"}, {"code": "4-01", "unit": 4, "title": "새 왕조는 왜 한양으로 수도를 옮겼을까?", "solveKey": "history_case_4_01_solved", "stampKey": "history_stamp_4_01_gyeongbokgung"}, {"code": "4-02", "unit": 4, "title": "왕 혼자 나라를 다스릴 수 있었을까?", "solveKey": "history_case_4_02_solved", "stampKey": "history_stamp_4_02_uijeongbu"}, {"code": "4-03", "unit": 4, "title": "조선은 명과 여진, 일본을 어떻게 다르게 대했을까?", "solveKey": "history_case_4_03_solved", "stampKey": "history_stamp_4_03_sadae_gyorin"}, {"code": "4-04", "unit": 4, "title": "지방 선비들은 왜 서원과 향약을 만들었을까?", "solveKey": "history_case_4_04_solved", "stampKey": "history_stamp_4_04_seowon"}, {"code": "4-05", "unit": 4, "title": "같은 유학자들이 왜 서로 갈라졌을까?", "solveKey": "history_case_4_05_solved", "stampKey": "history_stamp_4_05_bungdang"}, {"code": "4-06", "unit": 4, "title": "조선은 어떻게 7년 전쟁을 견뎌냈을까?", "solveKey": "history_case_4_06_solved", "stampKey": "history_stamp_4_06_geobukseon"}, {"code": "4-07", "unit": 4, "title": "청과 싸울 것인가, 화친할 것인가", "solveKey": "history_case_4_07_solved", "stampKey": "history_stamp_4_07_namhansanseong"}, {"code": "5-01", "unit": 5, "title": "왕은 왜 붕당 사이에서 줄타기를 했을까?", "solveKey": "history_case_5_01_solved", "stampKey": "history_stamp_5_01_gyujanggak"}, {"code": "5-02", "unit": 5, "title": "백성을 돕던 곡식이 왜 세금처럼 변했을까?", "solveKey": "history_case_5_02_solved", "stampKey": "history_stamp_5_02_hwangok"}, {"code": "5-03", "unit": 5, "title": "조선의 장터에는 왜 돈과 상인이 늘어났을까?", "solveKey": "history_case_5_03_solved", "stampKey": "history_stamp_5_03_sangpyeong"}, {"code": "5-04", "unit": 5, "title": "신분제 사회에서 양반이 갑자기 늘어난 이유는?", "solveKey": "history_case_5_04_solved", "stampKey": "history_stamp_5_04_gongmyeongcheop"}, {"code": "5-05", "unit": 5, "title": "학자들은 왜 책상 대신 농촌과 시장을 바라봤을까?", "solveKey": "history_case_5_05_solved", "stampKey": "history_stamp_5_05_mongminsimseo"}, {"code": "5-06", "unit": 5, "title": "백성의 이야기가 그림과 소설의 주인공이 된 이유는?", "solveKey": "history_case_5_06_solved", "stampKey": "history_stamp_5_06_genre_painting"}, {"code": "5-07", "unit": 5, "title": "농민들은 왜 관아를 점령했을까?", "solveKey": "history_case_5_07_solved", "stampKey": "history_stamp_5_07_peasant_uprising"}, {"code": "6-01", "unit": 6, "title": "닫혀 있던 조선의 항구는 왜 열렸을까?", "solveKey": "history_case_6_01_solved", "stampKey": "history_stamp_6_01_ganghwa_treaty"}, {"code": "6-02", "unit": 6, "title": "조선을 바꾸는 방법을 두고 왜 갈라졌을까?", "solveKey": "history_case_6_02_solved", "stampKey": "history_stamp_6_02_gapsin_reform"}, {"code": "6-03", "unit": 6, "title": "농민군은 왜 전주성까지 진격했을까?", "solveKey": "history_case_6_03_solved", "stampKey": "history_stamp_6_03_sabaltongmun"}, {"code": "6-04", "unit": 6, "title": "조선은 어떻게 황제의 나라가 되었을까?", "solveKey": "history_case_6_04_solved", "stampKey": "history_stamp_6_04_korean_empire"}, {"code": "6-05", "unit": 6, "title": "거리의 만세 운동은 어떻게 전국으로 퍼졌을까?", "solveKey": "history_case_6_05_solved", "stampKey": "history_stamp_6_05_declaration"}, {"code": "6-06", "unit": 6, "title": "나라 밖에서도 독립운동은 어떻게 이어졌을까?", "solveKey": "history_case_6_06_solved", "stampKey": "history_stamp_6_06_kla"}, {"code": "6-07", "unit": 6, "title": "해방의 기쁨은 왜 곧 분단과 전쟁으로 이어졌을까?", "solveKey": "history_case_6_07_solved", "stampKey": "history_stamp_6_07_38th_parallel"}, {"code": "6-08", "unit": 6, "title": "대한민국 사회는 어떻게 지금의 모습이 되었을까?", "solveKey": "history_case_6_08_solved", "stampKey": "history_stamp_6_08_democratic_citizen"}];
+const CASE_HTML = window.__HD_CASE_B64 = window.__HD_CASE_B64 || {};
+const CASE_DATA_FILES = {"1-01": "case_data/1-01.js", "1-02": "case_data/1-02.js", "1-03": "case_data/1-03.js", "1-04": "case_data/1-04.js", "1-05": "case_data/1-05.js", "1-06": "case_data/1-06.js", "1-07": "case_data/1-07.js", "2-01": "case_data/2-01.js", "2-02": "case_data/2-02.js", "2-03": "case_data/2-03.js", "2-04": "case_data/2-04.js", "2-05": "case_data/2-05.js", "2-06": "case_data/2-06.js", "2-07": "case_data/2-07.js", "3-01": "case_data/3-01.js", "3-02": "case_data/3-02.js", "3-03": "case_data/3-03.js", "3-04": "case_data/3-04.js", "3-05": "case_data/3-05.js", "3-06": "case_data/3-06.js", "3-07": "case_data/3-07.js", "3-08": "case_data/3-08.js", "4-01": "case_data/4-01.js", "4-02": "case_data/4-02.js", "4-03": "case_data/4-03.js", "4-04": "case_data/4-04.js", "4-05": "case_data/4-05.js", "4-06": "case_data/4-06.js", "4-07": "case_data/4-07.js", "5-01": "case_data/5-01.js", "5-02": "case_data/5-02.js", "5-03": "case_data/5-03.js", "5-04": "case_data/5-04.js", "5-05": "case_data/5-05.js", "5-06": "case_data/5-06.js", "5-07": "case_data/5-07.js", "6-01": "case_data/6-01.js", "6-02": "case_data/6-02.js", "6-03": "case_data/6-03.js", "6-04": "case_data/6-04.js", "6-05": "case_data/6-05.js", "6-06": "case_data/6-06.js", "6-07": "case_data/6-07.js", "6-08": "case_data/6-08.js"};
+const CASE_LOAD_STATE = {};
+const ANSWER_TARGETS = {"1-01": {"checkQ1": 1, "checkQ2": 2, "checkFinal": 3}, "1-02": {"checkQ1": 2, "checkQ2": 3, "checkFinal": 1}, "1-03": {"checkQ1": 3, "checkQ2": 1, "checkFinal": 2}, "1-04": {"checkQ2": 1, "checkFinal": 3}, "1-05": {"checkQ1": 2, "checkQ2": 2, "checkFinal": 1}, "1-06": {"checkQ1": 3, "checkQ2": 3, "checkFinal": 2}, "1-07": {"checkQ1": 1, "checkQ2": 1, "checkFinal": 2}, "2-01": {"checkQ1": 3, "checkQ2": 2, "checkFinal": 3}, "2-02": {"checkQ1": 1, "checkQ2": 3, "checkFinal": 1}, "2-03": {"checkQ1": 2, "checkQ2": 1, "checkFinal": 3}, "2-04": {"checkQ1": 2, "checkQ2": 2, "checkFinal": 1}, "2-05": {"checkQ1": 3, "checkQ2": 3, "checkFinal": 2}, "2-06": {"checkQ1": 1, "checkQ2": 1, "checkFinal": 2}, "2-07": {"checkQ1": 3, "checkQ2": 2, "checkFinal": 3}, "3-01": {"checkQ1": 1, "checkQ2": 3, "checkFinal": 1}, "3-02": {"checkQ1": 2, "checkQ2": 1, "checkFinal": 3}, "3-03": {"checkQ1": 2, "checkQ2": 2, "checkFinal": 1}, "3-04": {"checkQ1": 3, "checkQ2": 3, "checkFinal": 2}, "3-05": {"checkQ1": 1, "checkQ2": 1, "checkFinal": 2}, "3-06": {"checkQ1": 3, "checkQ2": 2, "checkFinal": 3}, "3-07": {"checkQ1": 1, "checkQ2": 3, "checkFinal": 1}, "3-08": {"checkQ1": 2, "checkQ2": 1, "checkFinal": 3}, "4-01": {"checkQ1": 2, "checkQ2": 2, "checkFinal": 1}, "4-02": {"checkQ1": 3, "checkQ2": 3, "checkFinal": 2}, "4-03": {"checkQ1": 1, "checkQ2": 1, "checkFinal": 2}, "4-04": {"checkQ1": 3, "checkQ2": 2, "checkFinal": 3}, "4-05": {"checkQ1": 1, "checkQ2": 3, "checkFinal": 1}, "4-06": {"checkQ1": 2, "checkQ2": 1, "checkFinal": 3}, "4-07": {"checkQ1": 2, "checkQ2": 2, "checkFinal": 1}, "5-01": {"checkQ1": 3, "checkQ2": 3, "checkFinal": 2}, "5-02": {"checkQ1": 1, "checkQ2": 1, "checkFinal": 2}, "5-03": {"checkQ1": 3, "checkQ2": 2, "checkFinal": 3}, "5-04": {"checkQ1": 1, "checkQ2": 3, "checkFinal": 1}, "5-05": {"checkQ1": 2, "checkQ2": 1, "checkFinal": 3}, "5-06": {"checkQ1": 2, "checkQ2": 2, "checkFinal": 1}, "5-07": {"checkQ1": 3, "checkQ2": 3, "checkFinal": 2}, "6-01": {"checkQ1": 1, "checkQ2": 1, "checkFinal": 2}, "6-02": {"checkQ1": 3, "checkQ2": 2, "checkFinal": 3}, "6-03": {"checkQ1": 1, "checkQ2": 3, "checkFinal": 1}, "6-04": {"checkQ1": 2, "checkQ2": 1, "checkFinal": 3}, "6-05": {"checkQ1": 2, "checkQ2": 2, "checkFinal": 1}, "6-06": {"checkQ1": 3, "checkQ2": 3, "checkFinal": 2}, "6-07": {"checkQ1": 1, "checkQ2": 1, "checkFinal": 2}, "6-08": {"checkQ1": 3, "checkQ2": 1, "checkFinal": 2}};
+const STAMP_IMAGES = {"1-01": "stamps/1-01.png", "1-02": "stamps/1-02.png", "1-03": "stamps/1-03.png", "1-04": "stamps/1-04.png", "1-05": "stamps/1-05.png", "1-06": "stamps/1-06.png", "1-07": "stamps/1-07.png", "2-01": "stamps/2-01.png", "2-02": "stamps/2-02.png", "2-03": "stamps/2-03.png", "2-04": "stamps/2-04.png", "2-05": "stamps/2-05.png", "2-06": "stamps/2-06.png", "2-07": "stamps/2-07.png", "3-01": "stamps/3-01.png", "3-02": "stamps/3-02.png", "3-03": "stamps/3-03.png", "3-04": "stamps/3-04.png", "3-05": "stamps/3-05.png", "3-06": "stamps/3-06.png", "3-07": "stamps/3-07.png", "3-08": "stamps/3-08.png", "4-01": "stamps/4-01.png", "4-02": "stamps/4-02.png", "4-03": "stamps/4-03.png", "4-04": "stamps/4-04.png", "4-05": "stamps/4-05.png", "4-06": "stamps/4-06.png", "4-07": "stamps/4-07.png", "5-01": "stamps/5-01.png", "5-02": "stamps/5-02.png", "5-03": "stamps/5-03.png", "5-04": "stamps/5-04.png", "5-05": "stamps/5-05.png", "5-06": "stamps/5-06.png", "5-07": "stamps/5-07.png", "6-01": "stamps/6-01.png", "6-02": "stamps/6-02.png", "6-03": "stamps/6-03.png", "6-04": "stamps/6-04.png", "6-05": "stamps/6-05.png", "6-06": "stamps/6-06.png", "6-07": "stamps/6-07.png", "6-08": "stamps/6-08.png"};
+
+// ===== lightweight package: external case files loaded on demand =====
+(function(){
+  const stampKeys = Object.keys(STAMP_IMAGES);
+  const codes = CASES.map(c=>c.code);
+  window.__HISTORY_DETECTIVE_V43__ = {
+    caseCount: codes.length,
+    stampCount: stampKeys.length,
+    missingStamps: codes.filter(k=>!STAMP_IMAGES[k]),
+    extraStamps: stampKeys.filter(k=>!codes.includes(k))
+  };
+  console.info("[역사 탐정사무소 v4.3 light]", window.__HISTORY_DETECTIVE_V43__);
+})();
+
+let activeCaseCode=null;
+let currentUnit=null;
+
+function solved(c){
+  try{return localStorage.getItem(c.solveKey)==="true"}catch(e){return false}
+}
+function stamped(c){
+  if(!c.stampKey) return solved(c);
+  try{return localStorage.getItem(c.stampKey)==="true"}catch(e){return solved(c)}
+}
+function countSolved(list=CASES){return list.filter(solved).length}
+
+function toast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg;t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),1800);
+}
+
+function updateViewerBackLabel(){
+  const btn=document.getElementById("viewerBackBtn");
+  if(!btn) return;
+  if(document.getElementById("unitPage").classList.contains("show") && currentUnit){
+    btn.textContent="← 단원 사건 목록";
+  }else if(document.getElementById("notebookPage").classList.contains("show")){
+    btn.textContent="← 탐정 수첩";
+  }else{
+    btn.textContent="← 탐정사무소";
+  }
+}
+
+window.historyDetectiveNavigate={
+  home(){ closeCase(); showHome(); },
+  notebook(){ closeCase(); showNotebook(); },
+  unitByCode(code){
+    const c=CASES.find(x=>x.code===code);
+    closeCase();
+    if(c) openUnit(c.unit); else showHome();
+  }
+};
+
+function updateProgress(){
+  const n=countSolved(), pct=Math.round(n/CASES.length*1000)/10;
+  document.getElementById("solvedTop").textContent=n;
+  document.getElementById("percentTop").textContent=pct;
+  document.getElementById("boardCount").textContent=`${n} / 44`;
+  document.getElementById("boardText").textContent=`사건 해결 · ${pct}%`;
+  document.getElementById("boardFill").style.width=pct+"%";
+
+  for(let u=1;u<=6;u++){
+    const list=CASES.filter(c=>c.unit===u), done=countSolved(list);
+    document.getElementById(`u${u}count`).textContent=`${done}/${list.length}`;
+    const h=document.getElementById(`unitHot${u}`);
+    h.classList.toggle("done",done===list.length);
+  }
+}
+
+function showHome(){
+  document.getElementById("home").style.display="";
+  document.getElementById("unitPage").classList.remove("show");
+  document.getElementById("notebookPage").classList.remove("show");
+  updateProgress();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function openUnit(u){
+  currentUnit=u;
+  document.getElementById("home").style.display="none";
+  document.getElementById("notebookPage").classList.remove("show");
+  document.getElementById("unitPage").classList.add("show");
+
+  const meta=UNITS[u], list=CASES.filter(c=>c.unit===u);
+  document.getElementById("unitNo").textContent=`${meta.roman}단원 · ${countSolved(list)}/${list.length} 해결`;
+  document.getElementById("unitTitle").textContent=meta.name;
+
+  const grid=document.getElementById("caseGrid"); grid.innerHTML="";
+  list.forEach(c=>{
+    const b=document.createElement("button");
+    b.className="case-file"+(solved(c)?" solved":"");
+    b.onclick=()=>openCase(c.code);
+    b.innerHTML=`<div class="case-no">CASE ${c.code}</div>
+      <div class="case-title">${c.title}</div>
+      <div class="case-state">${solved(c)?"✓ 해결 완료":"미해결 사건"}</div>`;
+    grid.appendChild(b);
+  });
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function showNotebook(){
+  document.getElementById("home").style.display="none";
+  document.getElementById("unitPage").classList.remove("show");
+  document.getElementById("notebookPage").classList.add("show");
+
+  const sourceGrid=document.getElementById("sourceStampGrid");
+  const extraGrid=document.getElementById("stampGrid");
+  sourceGrid.innerHTML="";
+  extraGrid.innerHTML="";
+
+  const reps=(typeof SOURCE_CASES!=="undefined") ? SOURCE_CASES : [];
+  let sourceDone=0;
+  reps.forEach(c=>{
+    const got=sourceStamped(c);
+    if(got) sourceDone++;
+    const div=document.createElement("div");
+    div.className="record source-record"+(got?" got":"");
+    div.onclick=()=>openSourceCase(c.code);
+    div.innerHTML=`<div class="mark">${got?"◉ 스탬프 획득":"○ 미해결"}</div>
+      <div class="stamp-img-wrap"><img class="stamp-img" src="${SOURCE_STAMP_IMAGES[c.code] || ('source_stamps/' + c.code + '.svg')}" alt="학습지 ${c.ws} 사료 분석 스탬프"></div>
+      <div>
+        <div class="small">학습지 ${c.ws}</div>
+        <div class="source-record-title">${c.title}</div>
+        <div class="source-record-meta">${c.source_type||"자료"} · ${c.thinking||"자료 해석"}</div>
+        <div class="stamp-caption">${got?(c.stamp+" 스탬프 획득"):"사료 수사 완료 후 획득"}</div>
+      </div>`;
+    sourceGrid.appendChild(div);
+  });
+
+  let extraDone=0;
+  CASES.forEach(c=>{
+    const got=stamped(c);
+    if(got) extraDone++;
+    const div=document.createElement("div");
+    div.className="record"+(got?" got":"");
+    div.onclick=()=>openCase(c.code);
+    div.innerHTML=`<div class="mark">${got?"◉ 스탬프 획득":"○ 미해결"}</div>
+      <div class="stamp-img-wrap"><img class="stamp-img" src="${STAMP_IMAGES[c.code]||""}" alt="CASE ${c.code} 스탬프"></div>
+      <div><div class="small">CASE ${c.code}</div>
+      <div style="font-weight:900;line-height:1.35">${c.title}</div>
+      <div class="stamp-caption">${got?"수사 완료 스탬프":"사건 해결 후 획득"}</div></div>`;
+    extraGrid.appendChild(div);
+  });
+
+  const sourceTotal=reps.length || 31;
+  const extraTotal=CASES.length;
+  document.getElementById("sourceStampCount").textContent=`${sourceDone} / ${sourceTotal}`;
+  document.getElementById("extraStampCount").textContent=`${extraDone} / ${extraTotal}`;
+  const totalDone=sourceDone+extraDone,total=sourceTotal+extraTotal;
+  document.getElementById("notebookSummary").innerHTML=`
+    <div class="summary-box"><b>${sourceDone}/${sourceTotal}</b><span>대표 사료 수사</span></div>
+    <div class="summary-box"><b>${extraDone}/${extraTotal}</b><span>추가 수사</span></div>
+    <div class="summary-box"><b>${totalDone}/${total}</b><span>전체 스탬프</span></div>`;
+
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function showOverview(){
+  const grid=document.getElementById("overviewGrid");grid.innerHTML="";
+  for(let u=1;u<=6;u++){
+    const meta=UNITS[u],list=CASES.filter(c=>c.unit===u),done=countSolved(list),pct=Math.round(done/list.length*100);
+    const div=document.createElement("div");
+    div.className="overview-item";
+    div.innerHTML=`<b>${meta.roman}단원 · ${meta.name}</b>
+      <div class="small" style="margin-bottom:6px">${done} / ${list.length} 사건 해결</div>
+      <div class="mini-bar"><div class="mini-fill" style="width:${pct}%"></div></div>`;
+    div.onclick=()=>{hideOverview();openUnit(u)};
+    div.style.cursor="pointer";
+    grid.appendChild(div);
+  }
+  document.getElementById("overviewModal").classList.add("show");
+}
+function hideOverview(){document.getElementById("overviewModal").classList.remove("show")}
+
+function decodeBase64Utf8(b64){
+  const bin=atob(b64),bytes=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+  return new TextDecoder("utf-8").decode(bytes);
+}
+
+const PACING_GUARD_JS = "\n(function(){\n  let pacingPendingClue = null;\n  let pacingPendingBtn = null;\n  let pacingTimer = null;\n  let pacingSeconds = 0;\n\n  const originalCloseModal = (typeof window.closeModal === 'function') ? window.closeModal : null;\n\n  function getEl(id){ return document.getElementById(id); }\n  function clearPacingTimer(){\n    if(pacingTimer){ clearInterval(pacingTimer); pacingTimer = null; }\n  }\n  function clueActionButton(){\n    const modal = getEl('clueModal');\n    if(!modal) return null;\n    const buttons = modal.querySelectorAll('.modal-card .btn');\n    return buttons.length ? buttons[buttons.length - 1] : null;\n  }\n  function setAction(text, disabled, handler){\n    const b = clueActionButton();\n    if(!b) return;\n    b.textContent = text;\n    b.disabled = !!disabled;\n    b.removeAttribute('onclick');\n    b.onclick = handler || null;\n  }\n  function genericCompleteMessage(){\n    return '단서 수집 완료. 이제 자료를 해석해 보세요.';\n  }\n  function markClueConfirmed(){\n    const n = pacingPendingClue;\n    const btn = pacingPendingBtn;\n    if(n == null || !btn) return;\n    const d = clueData[n];\n    if(!found.has(n)){\n      found.add(n);\n      btn.classList.add('found');\n      const count = getEl('clueCountHud');\n      if(count) count.textContent = found.size;\n      const log = getEl('log' + n);\n      if(log){\n        log.classList.remove('lock');\n        log.innerHTML = '<b>' + d.title + '</b><br><span class=\"small\">' + d.points[0] + '</span>';\n      }\n      const fb = getEl('sceneFb');\n      if(fb) fb.textContent = d.title + ' 단서를 확인했습니다.';\n      if(found.size >= 4){\n        if(fb) fb.textContent = genericCompleteMessage();\n        function enableInterpretationButton(){\n          let q = getEl('toQuiz');\n          if(!q){ q = document.querySelector('button[onclick*=\"goStage(3)\"]:not(.secondary)'); }\n          if(q){\n            q.disabled = false;\n            q.removeAttribute('disabled');\n            q.removeAttribute('aria-disabled');\n            q.style.pointerEvents = 'auto';\n            q.style.opacity = '1';\n            q.style.cursor = 'pointer';\n          }\n        }\n        enableInterpretationButton();\n        setTimeout(enableInterpretationButton, 0);\n        setTimeout(enableInterpretationButton, 120);\n      }\n    }\n    window.closeModal();\n  }\n\n  window.closeModal = function(){\n    clearPacingTimer();\n    pacingPendingClue = null;\n    pacingPendingBtn = null;\n    if(originalCloseModal) return originalCloseModal();\n    const modal = getEl('clueModal');\n    if(modal){ modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); }\n  };\n\n  window.showClue = function(n, btn){\n    const d = clueData[n];\n    if(!d) return;\n    const modal = getEl('clueModal');\n    const icon = getEl('modalIcon'), code = getEl('modalCode'), title = getEl('modalTitle');\n    const desc = getEl('modalDesc'), points = getEl('modalPoints');\n    if(icon) icon.textContent = d.icon || '';\n    if(code) code.textContent = d.code || '';\n    if(title) title.textContent = d.title || '';\n    if(desc) desc.textContent = d.desc || '';\n    if(points) points.innerHTML = (d.points || []).map(function(p){ return '<li>' + p + '</li>'; }).join('');\n    if(modal){ modal.classList.add('show'); modal.setAttribute('aria-hidden','false'); }\n\n    clearPacingTimer();\n    pacingPendingClue = n;\n    pacingPendingBtn = btn;\n\n    if(found.has(n)){\n      setAction('이미 확인한 단서 · 닫기', false, window.closeModal);\n      return;\n    }\n\n    pacingSeconds = 4;\n    setAction('단서 읽는 중 · 4초', true, null);\n    pacingTimer = setInterval(function(){\n      pacingSeconds -= 1;\n      if(pacingSeconds > 0){\n        setAction('단서 읽는 중 · ' + pacingSeconds + '초', true, null);\n      } else {\n        clearPacingTimer();\n        setAction('✓ 단서 확인 완료', false, markClueConfirmed);\n      }\n    }, 1000);\n  };\n\n  function lockQuestion(box, ms, permanent){\n    if(!box) return;\n    const options = Array.prototype.slice.call(box.querySelectorAll('.option'));\n    options.forEach(function(o){\n      o.style.pointerEvents = 'none';\n      if(!permanent) o.style.opacity = '.68';\n    });\n    if(permanent){ box.dataset.pacingSolved = '1'; return; }\n    box.dataset.pacingBusy = '1';\n    setTimeout(function(){\n      if(box.dataset.pacingSolved === '1') return;\n      delete box.dataset.pacingBusy;\n      options.forEach(function(o){ o.style.pointerEvents = ''; o.style.opacity = ''; });\n    }, ms);\n  }\n\n  function wrapAnswerFunction(name){\n    const original = window[name];\n    if(typeof original !== 'function') return;\n    window[name] = function(el, n){\n      const box = el && el.parentElement;\n      if(box && (box.dataset.pacingBusy === '1' || box.dataset.pacingSolved === '1')) return;\n      original(el, n);\n      if(!el) return;\n      if(el.classList.contains('correct')){\n        lockQuestion(box, 0, true);\n      } else if(el.classList.contains('wrong')){\n        const feedback = box ? box.querySelector('.feedback') : null;\n        if(feedback && feedback.textContent.indexOf('2초 뒤') === -1){\n          feedback.textContent += ' · 피드백을 읽고 2초 뒤 다시 선택하세요.';\n        }\n        lockQuestion(box, 2000, false);\n      }\n    };\n  }\n\n  ['checkQ1','checkQ2','checkFinal'].forEach(wrapAnswerFunction);\n\n  if(typeof window.checkMatch === 'function'){\n    const originalCheckMatch = window.checkMatch;\n    let matchBusy = false;\n    window.checkMatch = function(){\n      if(matchBusy) return;\n      originalCheckMatch();\n      if(typeof matchOK !== 'undefined' && !matchOK){\n        const b = document.querySelector('button[onclick=\"checkMatch()\"]');\n        matchBusy = true;\n        if(b){ b.disabled = true; b.textContent = '단서 다시 확인 중…'; }\n        setTimeout(function(){\n          matchBusy = false;\n          if(b){ b.disabled = false; b.textContent = '연결 확인'; }\n        }, 2000);\n      }\n    };\n  }\n})();\n";
+const NAVIGATION_GUARD_JS = '(function(){\n  function safeParentCall(name,arg){\n    try{\n      if(parent && parent.historyDetectiveNavigate && typeof parent.historyDetectiveNavigate[name] === \'function\'){\n        parent.historyDetectiveNavigate[name](arg);\n        return true;\n      }\n    }catch(e){}\n    return false;\n  }\n\n  window.goUnitListFromReward=function(){\n    if(typeof window.closeReward===\'function\') window.closeReward();\n    safeParentCall(\'unitByCode\',\'__CASE_CODE__\');\n  };\n  window.goHomeFromReward=function(){\n    if(typeof window.closeReward===\'function\') window.closeReward();\n    safeParentCall(\'home\');\n  };\n  window.goNotebookFromReward=function(){\n    if(typeof window.closeReward===\'function\') window.closeReward();\n    if(!safeParentCall(\'notebook\') && typeof window.openNotebook===\'function\') window.openNotebook();\n  };\n\n  const reward=document.getElementById(\'rewardModal\');\n  if(!reward) return;\n  const nav=reward.querySelector(\'.nav\');\n  if(!nav) return;\n  nav.classList.add(\'reward-nav-v501\');\n  nav.style.justifyContent=\'center\';\n  nav.style.gap=\'10px\';\n  nav.style.flexWrap=\'wrap\';\n  nav.innerHTML=\'\'\n    + \'<button class="btn secondary" onclick="goUnitListFromReward()">같은 단원 사건 보기</button>\'\n    + \'<button class="btn secondary" onclick="goHomeFromReward()">탐정사무소 메인</button>\'\n    + \'<button class="btn" onclick="goNotebookFromReward()">탐정 수첩 확인</button>\';\n\n  if(!reward.querySelector(\'.reward-nav-help-v501\')){\n    const help=document.createElement(\'div\');\n    help.className=\'small reward-nav-help-v501\';\n    help.style.marginTop=\'10px\';\n    help.style.color=\'var(--muted)\';\n    help.textContent=\'스탬프 확인 후 원하는 화면으로 이동하세요.\';\n    nav.insertAdjacentElement(\'afterend\',help);\n  }\n})();';
+const TABLET_SCROLL_GUARD_JS = `(function(){
+  function isVisible(el){
+    if(!el) return false;
+    const s=getComputedStyle(el);
+    return s.display!=='none' && s.visibility!=='hidden' && el.getClientRects().length>0;
+  }
+  function findNextStageButton(){
+    const candidates=Array.from(document.querySelectorAll('button'));
+    return candidates.find(function(b){
+      const oc=b.getAttribute('onclick')||'';
+      const label=(b.textContent||'').replace(/\s+/g,' ').trim();
+      return isVisible(b) && !b.disabled && b.getAttribute('aria-disabled')!=='true' &&
+        (oc.indexOf('goStage(4)')>=0 || label.indexOf('핵심 추론')>=0);
+    }) || null;
+  }
+  function revealNextStage(){
+    const b=findNextStageButton();
+    if(!b) return;
+    setTimeout(function(){
+      try{ b.scrollIntoView({behavior:'smooth',block:'center'}); }
+      catch(e){ b.scrollIntoView(false); }
+    },120);
+  }
+
+  // 세로 공간이 짧은 태블릿 가로모드에서도 본문 끝까지 스크롤되도록 강제 보정
+  document.documentElement.style.minHeight='100%';
+  document.documentElement.style.height='auto';
+  document.documentElement.style.overflowY='auto';
+  document.body.style.minHeight='100%';
+  document.body.style.height='auto';
+  document.body.style.overflowY='auto';
+  document.body.style.webkitOverflowScrolling='touch';
+
+  // 정답 처리 후 핵심 추론 버튼이 활성화되면 자동으로 화면 안에 보여 줌
+  const obs=new MutationObserver(function(muts){
+    let relevant=false;
+    muts.forEach(function(m){
+      if(m.type==='attributes' || m.type==='childList') relevant=true;
+    });
+    if(relevant) revealNextStage();
+  });
+  obs.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['disabled','class','style','aria-disabled']});
+
+  ['orientationchange','resize'].forEach(function(ev){
+    window.addEventListener(ev,function(){
+      setTimeout(function(){
+        document.body.style.overflowY='auto';
+        document.documentElement.style.overflowY='auto';
+      },180);
+    },{passive:true});
+  });
+})();`;
+const TABLET_SCROLL_GUARD_CSS = `<style data-tablet-scroll-guard="v5.0.2">
+html,body{min-height:100%!important;height:auto!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior-y:contain}
+body{padding-bottom:max(96px,env(safe-area-inset-bottom))!important}
+.app{padding-bottom:max(96px,env(safe-area-inset-bottom))!important}
+.screen{min-height:auto!important;height:auto!important;overflow:visible!important;padding-bottom:max(120px,env(safe-area-inset-bottom))!important}
+@media (orientation:landscape) and (max-height:760px){
+  body{padding-bottom:140px!important}
+  .app{padding-bottom:140px!important}
+  .screen{min-height:auto!important;padding-bottom:180px!important}
+  .panel:last-child,.nav:last-child{margin-bottom:40px!important}
+}
+</style>`;
+
+function patchCaseForPacing(caseHtml, code){
+  const scriptClose = '</scr' + 'ipt>';
+  let guard = '';
+  if(!caseHtml.includes('data-pacing-guard="v4.2"')){
+    const style = '<style data-pacing-guard="v4.2">#clueModal .btn:disabled{opacity:.52;cursor:wait} .option{transition:opacity .15s ease}</style>';
+    const scriptOpen = '<script data-pacing-guard="v4.2">';
+    guard += style + scriptOpen + PACING_GUARD_JS + scriptClose;
+  }
+  if(!caseHtml.includes('data-navigation-guard="v5.0.1"')){
+    const navOpen = '<script data-navigation-guard="v5.0.1">';
+    const navCode = NAVIGATION_GUARD_JS.replace('__CASE_CODE__', code);
+    guard += navOpen + navCode + scriptClose;
+  }
+  if(!caseHtml.includes('data-tablet-scroll-guard="v5.0.2"')){
+    const scrollOpen = '<script data-tablet-scroll-guard="v5.0.2">';
+    guard += TABLET_SCROLL_GUARD_CSS + scrollOpen + TABLET_SCROLL_GUARD_JS + scriptClose;
+  }
+  if(!guard) return caseHtml;
+  return caseHtml.includes('</body>') ? caseHtml.replace('</body>', guard + '</body>') : caseHtml + guard;
+}
+
+function cleanOptionText(s){ return s.replace(/^[①②③]\s*/,'').replace(/\s+/g,' ').trim(); }
+function rebalanceCaseHtml(code, html){
+  const target = ANSWER_TARGETS[code] || {};
+  const circ = {1:'①',2:'②',3:'③'};
+  const fns = ['checkQ1','checkQ2','checkFinal'];
+  function currentCorrect(src,fn){
+    const re = new RegExp(String.raw`function\s+${fn}\(el,\s*n\)\{[\s\S]*?if\(n===([123])\)`);
+    const m = src.match(re); return m ? Number(m[1]) : null;
+  }
+  function replaceCorrect(src,fn,n){
+    const re = new RegExp(String.raw`(function\s+${fn}\(el,\s*n\)\{[\s\S]*?if\(n===)([123])(\))`);
+    return src.replace(re,'$1'+n+'$3');
+  }
+  for(const fn of fns){
+    const desired = target[fn];
+    if(!desired) continue;
+    const cur = currentCorrect(html, fn);
+    if(cur==null || cur===desired) continue;
+    const blockRe = new RegExp(String.raw`((?:\s*<div class="option" onclick="${fn}\(this,\s*[123]\)">[\s\S]*?<\/div>\s*){3})`);
+    const block = html.match(blockRe);
+    if(!block) continue;
+    const itemRe = new RegExp(String.raw`<div class="option" onclick="${fn}\(this,\s*([123])\)">([\s\S]*?)<\/div>`,'g');
+    const items = {}; let m;
+    while((m=itemRe.exec(block[1]))!==null) items[Number(m[1])] = m[2];
+    if(!items[1]||!items[2]||!items[3]) continue;
+    const correct = items[cur];
+    const wrongs = [1,2,3].filter(n=>n!==cur).map(n=>items[n]);
+    const ordered = wrongs.slice(); ordered.splice(desired-1,0,correct);
+    let nb='\n';
+    ordered.forEach((txt,i)=>{ const pos=i+1; nb += '    <div class="option" onclick="'+fn+'(this,'+pos+')">'+circ[pos]+' '+cleanOptionText(txt)+'</div>\n'; });
+    html = html.replace(blockRe, nb);
+    html = replaceCorrect(html, fn, desired);
+  }
+  return html;
+}
+
+function caseLoadingHtml(code,title){
+  return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>로딩 중</title><style>body{margin:0;font-family:Pretendard,"Noto Sans KR",system-ui,sans-serif;background:#f4ede2;color:#3b3028;display:grid;place-items:center;min-height:100vh}.box{background:#fffaf1;border:1px solid #dbcdb8;border-radius:18px;padding:28px 24px;box-shadow:0 10px 30px rgba(0,0,0,.08);text-align:center;min-width:260px}.spinner{width:38px;height:38px;border:4px solid #eadbc4;border-top-color:#8c6239;border-radius:50%;margin:0 auto 14px;animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.small{font-size:13px;color:#7b6a58;margin-top:8px}</style></head><body><div class="box"><div class="spinner"></div><div style="font-weight:800">CASE ${code}</div><div style="margin-top:6px;font-size:15px">${title}</div><div class="small">사건 파일을 불러오는 중입니다.</div></div>
+
+
+</body></html>`;
+}
+
+function caseErrorHtml(code){
+  return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;font-family:Pretendard,"Noto Sans KR",system-ui,sans-serif;background:#f8efe7;color:#4b3026;display:grid;place-items:center;min-height:100vh}.box{background:#fff;border:1px solid #e1cfc2;border-radius:18px;padding:28px 24px;max-width:420px;box-shadow:0 10px 30px rgba(0,0,0,.08)}.btn{display:inline-block;margin-top:14px;padding:10px 14px;border-radius:999px;border:none;background:#7a5234;color:#fff;font-weight:800;cursor:pointer}</style></head><body><div class="box"><div style="font-weight:900;font-size:18px">CASE ${code} 불러오기 실패</div><div style="margin-top:8px;line-height:1.6">사건 파일을 읽지 못했습니다. 파일 압축을 모두 푼 뒤 <b>index.html</b>로 실행했는지 확인해 주세요.</div><button class="btn" onclick="location.reload()">다시 시도</button></div>
+
+
+</body></html>`;
+}
+
+function setCaseFrameFromCode(code){
+  const c=CASES.find(x=>x.code===code);
+  const b64=CASE_HTML[code];
+  if(!c || !b64){
+    document.getElementById("caseFrame").srcdoc=caseErrorHtml(code);
+    return;
+  }
+  const balanced = rebalanceCaseHtml(code, decodeBase64Utf8(b64));
+  document.getElementById("caseFrame").srcdoc=patchCaseForPacing(balanced, code);
+}
+
+function loadCaseData(code, done){
+  if(CASE_HTML[code]){ done(); return; }
+  if(CASE_LOAD_STATE[code] === 'loading'){
+    const timer = setInterval(()=>{
+      if(CASE_HTML[code]){ clearInterval(timer); done(); }
+      else if(CASE_LOAD_STATE[code] === 'error'){ clearInterval(timer); }
+    }, 80);
+    return;
+  }
+  const src = CASE_DATA_FILES[code];
+  if(!src){ done(); return; }
+  CASE_LOAD_STATE[code] = 'loading';
+  const s = document.createElement('script');
+  s.src = src;
+  s.async = true;
+  s.onload = ()=>{ CASE_LOAD_STATE[code] = 'loaded'; done(); };
+  s.onerror = ()=>{
+    CASE_LOAD_STATE[code] = 'error';
+    toast('사건 파일을 불러오지 못했습니다. 압축을 모두 푼 뒤 실행해 주세요.');
+    if(activeCaseCode===code) document.getElementById('caseFrame').srcdoc = caseErrorHtml(code);
+  };
+  document.head.appendChild(s);
+}
+
+function openCase(code){
+  const c=CASES.find(x=>x.code===code);if(!c)return;
+  activeCaseCode=code;
+  try{localStorage.setItem("history_detective_last_case",code)}catch(e){}
+  document.getElementById("viewerTitle").textContent=`CASE ${code} · ${c.title}`;
+  updateViewerBackLabel();
+  document.getElementById("viewer").classList.add("show");
+  document.body.style.overflow="hidden";
+  document.getElementById("caseFrame").srcdoc=caseLoadingHtml(code,c.title);
+  loadCaseData(code, ()=>{ if(activeCaseCode===code) setCaseFrameFromCode(code); });
+}
+
+function continueLast(){
+  let code=null;
+  try{code=localStorage.getItem("history_detective_last_case")}catch(e){}
+  const c=CASES.find(x=>x.code===code);
+  if(!c){toast("아직 최근 수사 기록이 없습니다.");return}
+  openCase(code);
+}
+
+function closeCase(){
+  document.getElementById("viewer").classList.remove("show");
+  document.body.style.overflow="";
+  document.getElementById("caseFrame").srcdoc="";
+  updateProgress();
+
+  if(document.getElementById("unitPage").classList.contains("show") && currentUnit){
+    openUnit(currentUnit);
+  } else if(document.getElementById("notebookPage").classList.contains("show")) {
+    showNotebook();
+  }
+  activeCaseCode=null;
+  updateViewerBackLabel();
+}
+
+function refreshCase(){
+  if(activeCaseCode){
+    const c=CASES.find(x=>x.code===activeCaseCode);
+    document.getElementById("caseFrame").srcdoc=caseLoadingHtml(activeCaseCode,c?c.title:'사건');
+    loadCaseData(activeCaseCode, ()=>{ if(activeCaseCode) setCaseFrameFromCode(activeCaseCode); });
+  }
+}
+
+window.addEventListener("focus",updateProgress);
+window.addEventListener("storage",updateProgress);
+updateProgress();
+</script>
+
+
+
+
+<style data-curriculum-source-integration="v1">
+/* ===== 단원 사건 목록 가독성 개선 패치 ===== */
+.curriculum-section-title{
+  grid-column:1/-1;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin:8px 0 2px;
+  padding:13px 16px;
+  border-radius:12px;
+  font-weight:900;
+}
+.curriculum-section-title b{
+  font-size:16px;
+  letter-spacing:-.02em;
+}
+.curriculum-section-title span{
+  font-size:11px;
+  font-weight:800;
+}
+.curriculum-section-title.source-section{
+  background:#5b3a27;
+  border:1px solid #4b2f20;
+  color:#fff8ed;
+  box-shadow:0 4px 10px rgba(63,38,22,.14);
+}
+.curriculum-section-title.source-section span{color:#eadbc9}
+.curriculum-section-title.extra-section{
+  background:#e8d5b9;
+  border:1px solid #c5a37c;
+  color:#4d392b;
+}
+.curriculum-section-title.extra-section span{color:#766352}
+
+/* 수업 안내 */
+.unit-guide{
+  grid-column:1/-1;
+  padding:12px 15px;
+  border-radius:12px;
+  background:#fffaf1;
+  border:1px solid #d5b996;
+  border-left:5px solid #8b6041;
+  font-size:12px;
+  line-height:1.6;
+  color:#5c493b;
+  box-shadow:0 3px 8px rgba(80,52,32,.05);
+}
+
+/* 공통 카드 */
+.case-file.source-case,
+.case-file.extra-case{
+  display:block;
+  position:relative;
+  text-align:left;
+  transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.case-file.source-case:hover,
+.case-file.extra-case:hover{
+  transform:translateY(-2px);
+}
+
+/* 대표 사료 수사 */
+.case-file.source-case{
+  min-height:132px;
+  padding:17px 18px 15px;
+  border:2px solid #9f744e;
+  background:#fffdf8;
+  border-radius:14px;
+  box-shadow:0 6px 15px rgba(79,49,29,.09);
+}
+.case-file.source-case:hover{
+  border-color:#765037;
+  box-shadow:0 9px 18px rgba(79,49,29,.14);
+}
+.case-file.source-case.solved{
+  border-color:#799578;
+  background:#fbfdf8;
+}
+.source-card-top,
+.extra-card-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:12px;
+}
+.case-file.source-case .case-no{
+  padding:5px 9px;
+  border-radius:8px;
+  background:#ead3ad;
+  border:1px solid #c89f6e;
+  color:#5e3d28;
+  font-size:11px;
+  font-weight:950;
+}
+.case-file.source-case .case-title{
+  margin:0 0 12px;
+  font-size:16px;
+  line-height:1.45;
+  font-weight:950;
+  color:#241b16;
+  letter-spacing:-.025em;
+}
+.case-file.source-case .source-topic{
+  margin:0;
+  font-size:11px;
+  line-height:1.4;
+  color:#766352;
+  font-weight:750;
+}
+.case-file.source-case .case-state{
+  flex:0 0 auto;
+  padding:5px 8px;
+  border-radius:999px;
+  background:#ece4d7;
+  color:#6e6258;
+  font-size:10px;
+  font-weight:900;
+}
+.case-file.source-case.solved .case-state{
+  background:#dce9d9;
+  color:#3f6443;
+}
+
+/* 추가 수사: 정보량을 줄여 대표 수사와 시각적으로 분리 */
+.case-file.extra-case{
+  min-height:92px;
+  padding:14px 16px;
+  border:1px solid #c9aa84;
+  background:#fbf6ec;
+  border-radius:12px;
+  box-shadow:0 3px 9px rgba(79,49,29,.05);
+}
+.case-file.extra-case:hover{
+  border-color:#a7835f;
+  box-shadow:0 6px 12px rgba(79,49,29,.09);
+}
+.case-file.extra-case.solved{
+  border-color:#9bb095;
+  background:#f7faf3;
+}
+.case-file.extra-case .case-no{
+  padding:4px 8px;
+  border-radius:7px;
+  background:#eadfcf;
+  border:0;
+  color:#6a594c;
+  font-size:10px;
+}
+.case-file.extra-case .case-title{
+  margin:0;
+  font-size:14px;
+  line-height:1.4;
+  font-weight:850;
+  color:#372c25;
+}
+.case-file.extra-case .case-state{
+  padding:4px 7px;
+  font-size:10px;
+  white-space:nowrap;
+}
+
+/* 기존 pseudo badge 제거: 섹션 제목으로 충분히 구분 */
+.case-file.source-case::before,
+.case-file.extra-case::before{
+  content:none !important;
+  display:none !important;
+}
+
+/* 넓은 화면에서는 2열 유지, 작은 화면은 1열 */
+@media(max-width:760px){
+  .case-grid{grid-template-columns:1fr}
+  .case-file.source-case{min-height:0}
+  .case-file.source-case .case-title{font-size:15px}
+}
+</style>
+
+<script data-curriculum-source-integration="v1">
+const SOURCE_TYPE_ICONS = {"SOURCE-1-1": "culture", "SOURCE-1-2": "government", "SOURCE-1-3": "economy", "SOURCE-1-4": "war", "SOURCE-1-5": "culture", "SOURCE-1-6": "war", "SOURCE-2-7": "source-analysis", "SOURCE-2-8": "government", "SOURCE-2-9": "war", "SOURCE-2-10": "culture", "SOURCE-3-11": "government", "SOURCE-3-12": "government", "SOURCE-3-13": "society", "SOURCE-3-14": "diplomacy", "SOURCE-3-15": "source-analysis", "SOURCE-3-16": "culture", "SOURCE-4-1": "government", "SOURCE-4-2": "government", "SOURCE-4-3": "diplomacy", "SOURCE-4-4": "government", "SOURCE-4-5": "culture", "SOURCE-4-6": "source-analysis", "SOURCE-4-7": "war", "SOURCE-4-8": "diplomacy", "SOURCE-5-9": "government", "SOURCE-5-10": "government", "SOURCE-5-11": "society", "SOURCE-5-12": "economy", "SOURCE-5-13": "society", "SOURCE-5-14": "diplomacy", "SOURCE-5-15": "culture"};
+function sourceTypeIcon(code){return `assets/ui_icons/${SOURCE_TYPE_ICONS[code]||"detective-case"}.png`;}
+const SOURCE_STAMP_IMAGES = {"SOURCE-1-1": "source_stamps/SOURCE-1-1.png", "SOURCE-1-2": "source_stamps/SOURCE-1-2.png", "SOURCE-1-3": "source_stamps/SOURCE-1-3.png", "SOURCE-1-4": "source_stamps/SOURCE-1-4.png", "SOURCE-1-5": "source_stamps/SOURCE-1-5.png", "SOURCE-1-6": "source_stamps/SOURCE-1-6.png", "SOURCE-2-7": "source_stamps/SOURCE-2-7.png", "SOURCE-2-8": "source_stamps/SOURCE-2-8.png", "SOURCE-2-9": "source_stamps/SOURCE-2-9.png", "SOURCE-2-10": "source_stamps/SOURCE-2-10.png", "SOURCE-3-11": "source_stamps/SOURCE-3-11.png", "SOURCE-3-12": "source_stamps/SOURCE-3-12.png", "SOURCE-3-13": "source_stamps/SOURCE-3-13.png", "SOURCE-3-14": "source_stamps/SOURCE-3-14.png", "SOURCE-3-15": "source_stamps/SOURCE-3-15.png", "SOURCE-3-16": "source_stamps/SOURCE-3-16.png", "SOURCE-4-1": "source_stamps/SOURCE-4-1.png", "SOURCE-4-2": "source_stamps/SOURCE-4-2.png", "SOURCE-4-3": "source_stamps/SOURCE-4-3.png", "SOURCE-4-4": "source_stamps/SOURCE-4-4.png", "SOURCE-4-5": "source_stamps/SOURCE-4-5.png", "SOURCE-4-6": "source_stamps/SOURCE-4-6.png", "SOURCE-4-7": "source_stamps/SOURCE-4-7.png", "SOURCE-4-8": "source_stamps/SOURCE-4-8.png", "SOURCE-5-9": "source_stamps/SOURCE-5-9.png", "SOURCE-5-10": "source_stamps/SOURCE-5-10.png", "SOURCE-5-11": "source_stamps/SOURCE-5-11.png", "SOURCE-5-12": "source_stamps/SOURCE-5-12.png", "SOURCE-5-13": "source_stamps/SOURCE-5-13.png", "SOURCE-5-14": "source_stamps/SOURCE-5-14.png", "SOURCE-5-15": "source_stamps/SOURCE-5-15.png"};
+
+const SOURCE_CASES = [{"code": "SOURCE-1-1", "ws": "1-1", "unit": 1, "title": "청동기 유물은 어떤 사회의 변화를 말해 줄까?", "topic": "선사 문화와 청동기", "stamp": "청동 거울", "source_type": "유물·유적 자료", "thinking": "변화와 지속", "solveKey": "history_source_1-1_solved", "stampKey": "history_source_1-1_stamp"}, {"code": "SOURCE-1-2", "ws": "1-2", "unit": 1, "title": "고조선의 법 세 조항은 어떤 사회를 보여 줄까?", "topic": "고조선과 여러 나라", "stamp": "8조법", "source_type": "실제 사료를 바탕으로 한 번역·요약", "thinking": "자료 해석", "solveKey": "history_source_1-2_solved", "stampKey": "history_source_1-2_stamp"}, {"code": "SOURCE-1-3", "ws": "1-3", "unit": 1, "title": "가야의 철 유물은 어떤 성장 기반을 보여 줄까?", "topic": "삼국과 가야의 성장", "stamp": "가야 철갑옷", "source_type": "유물·유적 자료", "thinking": "원인과 결과", "solveKey": "history_source_1-3_solved", "stampKey": "history_source_1-3_stamp"}, {"code": "SOURCE-1-4", "ws": "1-4", "unit": 1, "title": "비석은 삼국의 영토 경쟁을 어떻게 보여 줄까?", "topic": "삼국의 경쟁과 발전", "stamp": "진흥왕 순수비", "source_type": "유물·유적 자료", "thinking": "역사적 중요성", "solveKey": "history_source_1-4_solved", "stampKey": "history_source_1-4_stamp"}, {"code": "SOURCE-1-5", "ws": "1-5", "unit": 1, "title": "문화유산은 삼국의 교류를 어떻게 보여 줄까?", "topic": "삼국 문화와 대외 교류", "stamp": "금동대향로", "source_type": "비교 자료", "thinking": "자료의 한계", "solveKey": "history_source_1-5_solved", "stampKey": "history_source_1-5_stamp"}, {"code": "SOURCE-1-6", "ws": "1-6", "unit": 1, "title": "살수대첩 기록은 고구려의 전쟁 방식을 어떻게 보여 줄까?", "topic": "고구려와 수·당 전쟁", "stamp": "안시성", "source_type": "재구성 자료", "thinking": "원인과 결과", "solveKey": "history_source_1-6_solved", "stampKey": "history_source_1-6_stamp"}, {"code": "SOURCE-2-7", "ws": "2-7", "unit": 2, "title": "『발해고』는 왜 남북국을 이야기했을까?", "topic": "신라 통일과 발해 성립", "stamp": "발해고", "source_type": "실제 사료를 바탕으로 한 번역·요약", "thinking": "관점", "solveKey": "history_source_2-7_solved", "stampKey": "history_source_2-7_stamp"}, {"code": "SOURCE-2-8", "ws": "2-8", "unit": 2, "title": "발해의 5경 15부 62주는 무엇을 보여 줄까?", "topic": "통일 신라 통치와 발해 발전", "stamp": "상경성", "source_type": "재구성 자료", "thinking": "변화와 지속", "solveKey": "history_source_2-8_solved", "stampKey": "history_source_2-8_stamp"}, {"code": "SOURCE-2-9", "ws": "2-9", "unit": 2, "title": "신라 말의 기록은 왜 호족의 성장을 보여 줄까?", "topic": "신라 사회 동요와 후삼국", "stamp": "호족의 성", "source_type": "재구성 자료", "thinking": "원인과 결과", "solveKey": "history_source_2-9_solved", "stampKey": "history_source_2-9_stamp"}, {"code": "SOURCE-2-10", "ws": "2-10", "unit": 2, "title": "통일 신라와 발해의 문화는 교류 속에서 어떻게 발전했을까?", "topic": "통일 신라·발해 문화와 교류", "stamp": "석굴암", "source_type": "비교 자료", "thinking": "자료의 한계", "solveKey": "history_source_2-10_solved", "stampKey": "history_source_2-10_stamp"}, {"code": "SOURCE-3-11", "ws": "3-11", "unit": 3, "title": "시무 28조는 고려의 지방 통치를 어떻게 바꾸려 했을까?", "topic": "고려의 후삼국 통일과 왕권 강화", "stamp": "시무 28조", "source_type": "실제 사료를 바탕으로 한 번역·요약", "thinking": "원인과 결과", "solveKey": "history_source_3-11_solved", "stampKey": "history_source_3-11_stamp"}, {"code": "SOURCE-3-12", "ws": "3-12", "unit": 3, "title": "고려의 회의 기구는 왜 중요한 역할을 했을까?", "topic": "고려 통치 체제", "stamp": "도병마사", "source_type": "재구성 자료", "thinking": "역사적 중요성", "solveKey": "history_source_3-12_solved", "stampKey": "history_source_3-12_stamp"}, {"code": "SOURCE-3-13", "ws": "3-13", "unit": 3, "title": "무신 집권기의 기록은 어떤 사회 갈등을 보여 줄까?", "topic": "무신 정권의 성립과 변천", "stamp": "만적의 기록", "source_type": "재구성 자료", "thinking": "관점", "solveKey": "history_source_3-13_solved", "stampKey": "history_source_3-13_stamp"}, {"code": "SOURCE-3-14", "ws": "3-14", "unit": 3, "title": "서희의 담판은 왜 전쟁보다 강한 무기가 될 수 있었을까?", "topic": "고려 전기 대외 관계와 대몽 항쟁", "stamp": "강동 6주", "source_type": "재구성 자료", "thinking": "역사적 중요성", "solveKey": "history_source_3-14_solved", "stampKey": "history_source_3-14_stamp"}, {"code": "SOURCE-3-15", "ws": "3-15", "unit": 3, "title": "단심가와 하여가는 고려 말 어떤 선택을 보여 줄까?", "topic": "원 간섭·공민왕 개혁·새로운 세력", "stamp": "단심가", "source_type": "실제 사료", "thinking": "관점", "solveKey": "history_source_3-15_solved", "stampKey": "history_source_3-15_stamp"}, {"code": "SOURCE-3-16", "ws": "3-16", "unit": 3, "title": "『직지』는 고려의 인쇄 기술을 어떻게 보여 줄까?", "topic": "고려 사회·사상·문화", "stamp": "직지", "source_type": "유물·기록 자료", "thinking": "역사적 중요성", "solveKey": "history_source_3-16_solved", "stampKey": "history_source_3-16_stamp"}, {"code": "SOURCE-4-1", "ws": "4-1", "unit": 4, "title": "정도전은 어떤 나라를 만들려 했을까?", "topic": "조선의 건국과 기틀 마련", "stamp": "정도전의 설계도", "source_type": "재구성 자료", "thinking": "관점", "solveKey": "history_source_4-1_solved", "stampKey": "history_source_4-1_stamp"}, {"code": "SOURCE-4-2", "ws": "4-2", "unit": 4, "title": "3사는 왜 왕과 관리의 잘못을 비판했을까?", "topic": "조선의 통치 체제", "stamp": "3사", "source_type": "재구성 자료", "thinking": "역사적 중요성", "solveKey": "history_source_4-2_solved", "stampKey": "history_source_4-2_stamp"}, {"code": "SOURCE-4-3", "ws": "4-3", "unit": 4, "title": "조선은 왜 명·여진·일본을 다르게 대했을까?", "topic": "조선의 대외 관계", "stamp": "사대교린", "source_type": "재구성 자료", "thinking": "원인과 결과", "solveKey": "history_source_4-3_solved", "stampKey": "history_source_4-3_stamp"}, {"code": "SOURCE-4-4", "ws": "4-4", "unit": 4, "title": "사림은 어떻게 다시 중앙 정치의 주도 세력이 되었을까?", "topic": "사림의 성장과 붕당의 등장", "stamp": "사림의 상소", "source_type": "재구성 자료", "thinking": "변화와 지속", "solveKey": "history_source_4-4_solved", "stampKey": "history_source_4-4_stamp"}, {"code": "SOURCE-4-5", "ws": "4-5", "unit": 4, "title": "서원은 왜 향촌의 힘을 키우는 공간이 되었을까?", "topic": "성리학 확산과 사회 변화", "stamp": "서원", "source_type": "재구성 자료", "thinking": "변화와 지속", "solveKey": "history_source_4-5_solved", "stampKey": "history_source_4-5_stamp"}, {"code": "SOURCE-4-6", "ws": "4-6", "unit": 4, "title": "조선은 왜 왕의 말과 행동을 꼼꼼히 기록했을까?", "topic": "조선 전기 문화와 기록", "stamp": "조선왕조실록", "source_type": "실제 제도를 바탕으로 한 재구성 자료", "thinking": "역사적 중요성", "solveKey": "history_source_4-6_solved", "stampKey": "history_source_4-6_stamp"}, {"code": "SOURCE-4-7", "ws": "4-7", "unit": 4, "title": "임진왜란의 경험은 조선의 국방을 어떻게 바꾸었을까?", "topic": "왜란과 동아시아 정세", "stamp": "훈련도감", "source_type": "재구성 자료", "thinking": "변화와 지속", "solveKey": "history_source_4-7_solved", "stampKey": "history_source_4-7_stamp"}, {"code": "SOURCE-4-8", "ws": "4-8", "unit": 4, "title": "광해군은 왜 명과 후금 사이에서 신중하게 움직였을까?", "topic": "동아시아 정세 변화와 광해군 외교", "stamp": "강홍립의 밀지", "source_type": "재구성 자료", "thinking": "원인과 결과", "solveKey": "history_source_4-8_solved", "stampKey": "history_source_4-8_stamp"}, {"code": "SOURCE-5-9", "ws": "5-9", "unit": 5, "title": "왜란 이후, 조선의 최고 권력 기구는 왜 바뀌었을까?", "topic": "제도 개편과 붕당 정치", "stamp": "비변사", "source_type": "재구성 자료", "thinking": "원인과 결과", "solveKey": "history_source_5-9_solved", "stampKey": "history_source_5-9_stamp"}, {"code": "SOURCE-5-10", "ws": "5-10", "unit": 5, "title": "영조와 정조는 붕당 갈등을 어떻게 줄이려 했을까?", "topic": "탕평 정치", "stamp": "탕평비", "source_type": "비교 자료", "thinking": "변화와 지속", "solveKey": "history_source_5-10_solved", "stampKey": "history_source_5-10_stamp"}, {"code": "SOURCE-5-11", "ws": "5-11", "unit": 5, "title": "매관매직 기록은 세도 정치의 어떤 문제를 보여 줄까?", "topic": "세도 정치와 농민 봉기", "stamp": "세도가의 인장", "source_type": "재구성 자료", "thinking": "원인과 결과", "solveKey": "history_source_5-11_solved", "stampKey": "history_source_5-11_stamp"}, {"code": "SOURCE-5-12", "ws": "5-12", "unit": 5, "title": "모내기법과 상품작물은 조선 후기 경제를 어떻게 바꾸었을까?", "topic": "상품 화폐 경제의 발달", "stamp": "상평통보", "source_type": "재구성 자료", "thinking": "변화와 지속", "solveKey": "history_source_5-12_solved", "stampKey": "history_source_5-12_stamp"}, {"code": "SOURCE-5-13", "ws": "5-13", "unit": 5, "title": "양반이 늘어난 기록은 신분제가 흔들렸다는 뜻일까?", "topic": "생활 문화와 사회 구조 변화", "stamp": "공명첩", "source_type": "재구성 자료", "thinking": "변화와 지속", "solveKey": "history_source_5-13_solved", "stampKey": "history_source_5-13_stamp"}, {"code": "SOURCE-5-14", "ws": "5-14", "unit": 5, "title": "연행사는 조선인의 세계관을 어떻게 바꾸었을까?", "topic": "서양 문물과 세계관 변화", "stamp": "곤여만국전도", "source_type": "재구성 자료", "thinking": "변화와 지속", "solveKey": "history_source_5-14_solved", "stampKey": "history_source_5-14_stamp"}, {"code": "SOURCE-5-15", "ws": "5-15", "unit": 5, "title": "진경산수화와 풍속화는 왜 조선 후기 사회를 보여 주는 자료일까?", "topic": "문화의 새로운 경향", "stamp": "금강전도", "source_type": "비교 자료", "thinking": "자료의 한계", "solveKey": "history_source_5-15_solved", "stampKey": "history_source_5-15_stamp"}];
+const SOURCE_DATA_FILES = {"SOURCE-1-1": "source_data/SOURCE-1-1.js", "SOURCE-1-2": "source_data/SOURCE-1-2.js", "SOURCE-1-3": "source_data/SOURCE-1-3.js", "SOURCE-1-4": "source_data/SOURCE-1-4.js", "SOURCE-1-5": "source_data/SOURCE-1-5.js", "SOURCE-1-6": "source_data/SOURCE-1-6.js", "SOURCE-2-7": "source_data/SOURCE-2-7.js", "SOURCE-2-8": "source_data/SOURCE-2-8.js", "SOURCE-2-9": "source_data/SOURCE-2-9.js", "SOURCE-2-10": "source_data/SOURCE-2-10.js", "SOURCE-3-11": "source_data/SOURCE-3-11.js", "SOURCE-3-12": "source_data/SOURCE-3-12.js", "SOURCE-3-13": "source_data/SOURCE-3-13.js", "SOURCE-3-14": "source_data/SOURCE-3-14.js", "SOURCE-3-15": "source_data/SOURCE-3-15.js", "SOURCE-3-16": "source_data/SOURCE-3-16.js", "SOURCE-4-1": "source_data/SOURCE-4-1.js", "SOURCE-4-2": "source_data/SOURCE-4-2.js", "SOURCE-4-3": "source_data/SOURCE-4-3.js", "SOURCE-4-4": "source_data/SOURCE-4-4.js", "SOURCE-4-5": "source_data/SOURCE-4-5.js", "SOURCE-4-6": "source_data/SOURCE-4-6.js", "SOURCE-4-7": "source_data/SOURCE-4-7.js", "SOURCE-4-8": "source_data/SOURCE-4-8.js", "SOURCE-5-9": "source_data/SOURCE-5-9.js", "SOURCE-5-10": "source_data/SOURCE-5-10.js", "SOURCE-5-11": "source_data/SOURCE-5-11.js", "SOURCE-5-12": "source_data/SOURCE-5-12.js", "SOURCE-5-13": "source_data/SOURCE-5-13.js", "SOURCE-5-14": "source_data/SOURCE-5-14.js", "SOURCE-5-15": "source_data/SOURCE-5-15.js"};
+const SOURCE_LOAD_STATE = {};
+let activeSourceCode = null;
+
+function sourceSolved(c){
+  try{ return localStorage.getItem(c.solveKey)==="true"; }catch(e){ return false; }
+}
+function sourceStamped(c){
+  try{ return localStorage.getItem(c.stampKey)==="true"; }catch(e){ return sourceSolved(c); }
+}
+function sourceCount(list){
+  return list.filter(sourceSolved).length;
+}
+function unitRepresentativeList(u){
+  return SOURCE_CASES.filter(c=>c.unit===u);
+}
+function totalLearningCases(){
+  return SOURCE_CASES.length + CASES.filter(c=>c.unit===6).length;
+}
+function totalLearningSolved(){
+  return sourceCount(SOURCE_CASES) + countSolved(CASES.filter(c=>c.unit===6));
+}
+
+/* 수업 진행용 진도는 1~5단원 사료수사 31개 + 아직 재편 전인 6단원 기존 8개를 기준으로 표시 */
+updateProgress = function(){
+  const total=totalLearningCases();
+  const n=totalLearningSolved();
+  const pct=total ? Math.round(n/total*1000)/10 : 0;
+  const top=document.getElementById("solvedTop");
+  if(top){
+    top.textContent=n;
+    if(top.parentElement) top.parentElement.innerHTML=`해결 <span id="solvedTop">${n}</span>/${total}`;
+  }
+  const per=document.getElementById("percentTop"); if(per) per.textContent=pct;
+  const bc=document.getElementById("boardCount"); if(bc) bc.textContent=`${n} / ${total}`;
+  const bt=document.getElementById("boardText"); if(bt) bt.textContent=`대표 수사 해결 · ${pct}%`;
+  const bf=document.getElementById("boardFill"); if(bf) bf.style.width=pct+"%";
+
+  for(let u=1;u<=6;u++){
+    const list=u<=5 ? unitRepresentativeList(u) : CASES.filter(c=>c.unit===u);
+    const done=u<=5 ? sourceCount(list) : countSolved(list);
+    const el=document.getElementById(`u${u}count`);
+    if(el) el.textContent=`${done}/${list.length}`;
+    const h=document.getElementById(`unitHot${u}`);
+    if(h) h.classList.toggle("done",list.length>0 && done===list.length);
+  }
+};
+
+openUnit = function(u){
+  currentUnit=u;
+  document.getElementById("home").style.display="none";
+  document.getElementById("notebookPage").classList.remove("show");
+  document.getElementById("unitPage").classList.add("show");
+
+  const meta=UNITS[u], grid=document.getElementById("caseGrid");
+  grid.innerHTML="";
+
+  if(u<=5){
+    const reps=unitRepresentativeList(u), done=sourceCount(reps);
+    document.getElementById("unitNo").textContent=`${meta.roman}단원 · 대표 수사 ${done}/${reps.length} 완료`;
+    document.getElementById("unitTitle").textContent=meta.name;
+
+    const guide=document.createElement("div");
+    guide.className="unit-guide";
+    guide.innerHTML="<b>수업 진행:</b> 오늘 학습지 번호와 같은 <b>대표 사료 수사 1개</b>를 먼저 해결합니다. 자료를 읽고 근거를 찾아 역사적 의미를 추론합니다. 아래 사건은 빠르게 끝낸 학생을 위한 <b>추가 수사</b>입니다.";
+    grid.appendChild(guide);
+
+    const h1=document.createElement("div");
+    h1.className="curriculum-section-title source-section";
+    h1.innerHTML=`<b><img class="ui-head-icon" src="assets/ui_icons/scroll-search.png" alt="">대표 사료 수사</b><span>필수 · 학습지와 1:1 연결 · ${done}/${reps.length}</span>`;
+    grid.appendChild(h1);
+
+    reps.forEach(c=>{
+      const b=document.createElement("button");
+      b.className="case-file source-case"+(sourceSolved(c)?" solved":"");
+      b.onclick=()=>openSourceCase(c.code);
+      b.innerHTML=`<div class="source-card-top">
+          <img class="case-type-icon" src="${sourceTypeIcon(c.code)}" alt="">
+          <div class="case-no">학습지 ${c.ws}</div>
+          <div class="case-state">${sourceSolved(c)?"✓ 완료":"미해결"}</div>
+        </div>
+        <div class="case-title">${c.title}</div>
+        <div class="source-topic">${c.source_type} · ${c.thinking}</div>`;
+      grid.appendChild(b);
+    });
+
+    const old=CASES.filter(c=>c.unit===u);
+    const h2=document.createElement("div");
+    h2.className="curriculum-section-title extra-section";
+    h2.innerHTML=`<b><img class="ui-head-icon" src="assets/ui_icons/detective-case.png" alt="">추가 수사 사건</b><span>선택 · 기존 ${old.length}개 사건 보존</span>`;
+    grid.appendChild(h2);
+    old.forEach(c=>{
+      const b=document.createElement("button");
+      b.className="case-file extra-case"+(solved(c)?" solved":"");
+      b.onclick=()=>openCase(c.code);
+      b.innerHTML=`<div class="extra-card-top">
+          <div class="case-no">CASE ${c.code}</div>
+          <div class="case-state">${solved(c)?"✓ 완료":"선택"}</div>
+        </div>
+        <div class="case-title">${c.title}</div>`;
+      grid.appendChild(b);
+    });
+  }else{
+    const list=CASES.filter(c=>c.unit===u);
+    document.getElementById("unitNo").textContent=`${meta.roman}단원 · ${countSolved(list)}/${list.length} 해결`;
+    document.getElementById("unitTitle").textContent=meta.name;
+    list.forEach(c=>{
+      const b=document.createElement("button");
+      b.className="case-file"+(solved(c)?" solved":"");
+      b.onclick=()=>openCase(c.code);
+      b.innerHTML=`<div class="case-no">CASE ${c.code}</div><div class="case-title">${c.title}</div><div class="case-state">${solved(c)?"✓ 해결 완료":"미해결 사건"}</div>`;
+      grid.appendChild(b);
+    });
+  }
+  window.scrollTo({top:0,behavior:"smooth"});
+};
+
+function sourceLoadingHtml(code,title){
+  return `<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font-family:system-ui;background:#f4ede2;display:grid;place-items:center;min-height:100vh;color:#42352c}.b{background:#fffaf1;padding:24px;border-radius:18px;border:1px solid #d8c3aa;text-align:center}</style><body><div class="b"><b>${code}</b><p>${title}</p><small>대표 사료 수사를 불러오는 중입니다.</small></div></body></html>`;
+}
+function sourceErrorHtml(code){
+  return `<!doctype html><html lang="ko"><meta charset="utf-8"><body style="font-family:system-ui;padding:30px;background:#fff4ed"><h3>${code} 불러오기 실패</h3><p>source_data 폴더가 index.html과 함께 있는지 확인하세요.</p></body></html>`;
+}
+function loadSourceData(code,done){
+  if(CASE_HTML[code]){done();return;}
+  if(SOURCE_LOAD_STATE[code]==="loading"){
+    const t=setInterval(()=>{if(CASE_HTML[code]){clearInterval(t);done();}else if(SOURCE_LOAD_STATE[code]==="error") clearInterval(t);},80);
+    return;
+  }
+  const src=SOURCE_DATA_FILES[code]; if(!src){done();return;}
+  SOURCE_LOAD_STATE[code]="loading";
+  const s=document.createElement("script");s.src=src;s.async=true;
+  s.onload=()=>{SOURCE_LOAD_STATE[code]="loaded";done();};
+  s.onerror=()=>{SOURCE_LOAD_STATE[code]="error";if(activeSourceCode===code)document.getElementById("caseFrame").srcdoc=sourceErrorHtml(code);};
+  document.head.appendChild(s);
+}
+function openSourceCase(code){
+  const c=SOURCE_CASES.find(x=>x.code===code); if(!c)return;
+  activeSourceCode=code; activeCaseCode=code;
+  try{localStorage.setItem("history_detective_last_source_case",code);localStorage.setItem("history_detective_last_case_mode","source");}catch(e){}
+  document.getElementById("viewerTitle").textContent=`학습지 ${c.ws} · ${c.title}`;
+  updateViewerBackLabel();
+  document.getElementById("viewer").classList.add("show");
+  document.body.style.overflow="hidden";
+  document.getElementById("caseFrame").srcdoc=sourceLoadingHtml(code,c.title);
+  loadSourceData(code,()=>{
+    if(activeSourceCode===code){
+      const b64=CASE_HTML[code];
+      document.getElementById("caseFrame").srcdoc=b64?decodeBase64Utf8(b64):sourceErrorHtml(code);
+    }
+  });
+}
+
+const _oldOpenCase=openCase;
+openCase=function(code){
+  activeSourceCode=null;
+  try{localStorage.setItem("history_detective_last_case_mode","extra");}catch(e){}
+  return _oldOpenCase(code);
+};
+
+continueLast=function(){
+  let mode=null,code=null;
+  try{mode=localStorage.getItem("history_detective_last_case_mode");}catch(e){}
+  if(mode==="source"){
+    try{code=localStorage.getItem("history_detective_last_source_case");}catch(e){}
+    if(SOURCE_CASES.some(x=>x.code===code)){openSourceCase(code);return;}
+  }
+  try{code=localStorage.getItem("history_detective_last_case");}catch(e){}
+  if(CASES.some(x=>x.code===code)){openCase(code);return;}
+  toast("아직 최근 수사 기록이 없습니다.");
+};
+
+const _oldCloseCase=closeCase;
+closeCase=function(){
+  _oldCloseCase();
+  activeSourceCode=null;
+};
+
+refreshCase=function(){
+  if(activeSourceCode){
+    const c=SOURCE_CASES.find(x=>x.code===activeSourceCode); if(!c)return;
+    document.getElementById("caseFrame").srcdoc=sourceLoadingHtml(c.code,c.title);
+    loadSourceData(c.code,()=>{if(activeSourceCode===c.code)document.getElementById("caseFrame").srcdoc=decodeBase64Utf8(CASE_HTML[c.code]);});
+    return;
+  }
+  if(activeCaseCode){
+    const c=CASES.find(x=>x.code===activeCaseCode);
+    if(!c)return;
+    document.getElementById("caseFrame").srcdoc=caseLoadingHtml(activeCaseCode,c.title);
+    loadCaseData(activeCaseCode,()=>{if(activeCaseCode)setCaseFrameFromCode(activeCaseCode);});
+  }
+};
+
+showOverview=function(){
+  const grid=document.getElementById("overviewGrid");grid.innerHTML="";
+  for(let u=1;u<=6;u++){
+    const meta=UNITS[u],list=u<=5?unitRepresentativeList(u):CASES.filter(c=>c.unit===u);
+    const done=u<=5?sourceCount(list):countSolved(list),pct=list.length?Math.round(done/list.length*100):0;
+    const div=document.createElement("div");div.className="overview-item";
+    div.innerHTML=`<b>${meta.roman}단원 · ${meta.name}</b><div class="small" style="margin-bottom:6px">${done} / ${list.length} 대표 수사 완료</div><div class="mini-bar"><div class="mini-fill" style="width:${pct}%"></div></div>`;
+    div.onclick=()=>{hideOverview();openUnit(u)};div.style.cursor="pointer";grid.appendChild(div);
+  }
+  document.getElementById("overviewModal").classList.add("show");
+};
+
+updateProgress();
+</script>
+<script>
+
+/* ===== Legacy case professional icon enhancer ===== */
+const HD_UI_ICON_BASE='assets/ui_icons/';
+function hdIconForText(text){
+  const t=(text||'').replace(/\s+/g,' ');
+  if(/전쟁|전투|군사|장용영|왜군|침입|항쟁|정벌|성곽|무신|군대|수군|전쟁|병자|임진|몽골|거란/.test(t)) return 'war.png';
+  if(/외교|사신|교린|통신사|연행|담판|조약|명나라|후금|청나라|일본|여진|교역|국교/.test(t)) return 'diplomacy.png';
+  if(/시장|상업|경제|화폐|상평통보|공인|장시|농업|모내기|상품|무역|세금|대동법|공납/.test(t)) return 'economy.png';
+  if(/신분|노비|가족|혼인|향촌|백성|농민|봉기|생활|사회|공명첩|족보/.test(t)) return 'society.png';
+  if(/문화|불교|유물|그림|풍속화|산수화|실록|직지|훈민정음|규장각|책|학문|서원|성리학|과학|인쇄|천문/.test(t)) return 'culture.png';
+  if(/왕|정치|붕당|탕평|관청|제도|재상|관리|왕권|개혁|과거|정부|통치|회의|비변사/.test(t)) return 'government.png';
+  return 'source-analysis.png';
+}
+function hdImg(doc,file,cls='hd-inline-icon'){
+  const im=doc.createElement('img'); im.src=HD_UI_ICON_BASE+file; im.alt=''; im.className=cls; return im;
+}
+function enhanceLegacyCaseIcons(){
+  const frame=document.getElementById('caseFrame');
+  if(!frame) return;
+  let doc; try{doc=frame.contentDocument;}catch(e){return;} if(!doc||!doc.body)return;
+  if(doc.getElementById('hd-pro-icon-style')) return;
+  const st=doc.createElement('style'); st.id='hd-pro-icon-style'; st.textContent=`
+    .hd-inline-icon{width:22px;height:22px;object-fit:contain;vertical-align:-6px;margin-right:5px}
+    .hd-modal-icon-img{width:42px;height:42px;object-fit:contain;display:block}
+    .hd-reward-icon-img{width:58px;height:58px;object-fit:contain;display:block;margin:auto}
+    .modal-icon{display:grid!important;place-items:center!important;overflow:hidden}
+  `; doc.head.appendChild(st);
+  function stripEmoji(el){
+    if(!el) return; for(const n of [...el.childNodes]) if(n.nodeType===3) n.nodeValue=n.nodeValue.replace(/[📂🔎📖📚🛡️⚖️👑🏺⚔️🐉🏯📜🕯️🗂️📌☎️🧭🪙🎨🤝]/gu,'').replace(/^\s+/,'');
+  }
+  // top controls
+  doc.querySelectorAll('.book-btn,button').forEach(el=>{if(/탐정 수첩/.test(el.textContent)&&!el.querySelector('.hd-inline-icon')){stripEmoji(el);el.prepend(hdImg(doc,'notebook.png'));}});
+  doc.querySelectorAll('.chip').forEach(el=>{const txt=el.textContent;if(!el.querySelector('.hd-inline-icon')){if(/단서/.test(txt)){stripEmoji(el);el.prepend(hdImg(doc,'source-analysis.png'));}else if(/사건/.test(txt)){stripEmoji(el);el.prepend(hdImg(doc,'detective-case.png'));}}});
+  function refreshDynamic(){
+    doc.querySelectorAll('.modal-icon').forEach(el=>{const card=el.closest('.modal-card')||el.parentElement;const title=card?.querySelector('#modalTitle,h3')?.textContent||card?.textContent||'';const file=hdIconForText(title); if(el.dataset.hdIcon!==file){el.textContent='';el.append(hdImg(doc,file,'hd-modal-icon-img'));el.dataset.hdIcon=file;}});
+    doc.querySelectorAll('.reward-burst .icon,.artifact-stamp .icon').forEach(el=>{const box=el.parentElement;const title=box?.querySelector('.title')?.textContent||box?.textContent||'';const file=hdIconForText(title);if(el.dataset.hdIcon!==file){el.textContent='';el.append(hdImg(doc,file,'hd-reward-icon-img'));el.dataset.hdIcon=file;}});
+  }
+  refreshDynamic();
+  const obs=new MutationObserver(refreshDynamic); obs.observe(doc.body,{childList:true,subtree:true,characterData:true});
+}
+document.getElementById('caseFrame')?.addEventListener('load',()=>setTimeout(enhanceLegacyCaseIcons,80));
+/* ===== End legacy icon enhancer ===== */
+</script>
+
+<style data-unified-case-ui="v6.0">
+/* ===== 단원 사건 목록 통합 ===== */
+.case-grid.unified-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.unified-guide{grid-column:1/-1;padding:11px 14px;border-radius:12px;background:#fffaf1;border:1px solid #d5b996;border-left:5px solid #765037;font-size:12px;line-height:1.55;color:#5b4738}
+.case-file.unified-case-card{display:grid!important;grid-template-columns:54px 1fr auto!important;gap:12px!important;align-items:center!important;min-height:104px!important;padding:14px 16px!important;border:1px solid #c9aa84!important;background:#fffaf1!important;border-radius:13px!important;box-shadow:0 4px 10px rgba(79,49,29,.06)!important}
+.case-file.unified-case-card:hover{transform:translateY(-2px);border-color:#8e6746!important;box-shadow:0 7px 15px rgba(79,49,29,.11)!important}
+.case-file.unified-case-card.solved{border-color:#89a083!important;background:#f8fbf5!important}
+.unified-icon-wrap{width:50px;height:50px;border-radius:12px;background:#f0dfc6;border:1px solid #d3b48d;display:grid;place-items:center;overflow:hidden}
+.unified-icon-wrap img{width:42px;height:42px;object-fit:contain}
+.unified-card-body{min-width:0}.unified-card-top{display:flex;gap:8px;align-items:center;margin-bottom:6px;flex-wrap:wrap}.unified-card-code{font-size:10px;font-weight:950;color:#65472f;background:#ead3ad;border:1px solid #cda673;border-radius:7px;padding:4px 7px}.unified-card-type{font-size:9px;font-weight:900;color:#746457;background:#eee5d8;border-radius:999px;padding:4px 7px}
+.unified-case-card .case-title{font-size:14px!important;line-height:1.4!important;margin:0!important;font-weight:950!important;color:#261d18!important}.unified-meta{font-size:10px;color:#806e5d;margin-top:5px;line-height:1.35}.unified-case-card .case-state{font-size:10px!important;white-space:nowrap}
+@media(max-width:760px){.case-grid.unified-grid{grid-template-columns:1fr}.case-file.unified-case-card{grid-template-columns:48px 1fr auto!important;padding:12px!important}.unified-icon-wrap{width:44px;height:44px}.unified-icon-wrap img{width:38px;height:38px}}
+</style>
+<script data-unified-case-ui="v6.0">
+(function(){
+  const ICON_BASE='assets/ui_icons/';
+  function reps(){ try{return (typeof SOURCE_CASES!=='undefined'&&Array.isArray(SOURCE_CASES))?SOURCE_CASES:[]}catch(e){return[]} }
+  function iconForText(text){
+    const t=(text||'').replace(/\s+/g,' ');
+    if(/전쟁|전투|군사|장용영|왜군|침입|항쟁|정벌|성곽|무신|군대|수군|병자|임진|몽골|거란|전쟁/.test(t)) return 'war.png';
+    if(/외교|사신|교린|통신사|연행|담판|조약|후금|청나라|일본|여진|교역|국교|당나라/.test(t)) return 'diplomacy.png';
+    if(/시장|상업|경제|화폐|상평통보|공인|장시|농업|모내기|상품|무역|세금|대동법|공납|재정/.test(t)) return 'economy.png';
+    if(/신분|노비|가족|혼인|향촌|백성|농민|봉기|생활|사회|공명첩|족보|촌락/.test(t)) return 'society.png';
+    if(/문화|불교|유물|그림|풍속화|산수화|실록|직지|훈민정음|규장각|책|학문|서원|성리학|과학|인쇄|천문|금동|석굴|청자/.test(t)) return 'culture.png';
+    if(/왕|정치|붕당|탕평|관청|제도|재상|관리|왕권|개혁|과거|정부|통치|회의|비변사|법|시무/.test(t)) return 'government.png';
+    return 'source-analysis.png';
+  }
+  window.hdUnifiedIconForText=iconForText;
+
+  function unitCounts(u){
+    const old=CASES.filter(c=>c.unit===u), src=reps().filter(c=>c.unit===u);
+    const doneOld=old.filter(c=>solved(c)).length, doneSrc=src.filter(c=>sourceSolved(c)).length;
+    return {old,src,done:doneOld+doneSrc,total:old.length+src.length};
+  }
+  window.updateProgress=function(){
+    const src=reps();
+    const doneOld=CASES.filter(c=>solved(c)).length;
+    const doneSrc=src.filter(c=>sourceSolved(c)).length;
+    const n=doneOld+doneSrc,total=CASES.length+src.length;
+    const pct=total?Math.round(n/total*1000)/10:0;
+    const solvedTop=document.getElementById('solvedTop'); if(solvedTop) solvedTop.textContent=n;
+    const percentTop=document.getElementById('percentTop'); if(percentTop) percentTop.textContent=pct;
+    const boardCount=document.getElementById('boardCount'); if(boardCount) boardCount.textContent=`${n} / ${total}`;
+    const boardText=document.getElementById('boardText'); if(boardText) boardText.textContent=`사건 해결 · ${pct}%`;
+    const boardFill=document.getElementById('boardFill'); if(boardFill) boardFill.style.width=pct+'%';
+    for(let u=1;u<=6;u++){
+      const x=unitCounts(u), el=document.getElementById(`u${u}count`), h=document.getElementById(`unitHot${u}`);
+      if(el) el.textContent=`${x.done}/${x.total}`;
+      if(h) h.classList.toggle('done',x.total>0&&x.done===x.total);
+    }
+  };
+
+  window.openUnit=function(u){
+    currentUnit=u;
+    document.getElementById('home').style.display='none';
+    document.getElementById('notebookPage').classList.remove('show');
+    document.getElementById('unitPage').classList.add('show');
+    const meta=UNITS[u], x=unitCounts(u);
+    document.getElementById('unitNo').textContent=`${meta.roman}단원 · ${x.done}/${x.total} 해결`;
+    document.getElementById('unitTitle').textContent=meta.name;
+    const grid=document.getElementById('caseGrid'); grid.innerHTML=''; grid.className='case-grid unified-grid';
+    const guide=document.createElement('div'); guide.className='unified-guide'; guide.textContent='사료 분석 사건과 탐구 사건을 한 목록에서 확인합니다. 각 사건 카드를 눌러 바로 수사를 시작하세요.'; grid.appendChild(guide);
+    const items=[];
+    x.src.forEach(c=>items.push({kind:'source',c}));
+    x.old.forEach(c=>items.push({kind:'old',c}));
+    items.forEach(({kind,c})=>{
+      const isSource=kind==='source'; const done=isSource?sourceSolved(c):solved(c);
+      const b=document.createElement('button'); b.className='case-file unified-case-card'+(done?' solved':'');
+      b.onclick=()=>isSource?openSourceCase(c.code):openCase(c.code);
+      const icon=iconForText((c.title||'')+' '+(c.topic||'')+' '+(c.source_type||''));
+      b.innerHTML=`<div class="unified-icon-wrap"><img src="${ICON_BASE+icon}" alt=""></div><div class="unified-card-body"><div class="unified-card-top"><span class="unified-card-code">${isSource?'학습지 '+c.ws:'CASE '+c.code}</span><span class="unified-card-type">${isSource?'사료 분석':'탐구 사건'}</span></div><div class="case-title">${c.title}</div><div class="unified-meta">${isSource?((c.source_type||'자료')+' · '+(c.thinking||'자료 해석')):'역사 탐정형 사건'}</div></div><div class="case-state">${done?'✓ 완료':'미해결'}</div>`;
+      grid.appendChild(b);
+    });
+    window.scrollTo({top:0,behavior:'smooth'});
+  };
+
+  window.showOverview=function(){
+    const grid=document.getElementById('overviewGrid'); grid.innerHTML='';
+    for(let u=1;u<=6;u++){
+      const meta=UNITS[u],x=unitCounts(u),pct=x.total?Math.round(x.done/x.total*100):0;
+      const div=document.createElement('div');div.className='overview-item';
+      div.innerHTML=`<b>${meta.roman}단원 · ${meta.name}</b><div class="small" style="margin-bottom:6px">${x.done} / ${x.total} 사건 해결</div><div class="mini-bar"><div class="mini-fill" style="width:${pct}%"></div></div>`;
+      div.onclick=()=>{hideOverview();openUnit(u)};div.style.cursor='pointer';grid.appendChild(div);
+    }
+    document.getElementById('overviewModal').classList.add('show');
+  };
+
+  // 기존 44개 사건에 적용할 공통 런타임 보정 스크립트
+  const originalPatch=window.patchCaseForPacing;
+  if(typeof originalPatch==='function'){
+    window.patchCaseForPacing=function(caseHtml,code){
+      let html=originalPatch(caseHtml,code);
+      if(html.includes('data-legacy-case-runtime="v6.0"')) return html;
+      const css=`<style data-legacy-case-runtime="v6.0">html,body{height:auto!important;min-height:100%!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior-y:contain!important;-webkit-overflow-scrolling:touch!important;scroll-behavior:auto!important}.hd-modal-img{width:44px;height:44px;object-fit:contain;display:block}.modal-icon{overflow:hidden!important;display:grid!important;place-items:center!important}.reward-actions .hd-report-btn{order:-10}.screen{height:auto!important;overflow:visible!important}</style>`;
+      const js=`(function(){\n`+
+      `function iconFile(t){t=(t||'').replace(/\\s+/g,' ');if(/전쟁|전투|군사|장용영|왜군|침입|항쟁|정벌|성곽|무신|군대|수군|병자|임진|몽골|거란/.test(t))return 'war.png';if(/외교|사신|교린|통신사|연행|담판|조약|후금|청나라|일본|여진|교역|국교|당나라/.test(t))return 'diplomacy.png';if(/시장|상업|경제|화폐|상평통보|공인|장시|농업|모내기|상품|무역|세금|대동법|공납|재정/.test(t))return 'economy.png';if(/신분|노비|가족|혼인|향촌|백성|농민|봉기|생활|사회|공명첩|족보|촌락/.test(t))return 'society.png';if(/문화|불교|유물|그림|풍속화|산수화|실록|직지|훈민정음|규장각|책|학문|서원|성리학|과학|인쇄|천문|금동|석굴|청자/.test(t))return 'culture.png';if(/왕|정치|붕당|탕평|관청|제도|재상|관리|왕권|개혁|과거|정부|통치|회의|비변사|법/.test(t))return 'government.png';return 'source-analysis.png'}\n`+
+      `function url(f){try{return new URL('assets/ui_icons/'+f,parent.location.href).href}catch(e){return 'assets/ui_icons/'+f}}\n`+
+      `function refreshModalIcon(){var el=document.getElementById('modalIcon')||document.querySelector('.modal-icon');if(!el)return;var title=(document.getElementById('modalTitle')||{}).textContent||el.closest('.modal-card')?.textContent||'';var f=iconFile(title);if(el.dataset.hdFile===f)return;el.innerHTML='<img class="hd-modal-img" alt="">';el.querySelector('img').src=url(f);el.dataset.hdFile=f}\n`+
+      `if(typeof window.showClue==='function'){var oldShow=window.showClue;window.showClue=function(){var r=oldShow.apply(this,arguments);setTimeout(refreshModalIcon,0);return r}}\n`+
+      `var mo=new MutationObserver(function(){refreshModalIcon()});mo.observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['class']});\n`+
+      `function addReportButton(){var a=document.querySelector('.reward-actions');if(!a||a.querySelector('.hd-report-btn'))return;var b=document.createElement('button');b.className='btn hd-report-btn';b.textContent='사건보고서 보기';b.onclick=function(){try{if(typeof closeReward==='function')closeReward();else document.getElementById('rewardModal')?.classList.remove('show')}catch(e){};try{if(typeof setActiveScreen==='function'&&document.getElementById('stage5'))setActiveScreen('stage5');else if(typeof goStage==='function')goStage(5)}catch(e){}};a.prepend(b)}\n`+
+      `addReportButton();setTimeout(addReportButton,100);\n`+
+      `document.documentElement.style.overflowY='auto';document.body.style.overflowY='auto';document.documentElement.style.height='auto';document.body.style.height='auto';\n`+
+      `document.addEventListener('wheel',function(e){if(e.ctrlKey)return;var modal=e.target.closest&&e.target.closest('.modal-card');if(modal&&modal.scrollHeight>modal.clientHeight+2){modal.scrollTop+=e.deltaY;e.preventDefault();return}var s=document.scrollingElement||document.documentElement;if(s.scrollHeight>s.clientHeight+2){s.scrollTop+=e.deltaY;e.preventDefault()}},{passive:false});\n`+
+      `})();`;
+      const injection=css+'<scr'+'ipt>'+js+'</scr'+'ipt>';
+      return html.includes('</body>')?html.replace('</body>',injection+'</body>'):html+injection;
+    };
+  }
+
+  // 정적 표기 보정
+  const brand=document.querySelector('.brand .small'); if(brand) brand.textContent='학습지 연계 수사 · 필수 39개 + 선택 사건';
+  const board=document.getElementById('boardCount'); if(board&&/44/.test(board.textContent)) board.textContent='0 / 75';
+  updateProgress();
+})();
+</script>
+
+<script data-display-numbering="v6.1">
+(function(){
+  function sourceList(u){
+    try{return (typeof SOURCE_CASES!=='undefined'&&Array.isArray(SOURCE_CASES))?SOURCE_CASES.filter(c=>c.unit===u):[]}catch(e){return []}
+  }
+  function oldList(u){return CASES.filter(c=>c.unit===u)}
+  function displayNoSource(c){
+    const s=sourceList(c.unit); const i=s.findIndex(x=>x.code===c.code);
+    return `사건 ${c.unit}-${Math.max(1,i+1)}`;
+  }
+  function displayNoOld(c){
+    const s=sourceList(c.unit), o=oldList(c.unit); const i=o.findIndex(x=>x.code===c.code);
+    return `사건 ${c.unit}-${s.length+Math.max(1,i+1)}`;
+  }
+  window.hdDisplayNoSource=displayNoSource;
+  window.hdDisplayNoOld=displayNoOld;
+
+  // 단원 사건 목록: 학생에게 보이는 번호를 단원별 연속 번호로 통일
+  const priorOpenUnit=window.openUnit;
+  window.openUnit=function(u){
+    currentUnit=u;
+    document.getElementById('home').style.display='none';
+    document.getElementById('notebookPage').classList.remove('show');
+    document.getElementById('unitPage').classList.add('show');
+    const meta=UNITS[u], srcCases=sourceList(u), oldCases=oldList(u);
+    const doneSrc=srcCases.filter(c=>sourceSolved(c)).length, doneOld=oldCases.filter(c=>solved(c)).length;
+    const total=srcCases.length+oldCases.length, done=doneSrc+doneOld;
+    document.getElementById('unitNo').textContent=`${meta.roman}단원 · ${done}/${total} 해결`;
+    document.getElementById('unitTitle').textContent=meta.name;
+    const grid=document.getElementById('caseGrid'); grid.innerHTML=''; grid.className='case-grid unified-grid';
+    const guide=document.createElement('div'); guide.className='unified-guide';
+    guide.textContent='모든 수사를 하나의 사건 번호로 표시합니다. 사료 분석 사건은 관련 학습지 번호를 보조 정보로 함께 표시합니다.';
+    grid.appendChild(guide);
+    const items=[];
+    srcCases.forEach((c,i)=>items.push({kind:'source',c,no:`사건 ${u}-${i+1}`}));
+    oldCases.forEach((c,i)=>items.push({kind:'old',c,no:`사건 ${u}-${srcCases.length+i+1}`}));
+    items.forEach(({kind,c,no})=>{
+      const isSource=kind==='source', isDone=isSource?sourceSolved(c):solved(c);
+      const b=document.createElement('button'); b.className='case-file unified-case-card'+(isDone?' solved':'');
+      b.onclick=()=>isSource?openSourceCase(c.code):openCase(c.code);
+      const icon=window.hdUnifiedIconForText?window.hdUnifiedIconForText((c.title||'')+' '+(c.topic||'')+' '+(c.source_type||'')):'source-analysis.png';
+      const sub=isSource?`<span class="unified-card-type">학습지 ${c.ws} 연계</span>`:`<span class="unified-card-type">탐구 사건</span>`;
+      b.innerHTML=`<div class="unified-icon-wrap"><img src="assets/ui_icons/${icon}" alt=""></div><div class="unified-card-body"><div class="unified-card-top"><span class="unified-card-code">${no}</span>${sub}</div><div class="case-title">${c.title}</div><div class="unified-meta">${isSource?((c.source_type||'자료')+' · '+(c.thinking||'자료 해석')):'역사 탐정형 사건'}</div></div><div class="case-state">${isDone?'✓ 완료':'미해결'}</div>`;
+      grid.appendChild(b);
+    });
+    window.scrollTo({top:0,behavior:'smooth'});
+  };
+
+  // 탐정수첩에서도 CASE/학습지 번호 대신 같은 사건 번호 체계를 사용
+  window.showNotebook=function(){
+    document.getElementById('home').style.display='none';
+    document.getElementById('unitPage').classList.remove('show');
+    document.getElementById('notebookPage').classList.add('show');
+    const sourceGrid=document.getElementById('sourceStampGrid');
+    const extraGrid=document.getElementById('stampGrid');
+    sourceGrid.innerHTML=''; extraGrid.innerHTML='';
+    const reps=(typeof SOURCE_CASES!=='undefined')?SOURCE_CASES:[];
+    let sourceDone=0;
+    reps.forEach(c=>{
+      const got=sourceStamped(c); if(got)sourceDone++;
+      const div=document.createElement('div'); div.className='record source-record'+(got?' got':''); div.onclick=()=>openSourceCase(c.code);
+      div.innerHTML=`<div class="mark">${got?'◉ 스탬프 획득':'○ 미해결'}</div><div class="stamp-img-wrap"><img class="stamp-img" src="${SOURCE_STAMP_IMAGES[c.code]||('source_stamps/'+c.code+'.svg')}" alt="${displayNoSource(c)} 스탬프"></div><div><div class="small">${displayNoSource(c)} · 학습지 ${c.ws} 연계</div><div class="source-record-title">${c.title}</div><div class="source-record-meta">${c.source_type||'자료'} · ${c.thinking||'자료 해석'}</div><div class="stamp-caption">${got?(c.stamp+' 스탬프 획득'):'사건 해결 후 획득'}</div></div>`;
+      sourceGrid.appendChild(div);
+    });
+    let extraDone=0;
+    CASES.forEach(c=>{
+      const got=stamped(c); if(got)extraDone++;
+      const div=document.createElement('div'); div.className='record'+(got?' got':''); div.onclick=()=>openCase(c.code);
+      div.innerHTML=`<div class="mark">${got?'◉ 스탬프 획득':'○ 미해결'}</div><div class="stamp-img-wrap"><img class="stamp-img" src="${STAMP_IMAGES[c.code]||''}" alt="${displayNoOld(c)} 스탬프"></div><div><div class="small">${displayNoOld(c)}</div><div style="font-weight:900;line-height:1.35">${c.title}</div><div class="stamp-caption">${got?'수사 완료 스탬프':'사건 해결 후 획득'}</div></div>`;
+      extraGrid.appendChild(div);
+    });
+    const sourceTotal=reps.length||31, extraTotal=CASES.length, totalDone=sourceDone+extraDone,total=sourceTotal+extraTotal;
+    const a=document.getElementById('sourceStampCount'); if(a)a.textContent=`${sourceDone} / ${sourceTotal}`;
+    const b=document.getElementById('extraStampCount'); if(b)b.textContent=`${extraDone} / ${extraTotal}`;
+    document.getElementById('notebookSummary').innerHTML=`<div class="summary-box"><b>${sourceDone}/${sourceTotal}</b><span>사료 분석 스탬프</span></div><div class="summary-box"><b>${extraDone}/${extraTotal}</b><span>탐구 사건 스탬프</span></div><div class="summary-box"><b>${totalDone}/${total}</b><span>전체 스탬프</span></div>`;
+    window.scrollTo({top:0,behavior:'smooth'});
+  };
+
+  // 대표 사료 사건을 열 때 상단 뷰어 제목도 사건 번호 우선 표시
+  const priorOpenSource=window.openSourceCase;
+  window.openSourceCase=function(code){
+    priorOpenSource(code);
+    const c=(typeof SOURCE_CASES!=='undefined')?SOURCE_CASES.find(x=>x.code===code):null;
+    if(c){const t=document.getElementById('viewerTitle'); if(t)t.textContent=`${displayNoSource(c)} · 학습지 ${c.ws} 연계 · ${c.title}`;}
+  };
+
+  // 기존 탐구 사건도 상단 뷰어 제목은 같은 사건 번호를 사용
+  const priorOpenOld=window.openCase;
+  window.openCase=function(code){
+    const r=priorOpenOld(code);
+    const c=CASES.find(x=>x.code===code);
+    if(c){const t=document.getElementById('viewerTitle'); if(t)t.textContent=`${displayNoOld(c)} · ${c.title}`;}
+    return r;
+  };
+})();
+</script>
+
+<style data-curriculum-aligned="v1.0">
+/* 학습지 1:1 연계 구조 */
+.case-grid.curriculum-linked-grid{display:block!important}
+.curriculum-intro{margin:0 0 14px;padding:12px 15px;border:1px solid #d5b996;border-left:5px solid #70482f;border-radius:12px;background:#fff9ef;color:#5a4435;font-size:12px;line-height:1.65}
+.lesson-case-group{margin:0 0 14px;border:1px solid #cba982;border-radius:15px;background:#fffaf1;overflow:hidden;box-shadow:0 4px 10px rgba(79,49,29,.06)}
+.lesson-main-row{display:grid;grid-template-columns:58px 1fr auto;gap:13px;align-items:center;padding:15px 16px;cursor:pointer;background:#fffaf1}
+.lesson-main-row:hover{background:#fff6e9}.lesson-main-row.solved{background:#f7fbf4}
+.lesson-icon{width:52px;height:52px;border-radius:13px;border:1px solid #d4b58f;background:#f1dfc6;display:grid;place-items:center;overflow:hidden}.lesson-icon img{width:44px;height:44px;object-fit:contain}
+.lesson-topline{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:5px}.lesson-number{font-weight:950;font-size:11px;color:#65472f;background:#ead3ad;border:1px solid #cda673;border-radius:7px;padding:4px 8px}.lesson-required{font-weight:900;font-size:9px;color:#fff;background:#754a31;border-radius:999px;padding:4px 7px}.lesson-topic{font-size:14px;font-weight:950;color:#251b16;line-height:1.42}.lesson-meta{font-size:10px;color:#816e5d;margin-top:5px;line-height:1.4}.lesson-state{font-size:10px;font-weight:900;white-space:nowrap;padding:5px 8px;border-radius:999px;background:#eee4d4;color:#776658}.lesson-main-row.solved .lesson-state{background:#dfeeda;color:#486343}
+.extra-toggle-row{padding:0 16px 13px 87px}.extra-toggle{border:0;border-radius:9px;background:#efe1cf;color:#654831;font-weight:900;font-size:10px;padding:8px 11px;cursor:pointer}.extra-toggle:hover{background:#e6d1b7}
+.optional-list{display:none;border-top:1px dashed #d6b995;background:#fbf4e8;padding:10px 14px 12px 86px}.optional-list.show{display:block}.optional-label{font-size:9px;font-weight:900;color:#86694f;margin:0 0 7px}.optional-case{width:100%;display:grid;grid-template-columns:36px 1fr auto;gap:9px;align-items:center;text-align:left;border:1px solid #ddc9ae;background:#fffdf8;border-radius:10px;padding:9px 10px;margin:6px 0;cursor:pointer}.optional-case:hover{border-color:#9b7655;background:#fff9ef}.optional-case.solved{background:#f6faf3;border-color:#a8bca0}.optional-case img{width:32px;height:32px;object-fit:contain}.optional-case-title{font-size:11px;font-weight:900;color:#35271e;line-height:1.35}.optional-case-sub{font-size:9px;color:#8b7765;margin-top:2px}.optional-state{font-size:9px;color:#7f6a57;white-space:nowrap}
+.unit6-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px!important}.unit6-grid .unified-case-card{margin:0}
+/* 탐정수첩: 필수 사건 중심 + 보너스 */
+#notebookPage .notebook-section.extra{display:none!important}
+#sourceStampGrid.curriculum-notebook{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}
+.curriculum-record{border:1px solid #d7b993;border-radius:13px;background:#fffaf1;padding:12px;min-width:0}.curriculum-record.got{background:#f8fbf5;border-color:#95aa8f}.record-main{display:grid;grid-template-columns:86px 1fr;gap:12px;align-items:center;cursor:pointer}.record-main .stamp-img{width:78px;height:78px;object-fit:contain}.record-title{font-size:12px;font-weight:950;line-height:1.4;color:#2d211a}.record-small{font-size:9px;color:#826e5d;margin-bottom:4px}.record-status{font-size:9px;font-weight:900;margin-top:5px;color:#9a6b58}.record-bonus{margin-top:9px;padding-top:8px;border-top:1px dashed #d7c0a5}.bonus-head{font-size:9px;font-weight:900;color:#80634d;margin-bottom:6px}.bonus-row{display:flex;gap:7px;flex-wrap:wrap}.bonus-chip{width:64px;text-align:center;font-size:8px;color:#8a7665;cursor:pointer}.bonus-chip img{display:block;width:48px;height:48px;object-fit:contain;margin:0 auto 3px;filter:grayscale(1);opacity:.28}.bonus-chip.got img{filter:none;opacity:1}.bonus-chip.got{color:#6d4734;font-weight:900}
+.notebook-unit-title{grid-column:1/-1;background:#ead5b2;border:1px solid #c8a478;border-radius:10px;padding:9px 12px;font-size:11px;font-weight:950;color:#5b3f2c;margin-top:4px}
+@media(max-width:760px){.lesson-main-row{grid-template-columns:48px 1fr auto;padding:12px}.lesson-icon{width:44px;height:44px}.lesson-icon img{width:38px;height:38px}.extra-toggle-row,.optional-list{padding-left:72px}.unit6-grid{grid-template-columns:1fr!important}#sourceStampGrid.curriculum-notebook{grid-template-columns:1fr!important}}
+</style>
+
+<script data-curriculum-aligned="v1.0">
+(function(){
+  const DISPLAY_SOURCE={
+    'SOURCE-1-1':'1-1','SOURCE-1-2':'1-2','SOURCE-1-3':'1-3','SOURCE-1-4':'1-4','SOURCE-1-5':'1-5','SOURCE-1-6':'1-6',
+    'SOURCE-2-7':'2-1','SOURCE-2-8':'2-2','SOURCE-2-9':'2-3','SOURCE-2-10':'2-4',
+    'SOURCE-3-11':'3-1','SOURCE-3-12':'3-2','SOURCE-3-13':'3-3','SOURCE-3-14':'3-4','SOURCE-3-15':'3-5','SOURCE-3-16':'3-6',
+    'SOURCE-4-1':'4-1','SOURCE-4-2':'4-2','SOURCE-4-3':'4-3','SOURCE-4-4':'4-4','SOURCE-4-5':'4-5','SOURCE-4-6':'4-6','SOURCE-4-7':'4-7','SOURCE-4-8':'4-8',
+    'SOURCE-5-9':'5-1','SOURCE-5-10':'5-2','SOURCE-5-11':'5-3','SOURCE-5-12':'5-4','SOURCE-5-13':'5-5','SOURCE-5-14':'5-6','SOURCE-5-15':'5-7'
+  };
+  const EXTRA_MAP={
+    'SOURCE-1-1':['1-01','1-02'], 'SOURCE-1-2':['1-03','1-04'], 'SOURCE-1-3':['1-05'], 'SOURCE-1-4':['1-06'], 'SOURCE-1-5':['1-07'], 'SOURCE-1-6':['2-01'],
+    'SOURCE-2-7':['2-02','2-03','2-06'], 'SOURCE-2-8':['2-04','2-05'], 'SOURCE-2-9':[], 'SOURCE-2-10':['2-07'],
+    'SOURCE-3-11':['3-01'], 'SOURCE-3-12':['3-02','3-03','3-04'], 'SOURCE-3-13':['3-05'], 'SOURCE-3-14':['3-06'], 'SOURCE-3-15':['3-07'], 'SOURCE-3-16':['3-08'],
+    'SOURCE-4-1':['4-01'], 'SOURCE-4-2':['4-02'], 'SOURCE-4-3':['4-03'], 'SOURCE-4-4':['4-05'], 'SOURCE-4-5':['4-04'], 'SOURCE-4-6':[], 'SOURCE-4-7':['4-06'], 'SOURCE-4-8':['4-07'],
+    'SOURCE-5-9':[], 'SOURCE-5-10':['5-01'], 'SOURCE-5-11':['5-02','5-07'], 'SOURCE-5-12':['5-03'], 'SOURCE-5-13':['5-04'], 'SOURCE-5-14':['5-05'], 'SOURCE-5-15':['5-06']
+  };
+  const ICON_BASE='assets/ui_icons/';
+  function reps(u){return (typeof SOURCE_CASES!=='undefined'?SOURCE_CASES:[]).filter(c=>c.unit===u)}
+  function disp(c){return DISPLAY_SOURCE[c.code]||c.ws||c.code}
+  function extraCases(src){return (EXTRA_MAP[src.code]||[]).map(code=>CASES.find(c=>c.code===code)).filter(Boolean)}
+  function primarySolved(c){return !!sourceSolved(c)}
+  function requiredList(){return (typeof SOURCE_CASES!=='undefined'?SOURCE_CASES:[]).concat(CASES.filter(c=>c.unit===6))}
+  function requiredSolved(){return (typeof SOURCE_CASES!=='undefined'?SOURCE_CASES:[]).filter(sourceSolved).length + CASES.filter(c=>c.unit===6&&solved(c)).length}
+  function requiredTotal(){return (typeof SOURCE_CASES!=='undefined'?SOURCE_CASES.length:31)+CASES.filter(c=>c.unit===6).length}
+  function iconForSource(c){
+    const t=((c.title||'')+' '+(c.topic||'')).toLowerCase();
+    if(/전쟁|전투|침입|왜란|국방|살수/.test(t))return 'war.png';
+    if(/외교|명·여진|연행|세계관/.test(t))return 'diplomacy.png';
+    if(/경제|상품|화폐|모내기/.test(t))return 'economy.png';
+    if(/문화|직지|실록|유물|비석|서원/.test(t))return 'culture.png';
+    if(/신분|사회|호족/.test(t))return 'society.png';
+    return 'government.png';
+  }
+  function iconForOld(c){
+    const t=(c.title||'').toLowerCase();
+    if(/전쟁|전투|침입|왜란|호란|군대|연합/.test(t))return 'war.png';
+    if(/외교|사대|교린|조약|개화/.test(t))return 'diplomacy.png';
+    if(/상업|경제|환곡|삼정|화폐/.test(t))return 'economy.png';
+    if(/문화|직지|유물|무덤|장보고|청해진/.test(t))return 'culture.png';
+    if(/신분|농민|노비|풍습|촌락/.test(t))return 'society.png';
+    return 'detective-case.png';
+  }
+  window.hdCurriculumDisplayNo=disp;
+  window.hdExtraMap=EXTRA_MAP;
+
+  window.updateProgress=function(){
+    const n=requiredSolved(),total=requiredTotal(),pct=total?Math.round(n/total*1000)/10:0;
+    const top=document.getElementById('solvedTop'); if(top)top.textContent=n;
+    if(top&&top.parentElement)top.parentElement.innerHTML=`필수 해결 <span id="solvedTop">${n}</span>/${total}`;
+    const per=document.getElementById('percentTop');if(per)per.textContent=pct;
+    const bc=document.getElementById('boardCount');if(bc)bc.textContent=`${n} / ${total}`;
+    const bt=document.getElementById('boardText');if(bt)bt.textContent=`필수 수사 해결 · ${pct}%`;
+    const bf=document.getElementById('boardFill');if(bf)bf.style.width=pct+'%';
+    for(let u=1;u<=6;u++){
+      const list=u<=5?reps(u):CASES.filter(c=>c.unit===6);
+      const done=u<=5?list.filter(sourceSolved).length:list.filter(solved).length;
+      const el=document.getElementById(`u${u}count`);if(el)el.textContent=`${done}/${list.length}`;
+      const h=document.getElementById(`unitHot${u}`);if(h)h.classList.toggle('done',list.length>0&&done===list.length);
+    }
+  };
+
+  window.toggleOptional=function(code){
+    const box=document.querySelector(`[data-optional-for="${code}"]`); if(!box)return;
+    box.classList.toggle('show');
+    const btn=document.querySelector(`[data-toggle-for="${code}"]`);
+    if(btn)btn.textContent=box.classList.contains('show')?'추가 사건 접기':'추가 사건 '+box.querySelectorAll('.optional-case').length+'개 보기';
+  };
+
+  window.openUnit=function(u){
+    currentUnit=u;
+    document.getElementById('home').style.display='none';
+    document.getElementById('notebookPage').classList.remove('show');
+    document.getElementById('unitPage').classList.add('show');
+    const meta=UNITS[u],grid=document.getElementById('caseGrid');grid.innerHTML='';
+    document.getElementById('unitTitle').textContent=meta.name;
+    if(u===6){
+      const list=CASES.filter(c=>c.unit===6),done=list.filter(solved).length;
+      document.getElementById('unitNo').textContent=`${meta.roman}단원 · ${done}/${list.length} 해결 · 학습지 연계 전`;
+      grid.className='case-grid unified-grid unit6-grid';
+      const guide=document.createElement('div');guide.className='curriculum-intro';guide.style.gridColumn='1/-1';guide.textContent='6단원은 아직 학습지가 없으므로 기존 사건을 사건 순서대로 제공합니다.';grid.appendChild(guide);
+      list.forEach((c,i)=>{
+        const done=solved(c),b=document.createElement('button');b.className='case-file unified-case-card'+(done?' solved':'');b.onclick=()=>openCase(c.code);
+        b.innerHTML=`<div class="unified-icon-wrap"><img src="${ICON_BASE+iconForOld(c)}" alt=""></div><div class="unified-card-body"><div class="unified-card-top"><span class="unified-card-code">사건 6-${i+1}</span></div><div class="case-title">${c.title}</div><div class="unified-meta">역사 탐정 사건</div></div><div class="case-state">${done?'✓ 완료':'미해결'}</div>`;grid.appendChild(b);
+      });
+      window.scrollTo({top:0,behavior:'smooth'});return;
+    }
+    const list=reps(u),done=list.filter(sourceSolved).length;
+    document.getElementById('unitNo').textContent=`${meta.roman}단원 · 학습지 연계 필수 사건 ${done}/${list.length} 완료`;
+    grid.className='case-grid curriculum-linked-grid';
+    const intro=document.createElement('div');intro.className='curriculum-intro';intro.innerHTML='<b>수업 순서:</b> 오늘 학습지와 같은 번호의 필수 사건을 해결하세요. 같은 내용을 더 탐구하고 싶은 학생은 각 사건 아래의 <b>추가 사건</b>을 선택해서 해결할 수 있습니다.';grid.appendChild(intro);
+    list.forEach(src=>{
+      const isDone=primarySolved(src),extras=extraCases(src),group=document.createElement('div');group.className='lesson-case-group';
+      const row=document.createElement('div');row.className='lesson-main-row'+(isDone?' solved':'');row.onclick=()=>openSourceCase(src.code);
+      row.innerHTML=`<div class="lesson-icon"><img src="${ICON_BASE+iconForSource(src)}" alt=""></div><div><div class="lesson-topline"><span class="lesson-number">사건 ${disp(src)}</span><span class="lesson-required">필수</span></div><div class="lesson-topic">${src.title}</div><div class="lesson-meta">학습지 주제: ${src.topic||''} · ${src.source_type||'자료 분석'} · ${src.thinking||'자료 해석'}</div></div><div class="lesson-state">${isDone?'✓ 완료':'미해결'}</div>`;
+      group.appendChild(row);
+      if(extras.length){
+        const tr=document.createElement('div');tr.className='extra-toggle-row';tr.innerHTML=`<button class="extra-toggle" data-toggle-for="${src.code}" onclick="event.stopPropagation();toggleOptional('${src.code}')">추가 사건 ${extras.length}개 보기</button>`;group.appendChild(tr);
+        const op=document.createElement('div');op.className='optional-list';op.dataset.optionalFor=src.code;op.innerHTML='<div class="optional-label">선택 · 같은 학습지 내용을 더 탐구하는 사건</div>';
+        extras.forEach(c=>{const got=solved(c),b=document.createElement('button');b.className='optional-case'+(got?' solved':'');b.onclick=()=>openCase(c.code);b.innerHTML=`<img src="${ICON_BASE+iconForOld(c)}" alt=""><div><div class="optional-case-title">${c.title}</div><div class="optional-case-sub">추가 사건 · 해결 시 보너스 스탬프</div></div><div class="optional-state">${got?'✓ 완료':'선택'}</div>`;op.appendChild(b)});group.appendChild(op);
+      }
+      grid.appendChild(group);
+    });
+    window.scrollTo({top:0,behavior:'smooth'});
+  };
+
+  function parentSourceForOld(code){for(const [src,codes] of Object.entries(EXTRA_MAP)){if(codes.includes(code))return src}return null}
+  window.historyDetectiveNavigate.unitByCode=function(code){
+    const srcCode=parentSourceForOld(code),src=srcCode&&SOURCE_CASES.find(x=>x.code===srcCode),c=CASES.find(x=>x.code===code);closeCase();if(src)openUnit(src.unit);else if(c)openUnit(c.unit);else showHome();
+  };
+
+  window.showNotebook=function(){
+    document.getElementById('home').style.display='none';document.getElementById('unitPage').classList.remove('show');document.getElementById('notebookPage').classList.add('show');
+    const grid=document.getElementById('sourceStampGrid'),extraGrid=document.getElementById('stampGrid');grid.innerHTML='';extraGrid.innerHTML='';grid.className='stamp-grid source-stamp-grid curriculum-notebook';
+    const total=requiredTotal(),done=requiredSolved();
+    document.getElementById('notebookSummary').innerHTML=`<div class="summary-box"><b>${done}/${total}</b><span>필수 사건 스탬프</span></div><div class="summary-box"><b>${CASES.filter(c=>c.unit<=5&&stamped(c)).length}/36</b><span>선택 보너스 스탬프</span></div><div class="summary-box"><b>${Math.round(done/total*100)}%</b><span>수업 진도</span></div>`;
+    const cnt=document.getElementById('sourceStampCount');if(cnt)cnt.textContent=`${done} / ${total}`;
+    let lastUnit=null;
+    SOURCE_CASES.forEach(src=>{
+      if(src.unit!==lastUnit){lastUnit=src.unit;const h=document.createElement('div');h.className='notebook-unit-title';h.textContent=`${UNITS[src.unit].roman}단원 · ${UNITS[src.unit].name}`;grid.appendChild(h)}
+      const got=sourceStamped(src),rec=document.createElement('div');rec.className='curriculum-record'+(got?' got':'');
+      const extras=extraCases(src);rec.innerHTML=`<div class="record-main"><div><img class="stamp-img" src="${SOURCE_STAMP_IMAGES[src.code]||('source_stamps/'+src.code+'.png')}" alt=""></div><div><div class="record-small">사건 ${disp(src)} · 필수</div><div class="record-title">${src.title}</div><div class="record-status">${got?('● '+src.stamp+' 스탬프 획득'):'○ 미해결'}</div></div></div>`;rec.querySelector('.record-main').onclick=()=>openSourceCase(src.code);
+      if(extras.length){const bonus=document.createElement('div');bonus.className='record-bonus';bonus.innerHTML=`<div class="bonus-head">보너스 스탬프 ${extras.filter(stamped).length}/${extras.length}</div><div class="bonus-row"></div>`;const row=bonus.querySelector('.bonus-row');extras.forEach(c=>{const g=stamped(c),chip=document.createElement('div');chip.className='bonus-chip'+(g?' got':'');chip.onclick=()=>openCase(c.code);chip.innerHTML=`<img src="${STAMP_IMAGES[c.code]||''}" alt=""><span>${g?c.title:'미획득'}</span>`;row.appendChild(chip)});rec.appendChild(bonus)}
+      grid.appendChild(rec);
+    });
+    const h6=document.createElement('div');h6.className='notebook-unit-title';h6.textContent=`${UNITS[6].roman}단원 · ${UNITS[6].name} · 학습지 연계 전`;grid.appendChild(h6);
+    CASES.filter(c=>c.unit===6).forEach((c,i)=>{const got=stamped(c),rec=document.createElement('div');rec.className='curriculum-record'+(got?' got':'');rec.onclick=()=>openCase(c.code);rec.innerHTML=`<div class="record-main"><div><img class="stamp-img" src="${STAMP_IMAGES[c.code]||''}" alt=""></div><div><div class="record-small">사건 6-${i+1}</div><div class="record-title">${c.title}</div><div class="record-status">${got?'● 스탬프 획득':'○ 미해결'}</div></div></div>`;grid.appendChild(rec)});
+    const sec=document.querySelector('#notebookPage .notebook-section.required .notebook-section-head span');if(sec)sec.textContent='필수 사건 중심 · 같은 학습지의 추가 사건은 보너스 스탬프로 표시';
+    window.scrollTo({top:0,behavior:'smooth'});
+  };
+
+  window.showOverview=function(){
+    const grid=document.getElementById('overviewGrid');grid.innerHTML='';
+    for(let u=1;u<=6;u++){const list=u<=5?reps(u):CASES.filter(c=>c.unit===6),done=u<=5?list.filter(sourceSolved).length:list.filter(solved).length,pct=list.length?Math.round(done/list.length*100):0,div=document.createElement('div');div.className='overview-item';div.innerHTML=`<b>${UNITS[u].roman}단원 · ${UNITS[u].name}</b><div class="small" style="margin-bottom:6px">필수 사건 ${done} / ${list.length} 해결${u===6?' · 학습지 연계 전':''}</div><div class="mini-bar"><div class="mini-fill" style="width:${pct}%"></div></div>`;div.onclick=()=>{hideOverview();openUnit(u)};div.style.cursor='pointer';grid.appendChild(div)}
+    document.getElementById('overviewModal').classList.add('show');
+  };
+
+  const oldOpenSource=window.openSourceCase;window.openSourceCase=function(code){const r=oldOpenSource(code),c=SOURCE_CASES.find(x=>x.code===code);if(c){const t=document.getElementById('viewerTitle');if(t)t.textContent=`사건 ${disp(c)} · ${c.title}`}return r};
+  updateProgress();
+})();
+</script>
+</body>
+</html>
