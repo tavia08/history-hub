@@ -1791,7 +1791,44 @@ const RECORD_SERVER_URL='https://script.google.com/macros/s/AKfycbxjSzjvqHbrKpCj
 function readStudentIdentity(){
   try{return JSON.parse(localStorage.getItem(STUDENT_DEVICE_KEY)||'null')}catch(e){return null}
 }
-let studentIdentity=readStudentIdentity();
+
+function importHubStudentIdentity(){
+  try{
+    const studentNo=String(localStorage.getItem('studentNo')||'').trim();
+    const studentName=String(localStorage.getItem('studentName')||'').trim();
+    const studentId=String(localStorage.getItem('studentId')||'').trim() || (studentNo&&studentName ? `${studentNo}_${studentName}` : '');
+    const digits=studentNo.replace(/\D/g,'');
+    if(!studentNo || !studentName || !studentId) return null;
+
+    let grade=3, classNo='', number='';
+    if(digits.length===5){
+      grade=Number(digits.slice(0,1));
+      classNo=Number(digits.slice(1,3));
+      number=Number(digits.slice(3,5));
+    }else if(digits.length===4){
+      grade=Number(digits.slice(0,1));
+      classNo=Number(digits.slice(1,2));
+      number=Number(digits.slice(2,4));
+    }
+
+    const identity={grade,classNo,number,studentNo,studentName,studentId};
+    localStorage.setItem(STUDENT_DEVICE_KEY,JSON.stringify(identity));
+    sessionStorage.setItem(STUDENT_SESSION_KEY,studentSessionToken(identity));
+    return identity;
+  }catch(e){
+    console.warn('통합 메인 로그인 정보 가져오기 실패',e);
+    return null;
+  }
+}
+
+let studentIdentity=readStudentIdentity() || importHubStudentIdentity();
+if(studentIdentity){
+  const confirmedToken=sessionStorage.getItem(STUDENT_SESSION_KEY);
+  const expectedToken=studentSessionToken(studentIdentity);
+  if(confirmedToken!==expectedToken){
+    sessionStorage.setItem(STUDENT_SESSION_KEY,expectedToken);
+  }
+}
 function studentStorageScope(){return studentIdentity?.studentId?studentIdentity.studentId:'guest'}
 const PROFILE_KEY='historyTimeExplorersProfileV7:'+studentStorageScope();
 const APP_KEY='historyTimeExplorersAppV7:'+studentStorageScope();
