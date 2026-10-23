@@ -253,6 +253,7 @@ button{font:inherit}
     <div class="stats">
       <div class="chip">필수 해결 <span id="solvedTop">0</span>/39</div>
       <div class="chip hide-sm">진행률 <span id="percentTop">0</span>%</div>
+      <a class="top-btn" href="../index.html" style="text-decoration:none">← 역사 학습실</a>
       <button class="top-btn" onclick="showNotebook()"><img class="ui-mini-icon" src="assets/ui_icons/notebook.png" alt="">탐정 수첩</button>
     </div>
   </header>
@@ -1588,6 +1589,13 @@ document.getElementById('caseFrame')?.addEventListener('load',()=>setTimeout(enh
 
   const oldOpenSource=window.openSourceCase;window.openSourceCase=function(code){const r=oldOpenSource(code),c=SOURCE_CASES.find(x=>x.code===code);if(c){const t=document.getElementById('viewerTitle');if(t)t.textContent=`사건 ${disp(c)} · ${c.title}`}return r};
   updateProgress();
+
+  // 통합 메인 수업 모드에서 넘겨준 오늘 학습지로 바로 이동합니다.
+  const hubWorksheet=String(new URLSearchParams(location.search).get('hubWorksheet')||'').trim();
+  if(hubWorksheet){
+    const target=SOURCE_CASES.find(c=>String(c.ws||'')===hubWorksheet);
+    if(target){setTimeout(()=>openSourceCase(target.code),80);}
+  }
 })();
 </script>
 </body>

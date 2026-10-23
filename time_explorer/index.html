@@ -1229,6 +1229,7 @@ body:not(.student-gate) #home-actions button{pointer-events:auto!important}
 <div id="app">
   <header class="topbar">
     <button class="brand" data-go="home" aria-label="첫 화면으로">🧭 <span>시간탐험대</span></button>
+    <a class="ghost-btn" href="../index.html" style="text-decoration:none" aria-label="역사 학습실로 돌아가기">← 역사 학습실</a>
     <button id="era-shortcut" class="ghost-btn hidden">대단원 선택</button>
     <button id="student-info-chip" class="student-info-chip hidden" type="button" title="학생 정보 확인·변경"></button>
     <div id="player-mini" class="player-mini hidden"></div>
@@ -2028,6 +2029,32 @@ function checkSentenceCompletion(){
   feedback.innerHTML='<b>🔎 일부 단어가 알맞지 않습니다.</b><br>맞은 빈칸은 그대로 두었습니다. 비워진 부분만 다시 생각해 보세요.';
 }
 
+const HUB_WORKSHEET_MAP={
+  '1-1':{era:'ancient',stage:1},'1-2':{era:'ancient',stage:2},'1-3':{era:'ancient',stage:3},'1-4':{era:'ancient',stage:4},'1-5':{era:'ancient',stage:5},'1-6':{era:'ancient',stage:6},
+  '2-7':{era:'northsouth',stage:1},'2-8':{era:'northsouth',stage:2},'2-9':{era:'northsouth',stage:3},'2-10':{era:'northsouth',stage:4},
+  '3-11':{era:'goryeo',stage:1},'3-12':{era:'goryeo',stage:2},'3-13':{era:'goryeo',stage:3},'3-14':{era:'goryeo',stage:4},'3-15':{era:'goryeo',stage:5},'3-16':{era:'goryeo',stage:6},
+  '5-9':{era:'joseon_change',stage:1},'5-10':{era:'joseon_change',stage:2},'5-11':{era:'joseon_change',stage:3},'5-12':{era:'joseon_change',stage:4},'5-13':{era:'joseon_change',stage:5},'5-14':{era:'joseon_change',stage:6},'5-15':{era:'joseon_change',stage:7}
+};
+const HUB_WORKSHEET_ID=String(new URLSearchParams(location.search).get('hubWorksheet')||'').trim();
+const hubLessonTarget=HUB_WORKSHEET_MAP[HUB_WORKSHEET_ID]||null;
+function isHubTargetEra(id){return !!(hubLessonTarget&&hubLessonTarget.era===id)}
+function isHubTargetStage(eraId,stageId){return !!(hubLessonTarget&&hubLessonTarget.era===eraId&&Number(hubLessonTarget.stage)===Number(stageId))}
+function openHubLessonTarget(){
+  if(!hubLessonTarget||!profile)return false;
+  const e=ERAS[hubLessonTarget.era];
+  if(!e||!e.ready)return false;
+  const targetStage=e.stages.find(s=>Number(s.id)===Number(hubLessonTarget.stage));
+  if(!targetStage)return false;
+  activeEraId=hubLessonTarget.era;
+  state=loadEra(activeEraId);
+  previewRankIndex=null;
+  appState.lastEra=activeEraId;
+  saveJSON(APP_KEY,appState);
+  show('map');
+  setTimeout(()=>startStage(Number(hubLessonTarget.stage)),80);
+  return true;
+}
+
 let state=activeEraId?loadEra(activeEraId):eraDefault(),selectedCharacter=profile?.character||null,changingCharacter=false,currentStage=null,currentIndex=0,stageScore=0,stageWrong=0,stageFirstCorrect=0,stageQuestionPoints=[],questionAttemptCount=0,answered=false,teacherPreview=false,previewRankIndex=null,eraWasCompleteBeforeStage=false;
 function updateTeacherPreviewUI(){
   document.body.classList.toggle('teacher-preview-mode',teacherPreview);
@@ -2559,6 +2586,7 @@ async function bootStudentApp(){
 
     // 서버 데이터를 로컬에 정확히 복원한 뒤, 이후 변경분만 다시 서버에 저장합니다.
     setTimeout(()=>scheduleStudentStateSync(300),700);
+    if(hubLessonTarget&&profile){setTimeout(()=>openHubLessonTarget(),350);}
 
   }else if(isNewStudent){
     toast(`${studentIdentity.studentName} 학생을 새로 등록했습니다. 캐릭터를 선택해 주세요.`);
@@ -2850,7 +2878,7 @@ function renderHome(){
   </div>`;
 
   actions.innerHTML='<button class="primary big" id="home-continue">이어서 탐험하기 →</button><button class="ghost-btn" id="home-era">대단원 선택</button>';
-  document.querySelector('#home-continue')?.addEventListener('click',()=>activeEraId?openEra(activeEraId):show('eras'));
+  document.querySelector('#home-continue')?.addEventListener('click',()=>hubLessonTarget?openHubLessonTarget():(activeEraId?openEra(activeEraId):show('eras')));
   document.querySelector('#home-era')?.addEventListener('click',()=>show('eras'));
 
   try{
@@ -2912,12 +2940,12 @@ function renderHome(){
   try{renderMini();}catch(e){}
 }
 function renderCharacters(){const grid=document.querySelector('#character-grid');grid.innerHTML=characters.map(c=>`<article class="character-card ${selectedCharacter===c.id?'selected':''}" data-char="${c.id}"><div class="character-image"><img src="${avatarPath(c.id,0)}"></div><div class="character-info"><h3>${c.name}</h3><b>${c.role} · ${c.tag}</b><p>${c.desc}</p><div class="character-quote">“${c.quote}”</div></div></article>`).join('');grid.querySelectorAll('.character-card').forEach(x=>x.onclick=()=>{selectedCharacter=x.dataset.char;renderCharacters();document.querySelector('#start-profile-btn').disabled=false});document.querySelector('#start-profile-btn').disabled=!selectedCharacter;document.querySelector('#start-profile-btn').textContent=changingCharacter?'이 캐릭터로 변경하기 →':'이 캐릭터로 시작하기 →';document.querySelector('#cancel-character-btn').classList.toggle('hidden',!changingCharacter)}
-function saveProfileChoice(){if(!selectedCharacter)return;profile={character:selectedCharacter,createdAt:profile?.createdAt||Date.now()};saveJSON(PROFILE_KEY,profile);changingCharacter=false;const c=characters.find(x=>x.id===selectedCharacter);syncStudentLog('캐릭터선택','',c?c.name:selectedCharacter);scheduleStudentStateSync(150);toast('캐릭터가 저장되었습니다.');show('eras')}
+function saveProfileChoice(){if(!selectedCharacter)return;profile={character:selectedCharacter,createdAt:profile?.createdAt||Date.now()};saveJSON(PROFILE_KEY,profile);changingCharacter=false;const c=characters.find(x=>x.id===selectedCharacter);syncStudentLog('캐릭터선택','',c?c.name:selectedCharacter);scheduleStudentStateSync(150);toast('캐릭터가 저장되었습니다.');if(!openHubLessonTarget())show('eras')}
 function beginCharacterChange(){changingCharacter=true;selectedCharacter=profile?.character||null;show('character')}
 function renderEras(){if(!profile)return show('character');updateTeacherPreviewUI();const grid=document.querySelector('#era-grid');grid.innerHTML=ERA_ORDER.map((id,idx)=>{const e=ERAS[id];if(!e.ready)return `<button class="era-card era-locked" disabled><span class="unit-no">대단원 ${idx+1}</span><span class="era-action">🛠 준비 중</span><div class="era-seal">${String(e.seal).replace(/\s+/g,"<br>")}</div><h3>${e.name}</h3><p>${e.desc}</p><div class="lock-help">현재 버전은 조선 후기까지 완성되었습니다.</div></button>`;const s=loadEra(id),done=s.completedStages.length,isDone=done===e.stages.length,unlocked=eraUnlocked(id),locked=!unlocked&&!teacherPreview,pct=Math.round(done/e.stages.length*100);const oldActive=activeEraId;activeEraId=id;state=s;const ri=getRankIndex();activeEraId=oldActive;state=oldActive?loadEra(oldActive):eraDefault();return `<button class="era-card ${id} ${locked?'era-locked':''} ${isDone?'era-complete':''}" data-era="${id}" ${locked?'disabled':''}><span class="unit-no">대단원 ${idx+1}</span><span class="era-action">${teacherPreview?'👩‍🏫 전체 열람':locked?'🔒 이전 대단원 완료 필요':isDone?'✅ 복습하기':'탐험하기 →'}</span><div class="era-seal">${String(e.seal).replace(/\s+/g,"<br>")}</div><h3>${e.name}</h3><p>${e.desc}</p><div class="era-progress"><div class="era-progress-head"><span>학습지 미션 진행도</span><b>${done}/${e.stages.length}</b></div><div class="era-progress-track"><i style="width:${pct}%"></i></div></div><div class="era-meta"><span>탐험 점수 ${eraQuizScore(s)}점</span><span>4단계 성장</span><span>아이템 ${s.items.length}개</span></div></button>`}).join('');grid.querySelectorAll('.era-card:not(:disabled)[data-era]').forEach(b=>b.onclick=()=>openEra(b.dataset.era));document.querySelector('#global-summary').innerHTML=`<div class="summary-item"><span>나의 캐릭터</span><b>${getCharacter().name}</b></div><div class="summary-item"><span>탐험 점수</span><b>${totalQuizScore()}점</b></div><div class="summary-item"><span>완료 미션</span><b>${ERA_ORDER.reduce((n,id)=>n+(ERAS[id].ready?loadEra(id).completedStages.length:0),0)}</b></div><div class="summary-item"><span>꾸미기 아이템</span><b>${totalItems()}개</b></div><div class="summary-item"><span>완료 대단원</span><b>${completedEraCount()} / 5</b></div>`;const pv=document.querySelector('#teacher-preview-btn');if(pv)pv.textContent=teacherPreview?'교사용 미리보기 종료':'교사용 전체 콘텐츠 열람';document.querySelector('#teacher-preview-banner')?.classList.toggle('hidden',!teacherPreview)}
 function openEra(id){
   if(!ERAS[id]?.ready){toast('아직 학습지가 준비되지 않은 대단원입니다.');return}
-  if(!teacherPreview&&!eraUnlocked(id)){toast('앞 대단원 탐험을 먼저 완료하세요.');return}
+  if(!teacherPreview&&!isHubTargetEra(id)&&!eraUnlocked(id)){toast('앞 대단원 탐험을 먼저 완료하세요.');return}
   activeEraId=id;
   state=loadEra(id);
   previewRankIndex=null;
@@ -2930,7 +2958,7 @@ function openEra(id){
 }
 function renderMini(){const mini=document.querySelector('#player-mini');if(!profile){mini.classList.add('hidden');return}const c=getCharacter();let idx=0,label='탐험대원';if(activeEraId&&ERAS[activeEraId]?.ready){state=loadEra(activeEraId);idx=getRankIndex();label=`${ERAS[activeEraId].name} · ${ranks()[idx].name}`;}mini.classList.remove('hidden');mini.innerHTML=`${avatarBox(avatarPath(c.id,idx),'mini-composite',false)}<div><b>${c.name}</b><span>${label}</span></div>`}
 function renderMap(){if(!profile)return show('character');if(!activeEraId)return show('eras');state=loadEra(activeEraId);const e=era(),c=getCharacter(),actual=getRankIndex(),idx=previewRankIndex===null?actual:previewRankIndex,rank=ranks()[idx],next=nextRankInfo();document.querySelector('#chapter-label').textContent=e.chapter;document.querySelector('#chapter-title').textContent=e.title;document.querySelector('#chapter-desc').textContent=e.desc;document.querySelector('#historical-note').textContent=e.note;document.querySelector('#status-avatar').src=avatarPath(c.id,idx);document.querySelector('#status-name').textContent=c.name;document.querySelector('#status-role').textContent=`${c.role} · ${c.tag}`;document.querySelector('#rank-name').textContent=rank.name;document.querySelector('#rank-message').textContent=rank.note;document.querySelector('#preview-chip').classList.toggle('hidden',previewRankIndex===null);document.querySelector('#clear-preview').classList.toggle('hidden',previewRankIndex===null);const done=state.completedStages.length;document.querySelector('#xp-text').textContent=`${done} / ${stages().length} 미션`;document.querySelector('#xp-fill').style.width=`${Math.round(done/stages().length*100)}%`;document.querySelector('#next-rank-text').textContent=next?`다음 성장까지 미션 ${next.need}개`:'최종 4단계에 도달했습니다!';document.querySelector('#total-exp').textContent=`탐험 점수 ${eraQuizScore(state)}점 · 경험치 ${state.xp} EXP · 아이템 ${state.items.length}개`;const strip=document.querySelector('#growth-strip');strip.innerHTML=ranks().map((r,i)=>`<button class="growth-step ${i<actual?'reached':''} ${i>actual?'future':''} ${i===idx?'current':''}" data-preview="${i}"><img src="${avatarPath(c.id,i)}"><b>${i+1}단계</b><small>${r.name}</small></button>`).join('');strip.querySelectorAll('.growth-step').forEach(b=>b.onclick=()=>{previewRankIndex=Number(b.dataset.preview);renderMap()});document.querySelector('.growth-head span').textContent='아바타는 4단계로 성장합니다. 성장 사이의 미션에서는 시대 아이템을 얻습니다.';document.querySelector('#card-count').textContent=state.cards.length;document.querySelector('#wrong-count').textContent=state.wrong.length;document.querySelector('#item-count')&&(document.querySelector('#item-count').textContent=state.items.length);const eraDone=eraComplete(activeEraId);const banner=document.querySelector('#review-mode-banner');banner.classList.toggle('hidden',!eraDone&&!teacherPreview);banner.textContent=teacherPreview?'👩‍🏫 교사용 전체 열람: 이 대단원의 모든 미션과 추가 도전을 확인할 수 있으며 기록은 저장되지 않습니다.':eraDone?'✅ 대단원 탐험 완료 · 모든 학습지 미션을 복습할 수 있습니다.':'';const map=document.querySelector('#stage-map');map.innerHTML=stages().map(s=>{
-  const locked=!eraDone&&!teacherPreview&&s.id>state.unlockedStage,
+  const locked=!eraDone&&!teacherPreview&&!isHubTargetStage(activeEraId,s.id)&&s.id>state.unlockedStage,
         done=state.completedStages.includes(s.id),
         ans=state.answers[s.id],
         hasBonus=hasBonusChallenge(activeEraId,s.id),
