@@ -365,11 +365,11 @@ const APPS = [
   },
   {
     id: "history_survival",
-    name: "역사 살아남기",
+    name: "역사에서 살아남는 법",
     icon: "🗺️",
     description: "역사 지식을 활용하며 진행하는 반복 플레이형 생존 학습 게임",
-    url: "",
-    enabled: false,
+    url: "https://tavia08.github.io/history-survival/",
+    enabled: true,
     tone: "#dcfce7"
   }
 ];
@@ -1021,6 +1021,13 @@ function renderApps(){
           showLogin("메인페이지에서 먼저 로그인해주세요.", false);
           return;
         }
+        if(app.id === "history_survival"){
+          const s=getStudent();
+          if(sessionStorage.getItem("historyHubLoginSessionV1") !== s.studentId){showLogin("로그인 상태를 다시 확인해주세요.",false);return;}
+          if(!window.HDSurvivalHubLaunch){alert("서바이벌 로그인 모듈을 불러오지 못했습니다.");return;}
+          window.HDSurvivalHubLaunch.open({studentNo:s.studentNo,studentName:s.studentName},app.url).catch(e=>alert("서바이벌 연결 실패: "+e.message));
+          return;
+        }
         if(app.id === "history_defense"){
           const s = getStudent();
           if(sessionStorage.getItem("historyHubLoginSessionV1") !== s.studentId){
@@ -1332,5 +1339,6 @@ startFastReturnRefresh();
 })();
 </script>
 <script src="assets/hd-hub-launch-v513.js"></script>
+<script src="assets/hs-hub-launch-v13.js"></script>
 </body>
 </html>
