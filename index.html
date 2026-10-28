@@ -371,6 +371,15 @@ const APPS = [
     url: "https://tavia08.github.io/history-survival/",
     enabled: true,
     tone: "#dcfce7"
+  },
+  {
+    id: "history_tycoon",
+    name: "역사 찻집",
+    icon: "🍵",
+    description: "역사 인물의 주문을 풀고 엽전을 모아 찻집을 꾸미는 시즌 1 경영 게임",
+    url: "https://tavia08.github.io/history-tycoon/",
+    enabled: true,
+    tone: "#fce7ef"
   }
 ];
 
@@ -708,7 +717,7 @@ function appAccessState(app){
   }
 
   if(op.mode === "FREE"){
-    const isGame = app.id === "history_defense" || app.id === "history_survival";
+    const isGame = app.id === "history_defense" || app.id === "history_survival" || app.id === "history_tycoon";
     return {
       enabled:isGame && app.enabled,
       reason:isGame ? "" : "자유 이용 시간에는 게임 앱만 이용할 수 있어요."
@@ -748,7 +757,7 @@ function appAccessState(app){
     };
   }
 
-  const isGame = app.id === "history_defense" || app.id === "history_survival";
+  const isGame = app.id === "history_defense" || app.id === "history_survival" || app.id === "history_tycoon";
   if(isGame){
     const unlocked = !!op.unlockGamesAfterCore && coreLearningComplete();
     return {
@@ -1036,6 +1045,19 @@ function renderApps(){
           if(!window.HDHubLaunch513){alert("디펜스 통합 로그인 모듈이 로드되지 않았습니다.");return;}
           window.HDHubLaunch513.openDefense({studentNo:s.studentNo,studentName:s.studentName},app.url)
             .catch(err=>alert("역사 디펜스 연결 실패: "+err.message));
+          return;
+        }
+        if(app.id === "history_tycoon"){
+          const s=getStudent();
+          if(sessionStorage.getItem("historyHubLoginSessionV1") !== s.studentId){
+            showLogin("로그인 상태를 다시 확인해주세요.",false); return;
+          }
+          // Cross-repository same-site handoff: fragment is consumed and immediately removed by the game.
+          // It is not an authentication token; server-side verification is needed for a shared leaderboard.
+          const handoff=new URL(app.url);
+          const h=new URLSearchParams({bridge:"tycoon-s1",no:s.studentNo,name:s.studentName,id:s.studentId,back:location.href});
+          handoff.hash=h.toString();
+          window.location.assign(handoff.href);
           return;
         }
         window.location.href = classAppUrl(app);
