@@ -1172,6 +1172,37 @@ el("logoutBtn").addEventListener("click", () => {
 
 let classOperationPollTimer = null;
 let classOperationJsonpSeq = 0;
+let hubStateRefreshSeq = 0;
+
+function refreshFullHubStateFromServer(){
+  const studentNo=String(localStorage.getItem("studentNo")||"").trim();
+  const studentName=String(localStorage.getItem("studentName")||"").trim();
+  if(!studentNo || !studentName) return Promise.resolve(false);
+
+  return new Promise(resolve=>{
+    const callbackName="__hubRefreshCb_"+Date.now()+"_"+(++hubStateRefreshSeq);
+    const script=document.createElement("script");
+    let finished=false;
+    const cleanup=()=>{
+      if(finished)return; finished=true; clearTimeout(timer);
+      try{delete window[callbackName]}catch(e){window[callbackName]=undefined}
+      if(script.parentNode)script.parentNode.removeChild(script);
+    };
+    window[callbackName]=payload=>{
+      if(finished)return; cleanup();
+      if(payload && payload.status==="ok" && payload.hubState){
+        localStorage.setItem("historyHubStateV1",JSON.stringify(payload.hubState));
+        localStorage.setItem("historyHubStateStudentId",String(payload.student?.studentId||""));
+        renderApps(); resolve(true);
+      }else resolve(false);
+    };
+    const timer=setTimeout(()=>{cleanup();resolve(false)},9000);
+    const params=new URLSearchParams({action:"loginHub",studentNo,studentName,callback:callbackName,_:String(Date.now())});
+    script.src=RECORD_SERVER_URL+"?"+params.toString(); script.async=true;
+    script.onerror=()=>{cleanup();resolve(false)}; document.head.appendChild(script);
+  });
+}
+
 
 function refreshClassOperationFromServer(){
   const hub = readHubState();
@@ -1235,13 +1266,16 @@ function startClassOperationPolling(){
   refreshClassOperationFromServer();
   classOperationPollTimer = setInterval(() => {
     if(document.visibilityState === "visible"){
-      refreshClassOperationFromServer();
+      refreshFullHubStateFromServer().then(ok=>{ if(!ok) refreshClassOperationFromServer(); });
     }
   }, 10000);
 }
 
 window.addEventListener("focus", () => {
-  refreshClassOperationFromServer();
+  refreshFullHubStateFromServer().then(ok=>{ if(!ok) refreshClassOperationFromServer(); });
+});
+window.addEventListener("pageshow", () => {
+  refreshFullHubStateFromServer().then(ok=>{ if(!ok) refreshClassOperationFromServer(); });
 });
 
 (function init(){

@@ -1683,9 +1683,9 @@ window.addEventListener("DOMContentLoaded", function () {
       if (done >= 3) {
         box.innerHTML =
           "✓ 오늘 역사 DM 3/3 제출 완료 " +
-          '<button id="hubDmHomeBtn" type="button" style="margin-left:8px;border:0;border-radius:10px;padding:7px 10px;background:#171c28;color:white;font-weight:900;cursor:pointer">🏠 역사 학습실로</button>';
+          '<button id="hubDmHomeBtn" type="button" style="margin-left:8px;border:0;border-radius:10px;padding:7px 10px;background:#171c28;color:white;font-weight:900;cursor:pointer">🏠 역사 학습실로 이동 →</button>';
         const btn = document.getElementById("hubDmHomeBtn");
-        if (btn) btn.onclick = () => location.href = "index.html";
+        if (btn) btn.onclick = () => location.href = "index.html?from=history_dm&refresh=" + Date.now();
       } else {
         box.textContent = "오늘 역사 DM 제출 " + done + "/3 · Q1, Q2, Q3을 모두 제출하면 완료됩니다.";
       }

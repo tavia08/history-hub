@@ -1390,6 +1390,7 @@ body:not(.student-gate) #home-actions button{pointer-events:auto!important}
         <span class="eyebrow">STAGE RESULT</span>
         <h2 id="result-title"></h2><p id="result-summary"></p>
         <div id="result-stats" class="result-stats"></div><div id="promotion-area"></div>
+        <button id="hub-result-btn" class="primary big hidden">🏠 역사 학습실로 이동 →</button>
         <button id="next-era-btn" class="primary big hidden">다음 시대 탐험하기 →</button>
         <button class="ghost-btn big" data-go="map">지도 계속 탐험하기 →</button>
       </div>
@@ -3154,6 +3155,37 @@ function finishStage(openDone=false){
       :'';
 
   if(!teacherPreview&&pass&&after>before)setTimeout(()=>showPromotion(before,after),250);
+
+  const hubResultBtn=document.querySelector('#hub-result-btn');
+  if(hubResultBtn){
+    const isClassLesson=!!HUB_WORKSHEET_ID;
+    hubResultBtn.classList.toggle('hidden', !(isClassLesson && pass && !teacherPreview));
+    if(isClassLesson && pass && !teacherPreview){
+      hubResultBtn.disabled=false;
+      hubResultBtn.textContent='🏠 역사 학습실로 이동 →';
+      hubResultBtn.onclick=async()=>{
+        if(hubResultBtn.disabled)return;
+        hubResultBtn.disabled=true;
+        hubResultBtn.textContent='진행상황 저장 중...';
+        try{
+          saveEra();
+          syncStudentStatus();
+          const ok=await saveStudentStateRemote();
+          if(!ok){
+            hubResultBtn.disabled=false;
+            hubResultBtn.textContent='저장 다시 시도 →';
+            toast('진행상황 저장을 확인하지 못했습니다. 한 번 더 눌러 주세요.');
+            return;
+          }
+          location.href='../index.html?from=time_explorer&refresh='+Date.now();
+        }catch(e){
+          hubResultBtn.disabled=false;
+          hubResultBtn.textContent='저장 다시 시도 →';
+          toast('저장 중 오류가 발생했습니다. 다시 시도해 주세요.');
+        }
+      };
+    }
+  }
 
   const nb=document.querySelector('#next-era-btn');
   if(nb){
