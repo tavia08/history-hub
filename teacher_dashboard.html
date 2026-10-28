@@ -66,6 +66,122 @@ th{background:#f7f8fb;color:#626a7c;font-size:12px;position:sticky;top:0} td.nam
 .stall-note{display:inline-flex;align-items:center;margin-top:5px;padding:3px 7px;border-radius:8px;background:#fff3e8;color:#a35b00;font-size:11px;font-weight:900}
 </style>
 
+
+<style id="explorer-control-room-v1">
+body{
+  background:
+    linear-gradient(rgba(239,235,225,.92),rgba(238,241,246,.96)),
+    url("assets/history_control_bg.png") center top/cover fixed no-repeat;
+}
+.wrap{max-width:1500px;padding:18px}
+.top{
+  min-height:200px;
+  align-items:flex-end;
+  color:#fff7df;
+  border:1px solid rgba(232,184,94,.42);
+  background:
+    linear-gradient(180deg,rgba(22,16,11,.18),rgba(29,21,14,.83)),
+    url("assets/history_control_bg.png") center 47%/cover no-repeat;
+  box-shadow:0 18px 42px rgba(29,20,12,.24);
+}
+.brand h1{text-shadow:0 2px 8px rgba(0,0,0,.5)}
+.brand p{color:#ead9ba}
+.pinbox{background:rgba(28,20,14,.68);padding:10px;border-radius:14px;backdrop-filter:blur(8px)}
+.pinbox input{background:rgba(255,255,255,.94)}
+.control,.lesson,.qr-panel,.sum,.tablebox{
+  background:rgba(255,253,247,.94);
+  border-color:#d9c7a6;
+  box-shadow:0 8px 22px rgba(50,34,19,.08);
+  backdrop-filter:blur(7px);
+}
+.control{
+  border-top:4px solid #795633;
+}
+.lesson{
+  border-left:5px solid #b78642;
+}
+.summary .sum:nth-child(1){border-top:4px solid #6c5943}
+.summary .sum:nth-child(2){border-top:4px solid #2d8a61}
+.summary .sum:nth-child(3){border-top:4px solid #b8872f}
+.summary .sum:nth-child(4){border-top:4px solid #6b57b6}
+.tablebox{
+  border:2px solid #bfa77c;
+  box-shadow:0 15px 35px rgba(54,38,21,.12);
+}
+th{
+  background:#2e4e42;
+  color:#f4f0df;
+  border-bottom-color:#49695e;
+}
+tbody tr:nth-child(even){background:rgba(248,243,231,.55)}
+tbody tr:hover{background:#fff7e6}
+.mode-state{background:#fff8e7;border-color:#d9c28f}
+.qr-box{background:#f4efe3;border-color:#d6c5a7}
+.btn-main{background:#33261b}
+.btn-open{background:#dfd5ff;color:#4e389f}
+.footer-room-note{
+  margin:12px 0 0;text-align:right;color:#6b604f;font-size:11px
+}
+@media(max-width:900px){
+  .top{min-height:160px}
+}
+</style>
+
+
+<style id="palace-control-room-v1">
+body{
+  background:
+    linear-gradient(rgba(244,239,226,.90),rgba(239,243,248,.97)),
+    url("assets/palace_teacher_control.png") center top/cover fixed no-repeat!important;
+}
+.wrap{max-width:1500px!important;padding:14px!important}
+.top{
+  min-height:175px!important;
+  padding:16px 18px!important;
+  align-items:flex-end!important;
+  color:#fff5df!important;
+  border:1px solid #a8783f!important;
+  border-radius:20px!important;
+  background:
+    linear-gradient(180deg,rgba(24,16,10,.04),rgba(35,23,14,.82)),
+    url("assets/palace_teacher_control.png") center 48%/cover no-repeat!important;
+  box-shadow:0 14px 34px rgba(43,29,17,.22)!important;
+}
+.brand h1{font-size:25px!important;text-shadow:0 2px 7px rgba(0,0,0,.45)}
+.brand p{color:#ead8b9!important}
+.pinbox{
+  background:rgba(37,25,16,.72)!important;
+  border:1px solid rgba(235,196,125,.30)!important;
+  padding:9px!important;border-radius:13px!important
+}
+.control,.lesson,.qr-panel,.sum,.tablebox{
+  background:rgba(255,252,244,.95)!important;
+  border-color:#d1b987!important;
+  box-shadow:0 8px 22px rgba(60,41,22,.09)!important
+}
+.control{
+  border-top:4px solid #8b6033!important
+}
+.lesson{border-left:5px solid #b9853b!important}
+.summary .sum:nth-child(1){border-top:4px solid #6a563f!important}
+.summary .sum:nth-child(2){border-top:4px solid #2d8b5d!important}
+.summary .sum:nth-child(3){border-top:4px solid #bd8b2d!important}
+.summary .sum:nth-child(4){border-top:4px solid #6754b2!important}
+.tablebox{
+  border:2px solid #b9a06f!important;
+  box-shadow:0 14px 30px rgba(57,39,21,.12)!important
+}
+th{
+  background:#284f42!important;color:#f6f0dc!important;border-bottom-color:#45695f!important
+}
+tbody tr:nth-child(even){background:rgba(247,241,228,.55)!important}
+tbody tr:hover{background:#fff6df!important}
+.mode-state{background:#fff7e3!important;border-color:#d7be88!important}
+.btn-main{background:#382719!important}
+.qr-box{background:#f6efe0!important;border-color:#d6c3a0!important}
+.footer-room-note{color:#675a48!important}
+</style>
+
 </head>
 <body>
 <div class="wrap">
@@ -143,6 +259,7 @@ th{background:#f7f8fb;color:#626a7c;font-size:12px;position:sticky;top:0} td.nam
     </table>
   </div>
   <div class="msg" id="msg"></div>
+  <div class="footer-room-note">역사 탐험 본부 · 교사용 수업 관제실</div>
 </div>
 
 <script>
@@ -210,6 +327,10 @@ function locationCell(s){
   else if(/시간탐험대/.test(app)){ cls="time"; icon="⏳"; }
   else if(/탐정/.test(app)){ cls="detective"; icon="🔎"; }
   else if(/DM/.test(app)){ cls="dm"; icon="💬"; }
+  else if(/찻집|타이쿤/.test(app)){ cls="tycoon"; icon="🍵"; }
+  else if(/디펜스/.test(app)){ cls="defense"; icon="🛡️"; }
+  else if(/살아남/.test(app)){ cls="survival"; icon="🗺️"; }
+  else if(/명사수/.test(app)){ cls="other"; icon="🎯"; }
 
   let ageText="";
   let stalled=false;
