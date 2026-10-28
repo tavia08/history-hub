@@ -1057,7 +1057,8 @@ function renderApps(){
           const handoff=new URL(app.url);
           const h=new URLSearchParams({bridge:"tycoon-s1",no:s.studentNo,name:s.studentName,id:s.studentId,back:location.href});
           handoff.hash=h.toString();
-          window.location.assign(handoff.href);
+          hubTrackAppLocation("history_tycoon");
+          setTimeout(()=>window.location.assign(handoff.href),250);
           return;
         }
         window.location.href = classAppUrl(app);
@@ -1067,6 +1068,16 @@ function renderApps(){
     grid.appendChild(card);
   });
 }
+
+// v1.2: 관제실용 마지막 위치 기록. 로그인 검증은 공통 Apps Script에서 다시 수행합니다.
+function hubTrackAppLocation(appId,event='open',orderNo=0){
+  const s=getStudent(); if(!s.studentId)return;
+  const params=new URLSearchParams({action:'recordAppLocation',studentNo:s.studentNo,
+    studentName:s.studentName,studentId:s.studentId,appId,event,orderNo:String(orderNo),_:String(Date.now())});
+  // 이미지 GET을 사용해 페이지 이동 중에도 전송을 시도하며, 응답 내용은 필요하지 않습니다.
+  const img=new Image(); img.src=RECORD_SERVER_URL+'?'+params.toString();
+}
+
 function showLogin(message="", ok=true){
   el("loginSection").style.display = "block";
   el("dashboard").classList.remove("show");
@@ -1082,6 +1093,7 @@ function showDashboard(student){
   el("pillText").textContent = `${student.studentNo} ${student.studentName}`;
   el("helloName").textContent = student.studentName;
   renderApps();
+  hubTrackAppLocation("history_hub","return");
   startClassOperationPolling();
 }
 
