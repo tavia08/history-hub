@@ -5,7 +5,7 @@
    This uses the existing v5.11 issueToken flow; it is NOT stronger authentication.
  */
 (()=>{'use strict';
- const OPT={serverUrl:'PASTE_V511_EXEC_URL_HERE',defenseOrigin:'https://tavia08.github.io'};
+ const OPT={serverUrl:'https://script.google.com/macros/s/AKfycbxaNVvX4B1moP5mlKyk2wUP1NMfOyghLXGtRlWbK7l4x4uKRHOdW-Uj53QvjVYkYHhg/exec',defenseOrigin:'https://tavia08.github.io'};
  const waiters=new Map();
  function jsonp(p){return new Promise((resolve,reject)=>{
   if(!OPT.serverUrl||!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(OPT.serverUrl)) return reject(Error('hub 인증 서버 주소를 설정하세요.'));
