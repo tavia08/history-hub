@@ -584,10 +584,21 @@ function getWorksheetBundle(){
   return WORKSHEET_BUNDLES[String(op.worksheetId || "").trim()] || null;
 }
 
+function recentCompletionHint(appId){
+  try{
+    const raw=JSON.parse(localStorage.getItem('historyHubCompletionHintV1')||'null');
+    const op=getClassOperation();
+    if(!raw||raw.app!==appId)return false;
+    if(String(raw.worksheetId||'')!==String(op.worksheetId||''))return false;
+    return Date.now()-Number(raw.at||0) < 5*60*1000;
+  }catch(e){return false}
+}
+
 function worksheetStepComplete(appId){
   const hub = readHubState();
   const bundle = getWorksheetBundle();
   if(!hub || !bundle) return false;
+  if(recentCompletionHint(appId)) return true;
 
   if(appId === "time_explorer"){
     const route = bundle.timeExplorer;
@@ -658,7 +669,7 @@ function classAppUrl(app){
   }
 
   if(app.id === "detective"){
-    return `detective/index.html?v=precision505-integrated1&hubWorksheet=${ws}`;
+    return `detective/index.html?v=precision505-integrated2&hubWorksheet=${ws}`;
   }
 
   if(app.id === "history_dm"){
@@ -1278,6 +1289,16 @@ window.addEventListener("focus", () => {
 window.addEventListener("pageshow", () => {
   refreshFullHubStateFromServer().then(ok=>{ if(!ok) refreshClassOperationFromServer(); });
 });
+
+function startFastReturnRefresh(){
+  const from=new URLSearchParams(location.search).get('from');
+  if(!from)return;
+  let n=0;
+  const run=()=>{n++;refreshFullHubStateFromServer().then(()=>{});if(n>=8)clearInterval(timer)};
+  run();
+  const timer=setInterval(run,1500);
+}
+startFastReturnRefresh();
 
 (function init(){
   const s = getStudent();

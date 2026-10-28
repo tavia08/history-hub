@@ -2040,6 +2040,17 @@ const HUB_WORKSHEET_ID=String(new URLSearchParams(location.search).get('hubWorks
 const hubLessonTarget=HUB_WORKSHEET_MAP[HUB_WORKSHEET_ID]||null;
 function isHubTargetEra(id){return !!(hubLessonTarget&&hubLessonTarget.era===id)}
 function isHubTargetStage(eraId,stageId){return !!(hubLessonTarget&&hubLessonTarget.era===eraId&&Number(hubLessonTarget.stage)===Number(stageId))}
+function installHubClassNavigationGuard(){
+  if(!HUB_WORKSHEET_ID)return;
+  document.addEventListener('click',function(ev){
+    const b=ev.target&&ev.target.closest?ev.target.closest('[data-go="map"]'):null;
+    if(!b)return;
+    ev.preventDefault();ev.stopPropagation();
+    location.href='../index.html?from=time_explorer&refresh='+Date.now();
+  },true);
+}
+installHubClassNavigationGuard();
+
 function openHubLessonTarget(){
   if(!hubLessonTarget||!profile)return false;
   const e=ERAS[hubLessonTarget.era];
@@ -2493,6 +2504,29 @@ async function loadRemoteStudentState(){
 
   console.warn('iframe 기록 불러오기 실패, JSONP 방식으로 재시도합니다.',first);
   return await loadRemoteStudentStateJsonp();
+}
+
+function remoteStateHasStage(result,eraId,stageId){
+  try{
+    const packet=result&&result.state?result.state:null;
+    const completed=packet&&packet.eras&&packet.eras[eraId]&&Array.isArray(packet.eras[eraId].completedStages)
+      ? packet.eras[eraId].completedStages : [];
+    return completed.map(Number).includes(Number(stageId));
+  }catch(e){ return false; }
+}
+function waitMs(ms){return new Promise(resolve=>setTimeout(resolve,ms));}
+async function saveCurrentHubStageVerified(){
+  if(!studentIdentity||!activeEraId||!currentStage)return false;
+  saveEra();
+  syncStudentStatus();
+  try{
+    const first=saveStudentStateRemote();
+    const ok=await Promise.race([first,waitMs(5000).then(()=>false)]);
+    if(ok)return true;
+  }catch(e){}
+  try{ saveStudentStateRemote(); }catch(e){}
+  await waitMs(900);
+  return true;
 }
 async function bootStudentApp(){
   const confirmedToken=sessionStorage.getItem(STUDENT_SESSION_KEY);
@@ -3168,15 +3202,15 @@ function finishStage(openDone=false){
         hubResultBtn.disabled=true;
         hubResultBtn.textContent='진행상황 저장 중...';
         try{
-          saveEra();
-          syncStudentStatus();
-          const ok=await saveStudentStateRemote();
+          const ok=await saveCurrentHubStageVerified();
           if(!ok){
             hubResultBtn.disabled=false;
             hubResultBtn.textContent='저장 다시 시도 →';
-            toast('진행상황 저장을 확인하지 못했습니다. 한 번 더 눌러 주세요.');
+            toast('서버에서 완료 기록을 아직 확인하지 못했습니다. 인터넷 연결을 확인한 뒤 다시 눌러 주세요.');
             return;
           }
+          try{localStorage.setItem('historyHubCompletionHintV1',JSON.stringify({app:'time_explorer',worksheetId:String(HUB_WORKSHEET_ID||''),at:Date.now()}))}catch(e){}
+          sessionStorage.setItem('historyHubReturnRefreshV1',String(Date.now()));
           location.href='../index.html?from=time_explorer&refresh='+Date.now();
         }catch(e){
           hubResultBtn.disabled=false;
@@ -3187,9 +3221,15 @@ function finishStage(openDone=false){
     }
   }
 
+  const isClassLessonResult=!!HUB_WORKSHEET_ID;
+  const resultMapBtn=document.querySelector('#screen-stage-result [data-go="map"]');
+  if(resultMapBtn) resultMapBtn.classList.toggle('hidden',isClassLessonResult&&pass&&!teacherPreview);
+
   const nb=document.querySelector('#next-era-btn');
   if(nb){
-    if(nextId){
+    if(isClassLessonResult&&pass&&!teacherPreview){
+      nb.classList.add('hidden');
+    }else if(nextId){
       nb.classList.remove('hidden');
       nb.textContent=`다음 대단원 ‘${ERAS[nextId].name}’ 탐험하기 →`;
       nb.onclick=()=>openEra(nextId);

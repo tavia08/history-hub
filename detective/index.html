@@ -643,116 +643,7 @@ function patchCaseForPacing(caseHtml, code){
     guard += TABLET_SCROLL_GUARD_CSS + scrollOpen + TABLET_SCROLL_GUARD_JS + scriptClose;
   }
   if(!guard) return caseHtml;
-  return caseHtml.includes('
-<script data-history-hub-integration="precision-v1">
-(function(){
-  'use strict';
-  const RECORD_SERVER_URL='https://script.google.com/macros/s/AKfycbxjSzjvqHbrKpCjwnUbsGzYvqDvTdfVB8DUxkki5TXp-jX0wqfmlydpC7DWOIB14oLF2A/exec';
-  const params=new URLSearchParams(location.search);
-  const HUB_WORKSHEET_ID=String(params.get('hubWorksheet')||'').trim();
-  window.HUB_WORKSHEET_ID=HUB_WORKSHEET_ID;
-
-  function studentIdentity(){
-    const studentNo=String(localStorage.getItem('studentNo')||'').trim();
-    const studentName=String(localStorage.getItem('studentName')||'').trim();
-    const studentId=String(localStorage.getItem('studentId')||'').trim() || (studentNo&&studentName ? studentNo+'_'+studentName : '');
-    return {studentNo,studentName,studentId};
-  }
-
-  function buildState(){
-    const sourceSolvedList=(typeof SOURCE_CASES!=='undefined'?SOURCE_CASES:[]).filter(sourceSolved).map(c=>c.code);
-    const sourceStampList=(typeof SOURCE_CASES!=='undefined'?SOURCE_CASES:[]).filter(sourceStamped).map(c=>c.code);
-    const solvedList=(typeof CASES!=='undefined'?CASES:[]).filter(solved).map(c=>c.code);
-    const stampList=(typeof CASES!=='undefined'?CASES:[]).filter(stamped).map(c=>c.code);
-    let lastSource='';
-    try{lastSource=String(localStorage.getItem('history_detective_last_source_case')||'')}catch(e){}
-    return {solvedCases:solvedList,stamps:stampList,sourceSolved:sourceSolvedList,sourceStamps:sourceStampList,lastCase:'',lastSourceCase:lastSource,lastCaseMode:lastSource?'source':''};
-  }
-
-  window.syncDetectiveToHubServer=function(){
-    return new Promise(resolve=>{
-      try{
-        const id=studentIdentity();
-        if(!id.studentNo||!id.studentName||!id.studentId){resolve(false);return;}
-        const callback='__detPrecisionSave_'+Date.now()+'_'+Math.random().toString(36).slice(2);
-        const script=document.createElement('script');let finished=false;
-        const timer=setTimeout(()=>finish(false),12000);
-        function finish(ok){
-          if(finished)return;finished=true;clearTimeout(timer);
-          try{delete window[callback]}catch(e){window[callback]=undefined}
-          if(script.parentNode)script.parentNode.removeChild(script);
-          resolve(ok);
-        }
-        window[callback]=payload=>finish(!!(payload&&payload.status==='ok'));
-        script.onerror=()=>finish(false);
-        const q=new URLSearchParams({action:'saveDetectiveState',studentNo:id.studentNo,studentName:id.studentName,studentId:id.studentId,state:JSON.stringify(buildState()),callback,_:String(Date.now())});
-        script.src=RECORD_SERVER_URL+'?'+q.toString();
-        script.async=true;document.head.appendChild(script);
-      }catch(e){resolve(false)}
-    });
-  };
-
-  window.returnDetectiveToHub=async function(btn){
-    const old=btn?btn.textContent:'';
-    if(btn){btn.disabled=true;btn.textContent='진행상황 저장 중...';}
-    const ok=await window.syncDetectiveToHubServer();
-    if(!ok){
-      if(btn){btn.disabled=false;btn.textContent=old||'저장 다시 시도 →';}
-      if(typeof toast==='function')toast('진행상황 저장을 확인하지 못했습니다. 다시 시도해 주세요.');
-      return false;
-    }
-    try{sessionStorage.setItem('historyHubReturnRefreshV1',String(Date.now()))}catch(e){}
-    location.href='../index.html?from=detective&refresh='+Date.now();
-    return true;
-  };
-
-  function patchSourceHtml(html,c){
-    if(!html||!c||!HUB_WORKSHEET_ID||String(c.ws)!==String(HUB_WORKSHEET_ID)) return html;
-    if(html.includes('data-hub-precision-flow="v1"')) return html;
-    const css=`<style data-hub-precision-flow="v1">.hub-return-btn{border:0;border-radius:12px;padding:11px 15px;background:#1c2430;color:#fff;font-weight:900;cursor:pointer;margin:6px}.hub-report-return{display:block;width:max-content;max-width:94%;margin:18px auto;padding:12px 18px;border:0;border-radius:12px;background:#1c2430;color:#fff;font-weight:900;cursor:pointer}</style>`;
-    const js=`<script data-hub-precision-flow="v1">(function(){function go(){parent.postMessage({source:'historyDetectiveRequestHub'},'*')}function add(){var reward=document.querySelector('#rewardModal .reward-actions,#rewardModal .nav,.reward-actions,#rewardModal .actions');if(reward&&!reward.querySelector('.hub-return-btn')){var b=document.createElement('button');b.className='btn hub-return-btn';b.textContent='🏠 사건보고서 건너뛰고 역사 학습실로';b.onclick=go;reward.appendChild(b)}var report=document.getElementById('stage5')||document.querySelector('.report-page,.report,.case-report,.report-card');if(report&&!report.querySelector('.hub-report-return')){var r=document.createElement('button');r.className='hub-report-return';r.textContent='🏠 역사 학습실로 이동';r.onclick=go;report.appendChild(r)}}document.addEventListener('DOMContentLoaded',add);new MutationObserver(add).observe(document.documentElement,{subtree:true,childList:true,attributes:true});setTimeout(add,80);setTimeout(add,500);setTimeout(add,1200)})();<\/script>`;
-    return html.includes('</body>') ? html.replace('</body>',css+js+'</body>') : html+css+js;
-  }
-
-  // Precision QA의 최종 openSourceCase 동작을 보존하면서 수업 차시에만 복귀 버튼을 삽입합니다.
-  const originalOpenSource=window.openSourceCase;
-  if(typeof originalOpenSource==='function'){
-    window.openSourceCase=function(code){
-      const result=originalOpenSource(code);
-      const c=(typeof SOURCE_CASES!=='undefined'?SOURCE_CASES:[]).find(x=>x.code===code);
-      if(c&&HUB_WORKSHEET_ID&&String(c.ws)===String(HUB_WORKSHEET_ID)){
-        let tries=0;
-        const timer=setInterval(()=>{
-          tries++;
-          try{
-            if(CASE_HTML&&CASE_HTML[code]){
-              clearInterval(timer);
-              const frame=document.getElementById('caseFrame');
-              if(frame)frame.srcdoc=patchSourceHtml(decodeBase64Utf8(CASE_HTML[code]),c);
-            }else if(tries>100){clearInterval(timer)}
-          }catch(e){if(tries>100)clearInterval(timer)}
-        },50);
-      }
-      return result;
-    };
-  }
-
-  window.addEventListener('message',ev=>{
-    const d=ev.data;
-    if(d&&d.source==='historyDetectiveRequestHub') returnDetectiveToHub(document.getElementById('viewerHubBtn'));
-  });
-
-  if(HUB_WORKSHEET_ID){
-    const hubBtn=document.getElementById('viewerHubBtn');if(hubBtn)hubBtn.style.display='inline-flex';
-    const backBtn=document.getElementById('viewerBackBtn');
-    if(backBtn){backBtn.textContent='← 역사 학습실';backBtn.onclick=function(){returnDetectiveToHub(backBtn)}}
-    const target=(typeof SOURCE_CASES!=='undefined'?SOURCE_CASES:[]).find(c=>String(c.ws||'')===HUB_WORKSHEET_ID);
-    if(target)setTimeout(()=>window.openSourceCase(target.code),100);
-  }
-})();
-</script>
-
-</body>') ? caseHtml.replace('</body>', guard + '</body>') : caseHtml + guard;
+  return caseHtml.includes('</body>') ? caseHtml.replace('</body>', guard + '</body>') : caseHtml + guard;
 }
 
 function cleanOptionText(s){ return s.replace(/^[①②③]\s*/,'').replace(/\s+/g,' ').trim(); }
@@ -1700,6 +1591,95 @@ document.getElementById('caseFrame')?.addEventListener('load',()=>setTimeout(enh
 
   const oldOpenSource=window.openSourceCase;window.openSourceCase=function(code){const r=oldOpenSource(code),c=SOURCE_CASES.find(x=>x.code===code);if(c){const t=document.getElementById('viewerTitle');if(t)t.textContent=`사건 ${disp(c)} · ${c.title}`}return r};
   updateProgress();
+})();
+</script>
+
+<script data-history-hub-integration="precision-v2">
+(function(){
+  'use strict';
+  const RECORD_SERVER_URL='https://script.google.com/macros/s/AKfycbxjSzjvqHbrKpCjwnUbsGzYvqDvTdfVB8DUxkki5TXp-jX0wqfmlydpC7DWOIB14oLF2A/exec';
+  const params=new URLSearchParams(location.search);
+  const HUB_WORKSHEET_ID=String(params.get('hubWorksheet')||'').trim();
+  window.HUB_WORKSHEET_ID=HUB_WORKSHEET_ID;
+
+  function studentIdentity(){
+    const studentNo=String(localStorage.getItem('studentNo')||'').trim();
+    const studentName=String(localStorage.getItem('studentName')||'').trim();
+    const studentId=String(localStorage.getItem('studentId')||'').trim() || (studentNo&&studentName ? studentNo+'_'+studentName : '');
+    return {studentNo,studentName,studentId};
+  }
+  function buildState(){
+    const sourceSolvedList=(typeof SOURCE_CASES!=='undefined'?SOURCE_CASES:[]).filter(sourceSolved).map(c=>c.code);
+    const sourceStampList=(typeof SOURCE_CASES!=='undefined'?SOURCE_CASES:[]).filter(sourceStamped).map(c=>c.code);
+    const solvedList=(typeof CASES!=='undefined'?CASES:[]).filter(solved).map(c=>c.code);
+    const stampList=(typeof CASES!=='undefined'?CASES:[]).filter(stamped).map(c=>c.code);
+    let lastSource='';
+    try{lastSource=String(localStorage.getItem('history_detective_last_source_case')||'')}catch(e){}
+    return {solvedCases:solvedList,stamps:stampList,sourceSolved:sourceSolvedList,sourceStamps:sourceStampList,lastCase:'',lastSourceCase:lastSource,lastCaseMode:lastSource?'source':''};
+  }
+  function setCompletionHint(){
+    if(!HUB_WORKSHEET_ID)return;
+    try{localStorage.setItem('historyHubCompletionHintV1',JSON.stringify({app:'detective',worksheetId:HUB_WORKSHEET_ID,at:Date.now()}))}catch(e){}
+  }
+  window.syncDetectiveToHubServer=function(){
+    return new Promise(resolve=>{
+      try{
+        const id=studentIdentity();
+        if(!id.studentNo||!id.studentName||!id.studentId){resolve(false);return;}
+        const callback='__detPrecisionSave_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+        const script=document.createElement('script');let finished=false;
+        const timer=setTimeout(()=>finish(false),10000);
+        function finish(ok){if(finished)return;finished=true;clearTimeout(timer);try{delete window[callback]}catch(e){window[callback]=undefined}if(script.parentNode)script.parentNode.removeChild(script);resolve(ok)}
+        window[callback]=payload=>finish(!!(payload&&payload.status==='ok'));
+        script.onerror=()=>finish(false);
+        const q=new URLSearchParams({action:'saveDetectiveState',studentNo:id.studentNo,studentName:id.studentName,studentId:id.studentId,state:JSON.stringify(buildState()),callback,_:String(Date.now())});
+        script.src=RECORD_SERVER_URL+'?'+q.toString();script.async=true;document.head.appendChild(script);
+      }catch(e){resolve(false)}
+    });
+  };
+  window.returnDetectiveToHub=async function(btn){
+    const old=btn?btn.textContent:'';
+    if(btn){btn.disabled=true;btn.textContent='진행상황 저장 중...';}
+    const ok=await window.syncDetectiveToHubServer();
+    if(!ok){if(btn){btn.disabled=false;btn.textContent=old||'저장 다시 시도 →';}if(typeof toast==='function')toast('진행상황 저장을 확인하지 못했습니다. 다시 시도해 주세요.');return false;}
+    setCompletionHint();
+    try{sessionStorage.setItem('historyHubReturnRefreshV1',String(Date.now()))}catch(e){}
+    location.href='../index.html?from=detective&refresh='+Date.now();
+    return true;
+  };
+
+  function childIntegration(){
+    const css='<style data-hub-precision-flow="v2">.hub-return-btn{border:0;border-radius:12px;padding:11px 15px;background:#1c2430;color:#fff;font-weight:900;cursor:pointer;margin:6px}.hub-report-return{display:block;width:max-content;max-width:94%;margin:18px auto;padding:12px 18px;border:0;border-radius:12px;background:#1c2430;color:#fff;font-weight:900;cursor:pointer}</style>';
+    const code="(function(){function go(){parent.postMessage({source:'historyDetectiveRequestHub'},'*')}function add(){var reward=document.querySelector('#rewardModal .reward-actions,#rewardModal .nav,.reward-actions,#rewardModal .actions');if(reward&&!reward.querySelector('.hub-return-btn')){var b=document.createElement('button');b.className='btn hub-return-btn';b.textContent='사건보고서 건너뛰고 역사 학습실로';b.onclick=go;reward.appendChild(b)}var report=document.getElementById('stage5')||document.querySelector('.report-page,.report,.case-report,.report-card');if(report&&!report.querySelector('.hub-report-return')){var r=document.createElement('button');r.className='hub-report-return';r.textContent='역사 학습실로 이동';r.onclick=go;report.appendChild(r)}}document.addEventListener('DOMContentLoaded',add);new MutationObserver(add).observe(document.documentElement,{subtree:true,childList:true,attributes:true});setTimeout(add,80);setTimeout(add,500);setTimeout(add,1200)})();";
+    const js='<scr'+'ipt data-hub-precision-flow="v2">'+code+'</scr'+'ipt>';
+    return css+js;
+  }
+  function patchSourceHtml(html,c){
+    if(!html||!c||!HUB_WORKSHEET_ID||String(c.ws)!==String(HUB_WORKSHEET_ID))return html;
+    if(html.includes('data-hub-precision-flow="v2"'))return html;
+    const add=childIntegration();
+    return html.includes('</body>')?html.replace('</body>',add+'</body>'):html+add;
+  }
+
+  const originalOpenSource=window.openSourceCase;
+  if(typeof originalOpenSource==='function'){
+    window.openSourceCase=function(code){
+      const result=originalOpenSource(code);
+      const c=(typeof SOURCE_CASES!=='undefined'?SOURCE_CASES:[]).find(x=>x.code===code);
+      if(c&&HUB_WORKSHEET_ID&&String(c.ws)===String(HUB_WORKSHEET_ID)){
+        let tries=0;
+        const timer=setInterval(()=>{tries++;try{if(CASE_HTML&&CASE_HTML[code]){clearInterval(timer);const frame=document.getElementById('caseFrame');if(frame)frame.srcdoc=patchSourceHtml(decodeBase64Utf8(CASE_HTML[code]),c)}else if(tries>120){clearInterval(timer)}}catch(e){if(tries>120)clearInterval(timer)}},50);
+      }
+      return result;
+    };
+  }
+  window.addEventListener('message',ev=>{const d=ev.data;if(d&&d.source==='historyDetectiveRequestHub')returnDetectiveToHub(document.getElementById('viewerHubBtn'))});
+  if(HUB_WORKSHEET_ID){
+    const hubBtn=document.getElementById('viewerHubBtn');if(hubBtn)hubBtn.style.display='inline-flex';
+    const backBtn=document.getElementById('viewerBackBtn');if(backBtn){backBtn.textContent='← 역사 학습실';backBtn.onclick=function(){returnDetectiveToHub(backBtn)}}
+    const target=(typeof SOURCE_CASES!=='undefined'?SOURCE_CASES:[]).find(c=>String(c.ws||'')===HUB_WORKSHEET_ID);
+    if(target)setTimeout(()=>window.openSourceCase(target.code),120);
+  }
 })();
 </script>
 </body>
