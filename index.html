@@ -359,8 +359,8 @@ const APPS = [
     name: "역사 디펜스",
     icon: "🛡️",
     description: "퀴즈와 병력 운용으로 역사 속 전투를 방어하는 전략 학습 게임",
-    url: "",
-    enabled: false,
+    url: "https://tavia08.github.io/history-defense/",
+    enabled: true,
     tone: "#fee2e2"
   },
   {
@@ -1021,6 +1021,16 @@ function renderApps(){
           showLogin("메인페이지에서 먼저 로그인해주세요.", false);
           return;
         }
+        if(app.id === "history_defense"){
+          const s = getStudent();
+          if(sessionStorage.getItem("historyHubLoginSessionV1") !== s.studentId){
+            showLogin("로그인 상태를 다시 확인해주세요.", false); return;
+          }
+          if(!window.HDHubLaunch513){alert("디펜스 통합 로그인 모듈이 로드되지 않았습니다.");return;}
+          window.HDHubLaunch513.openDefense({studentNo:s.studentNo,studentName:s.studentName},app.url)
+            .catch(err=>alert("역사 디펜스 연결 실패: "+err.message));
+          return;
+        }
         window.location.href = classAppUrl(app);
       });
     }
@@ -1321,5 +1331,6 @@ startFastReturnRefresh();
   }
 })();
 </script>
+<script src="assets/hd-hub-launch-v513.js"></script>
 </body>
 </html>
