@@ -599,7 +599,10 @@ function worksheetStepComplete(appId){
   if(appId === "detective"){
     const st = hub.detective && hub.detective.state;
     const done = st && Array.isArray(st.sourceSolved) ? st.sourceSolved : [];
-    return done.includes(bundle.detective.ws);
+    return (
+      done.includes(bundle.detective.ws) ||
+      done.includes("SOURCE-" + bundle.detective.ws)
+    );
   }
 
   if(appId === "history_dm"){
