@@ -934,9 +934,9 @@ function summarizeAppProgress(appId){
   }
 
   return {
-    label: appId === "history_defense" || appId === "history_survival" ? "연결 준비 중" : "이용 가능",
-    detail:"",
-    tone: appId === "history_defense" || appId === "history_survival" ? "wait" : "ok",
+    label: appId === "history_defense" ? "게임 이용 가능" : (appId === "history_survival" ? "연결 준비 중" : "이용 가능"),
+    detail: appId === "history_defense" ? "개인 최고점은 게임에 입장하면 조회됩니다." : "",
+    tone: appId === "history_defense" ? "ok" : (appId === "history_survival" ? "wait" : "ok"),
     percent:null,
     recent:"",
     started:false
