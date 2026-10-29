@@ -2995,7 +2995,9 @@ function verifyLoginWithServer(studentNo, studentName){
     }, 12000);
 
     const params = new URLSearchParams({
-      action: "loginHub",
+      // v1.5: 첫 화면은 학생 확인만 빠르게 처리합니다.
+      // 상세 학습기록은 학습실이 먼저 열린 뒤 loginHub로 백그라운드 갱신합니다.
+      action: "login",
       studentNo: studentNo,
       studentName: studentName,
       callback: callbackName,
@@ -3026,7 +3028,7 @@ el("loginBtn").addEventListener("click", async () => {
   }
 
   setLoginBusy(true);
-  el("loginMsg").textContent = "학생명단과 학습 진행정보를 불러오고 있습니다.";
+  el("loginMsg").textContent = "학생 정보를 확인하고 있습니다.";
   el("loginMsg").className = "login-msg";
 
   try{
@@ -3051,20 +3053,56 @@ el("loginBtn").addEventListener("click", async () => {
     // 진행 캐시는 localStorage에 남지만 다음 접속 때 서버에서 다시 최신 정보를 불러옵니다.
     sessionStorage.setItem("historyHubLoginSessionV1", student.studentId);
 
-    if(result.hubState){
-      const hubState = Object.assign({}, result.hubState, {
-        loadedAt: Date.now()
-      });
-      localStorage.setItem("historyHubStateV1", JSON.stringify(hubState));
-      localStorage.setItem("historyHubStateStudentId", student.studentId);
-    }else{
-      localStorage.removeItem("historyHubStateV1");
-      localStorage.removeItem("historyHubStateStudentId");
-    }
+    // v1.5 빠른 첫 화면:
+    // 학생 확인이 끝나면 수업정보/진행기록 전체를 기다리지 않고 학습실부터 표시합니다.
+    const provisionalHubState = {
+      version: 2,
+      loadedAt: Date.now(),
+      student: {
+        studentNo: String(verified.studentNo || no),
+        studentName: String(verified.studentName || name),
+        studentId: student.studentId,
+        classNo: String(verified.classNo || ""),
+        numberNo: String(verified.numberNo || "")
+      },
+      classOperation: {
+        mode: "LOADING",
+        worksheetId: "",
+        worksheetTitle: "",
+        requiredApps: ["time_explorer","detective","history_dm"],
+        unlockGamesAfterCore: true,
+        enabled: false
+      },
+      lessonSession: {
+        active: false,
+        sessionId: "",
+        worksheetId: "",
+        worksheetTitle: "",
+        startedAt: null,
+        baseline: {timeDone:false,detectiveDone:false,dmDone:false}
+      },
+      timeExplorer: null,
+      historyDM: null,
+      detective: null,
+      defense: {serverSynced:false},
+      survival: {serverSynced:false}
+    };
 
-    el("loginMsg").textContent = "로그인과 학습정보 불러오기가 완료되었습니다.";
+    localStorage.setItem("historyHubStateV1", JSON.stringify(provisionalHubState));
+    localStorage.setItem("historyHubStateStudentId", student.studentId);
+
+    el("loginMsg").textContent = "로그인 완료 · 수업정보를 불러오는 중입니다.";
     el("loginMsg").className = "login-msg ok";
+
+    // 먼저 학습실을 보여줍니다.
     showDashboard(student);
+
+    // 상세 진행상황은 화면이 열린 뒤 백그라운드에서 갱신합니다.
+    setTimeout(()=>{
+      refreshFullHubStateFromServer().then(ok=>{
+        if(!ok) refreshClassOperationFromServer();
+      });
+    }, 0);
   }catch(err){
     el("loginMsg").textContent = err.message || "로그인 확인에 실패했습니다.";
     el("loginMsg").className = "login-msg err";
