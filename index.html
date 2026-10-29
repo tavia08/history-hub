@@ -1974,47 +1974,39 @@ body{
 
 
 
-
-
-
-<style id="palace-signboard-autofit-v17">
-/*
-  v1.7 현판별 실측 자동맞춤
-  - 각 현판 버튼의 실제 너비를 기준으로 글자 크기를 개별 계산
-  - 한 줄 유지
-  - 기기별 viewport, DPR, 브라우저 UI 차이의 영향을 최소화
-*/
-@media (min-width:821px){
-  .app-card .app-head{
-    overflow:visible!important;
-  }
-  .app-card .app-title{
-    display:inline-block!important;
-    max-width:none!important;
-    white-space:nowrap!important;
-    overflow:visible!important;
-    text-overflow:clip!important;
-    line-height:1!important;
-    letter-spacing:-0.03em!important;
-    text-shadow:0 2px 4px rgba(48,28,12,.88)!important;
-    transform-origin:center center!important;
-  }
-  .app-detective .app-title{
-    transform:translateX(var(--detective-offset,0px)) rotate(-1.2deg)!important;
-  }
-  .app-history_sharpshooter .app-title{
-    transform:translateX(var(--sharpshooter-offset,0px)) rotate(1.2deg)!important;
-  }
+<style id="palace-signboard-stable-v18">
+:root{
+  --sign-font-v18:17px;
+  --sign-font-long-v18:14px;
+  --sign-font-mid-v18:15px;
+  --sign-offset-v18:5px;
 }
-
-/* 모바일 카드형 레이아웃으로 전환되는 경우는 기존 카드 가독성 유지 */
-@media (max-width:820px){
-  .app-card .app-title{
-    white-space:normal!important;
-    font-size:clamp(14px,4vw,18px)!important;
-    line-height:1.15!important;
-    transform:none!important;
-  }
+.app-card .app-title{
+  display:inline-block!important;
+  white-space:nowrap!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+  max-width:none!important;
+  line-height:1!important;
+  font-size:var(--sign-font-v18)!important;
+  letter-spacing:-0.035em!important;
+  text-shadow:0 2px 4px rgba(48,28,12,.88)!important;
+  transform-origin:center center!important;
+}
+.app-history_survival .app-title{
+  font-size:var(--sign-font-long-v18)!important;
+  letter-spacing:-0.055em!important;
+}
+.app-detective .app-title,
+.app-history_sharpshooter .app-title{
+  font-size:var(--sign-font-mid-v18)!important;
+  letter-spacing:-0.045em!important;
+}
+.app-detective .app-title{
+  transform:translateX(var(--sign-offset-v18)) rotate(-1.2deg)!important;
+}
+.app-history_sharpshooter .app-title{
+  transform:translateX(var(--sign-offset-v18)) rotate(1.2deg)!important;
 }
 </style>
 
@@ -3346,149 +3338,36 @@ function startClassOperationPolling(){
 <script src="assets/hd-hub-launch-v513.js"></script>
 <script src="assets/hs-hub-launch-v13.js"></script>
 
-
-
-
-<script id="palace-signboard-autofit-js-v17">
+<script id="palace-signboard-stable-js-v18">
 (function(){
   'use strict';
-
-  const DEFAULTS = {
-    min: 10,
-    max: 24,
-    ratio: 0.84
-  };
-
-  const PER_APP = {
-    history_survival: {min:10, max:21, ratio:0.82},
-    detective: {min:10.5, max:22, ratio:0.84},
-    history_sharpshooter: {min:10.5, max:22, ratio:0.84},
-    time_explorer: {min:11, max:24, ratio:0.84},
-    history_defense: {min:11, max:24, ratio:0.84},
-    history_dm: {min:11, max:24, ratio:0.84},
-    history_tycoon: {min:11, max:24, ratio:0.84}
-  };
-
-  function getAppId(card){
-    if(!card) return '';
-    const cls = Array.from(card.classList).find(x=>x.startsWith('app-') && x!=='app-card');
-    return cls ? cls.slice(4) : '';
+  const DESIGN_WIDTH=1746, BASE=23, LONG=18.5, MID=20.5, OFFSET=8;
+  const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
+  function applyScale(){
+    const scene=document.querySelector('.hq-scene');
+    if(!scene)return;
+    const w=scene.getBoundingClientRect().width;
+    if(!w)return;
+    const scale=w/DESIGN_WIDTH;
+    const root=document.documentElement.style;
+    root.setProperty('--sign-font-v18',clamp(BASE*scale,11.5,20).toFixed(2)+'px');
+    root.setProperty('--sign-font-long-v18',clamp(LONG*scale,10.2,16.5).toFixed(2)+'px');
+    root.setProperty('--sign-font-mid-v18',clamp(MID*scale,10.8,18).toFixed(2)+'px');
+    root.setProperty('--sign-offset-v18',clamp(OFFSET*scale,2.5,7).toFixed(2)+'px');
   }
-
-  function measureTextWidth(el, sizePx){
-    const clone = el.cloneNode(true);
-    clone.style.position='fixed';
-    clone.style.visibility='hidden';
-    clone.style.pointerEvents='none';
-    clone.style.left='-99999px';
-    clone.style.top='0';
-    clone.style.width='auto';
-    clone.style.maxWidth='none';
-    clone.style.whiteSpace='nowrap';
-    clone.style.transform='none';
-    clone.style.fontSize=sizePx+'px';
-    clone.style.lineHeight='1';
-    document.body.appendChild(clone);
-    const w = clone.getBoundingClientRect().width;
-    clone.remove();
-    return w;
-  }
-
-  function fitOne(card){
-    if(!card || window.innerWidth<=820) return;
-
-    const title = card.querySelector('.app-title');
-    const head = card.querySelector('.app-head');
-    if(!title || !head) return;
-
-    const id = getAppId(card);
-    const cfg = Object.assign({}, DEFAULTS, PER_APP[id]||{});
-
-    const headRect = head.getBoundingClientRect();
-    if(!headRect.width) return;
-
-    // 현판 버튼의 실제 폭에서 여백을 제외한 목표 폭
-    const target = headRect.width * cfg.ratio;
-
-    let lo = cfg.min;
-    let hi = cfg.max;
-    let best = cfg.min;
-
-    // 이진 탐색으로 가장 큰 적정 크기를 찾음
-    for(let i=0;i<10;i++){
-      const mid = (lo+hi)/2;
-      const width = measureTextWidth(title, mid);
-      if(width <= target){
-        best = mid;
-        lo = mid;
-      }else{
-        hi = mid;
-      }
-    }
-
-    title.style.fontSize = best.toFixed(2)+'px';
-
-    // 각 현판 실제 크기에 비례해 미세 위치보정
-    if(id==='detective'){
-      const off = Math.max(2, Math.min(8, headRect.width*0.035));
-      document.documentElement.style.setProperty('--detective-offset',off.toFixed(2)+'px');
-    }
-    if(id==='history_sharpshooter'){
-      const off = Math.max(2, Math.min(8, headRect.width*0.035));
-      document.documentElement.style.setProperty('--sharpshooter-offset',off.toFixed(2)+'px');
-    }
-  }
-
-  function fitAll(){
-    document.querySelectorAll('.app-card').forEach(fitOne);
-  }
-
-  let raf = 0;
-  function schedule(){
-    cancelAnimationFrame(raf);
-    raf = requestAnimationFrame(fitAll);
-  }
-
+  let raf=0;
+  const schedule=()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(applyScale)};
   function install(){
-    fitAll();
-
-    const scene = document.querySelector('.hq-scene');
-    if(scene && 'ResizeObserver' in window){
-      const ro = new ResizeObserver(schedule);
-      ro.observe(scene);
-      document.querySelectorAll('.app-head').forEach(el=>ro.observe(el));
-    }
-
+    applyScale();
+    const scene=document.querySelector('.hq-scene');
+    if(scene&&'ResizeObserver' in window){const ro=new ResizeObserver(schedule);ro.observe(scene);}
     window.addEventListener('resize',schedule,{passive:true});
-    window.addEventListener('orientationchange',()=>{
-      setTimeout(fitAll,120);
-      setTimeout(fitAll,350);
-      setTimeout(fitAll,700);
-    });
-
-    if(window.visualViewport){
-      window.visualViewport.addEventListener('resize',schedule,{passive:true});
-    }
-
-    // 폰트 로딩 후 재측정
-    if(document.fonts && document.fonts.ready){
-      document.fonts.ready.then(()=>{
-        fitAll();
-        setTimeout(fitAll,100);
-      }).catch(()=>{});
-    }
-
-    setTimeout(fitAll,50);
-    setTimeout(fitAll,250);
-    setTimeout(fitAll,700);
-    setTimeout(fitAll,1400);
+    window.addEventListener('orientationchange',()=>{setTimeout(applyScale,100);setTimeout(applyScale,300);setTimeout(applyScale,700)});
+    if(window.visualViewport)window.visualViewport.addEventListener('resize',schedule,{passive:true});
+    if(document.fonts&&document.fonts.ready)document.fonts.ready.then(applyScale).catch(()=>{});
+    setTimeout(applyScale,60);setTimeout(applyScale,250);setTimeout(applyScale,700);
   }
-
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',install,{once:true});
-  }else{
-    install();
-  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
 })();
 </script>
 
