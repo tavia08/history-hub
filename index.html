@@ -2364,49 +2364,49 @@ const WORKSHEET_BUNDLES = {
     title:"조선의 건국과 기틀 마련",
     timeExplorer:{era:"joseon",stage:1},
     detective:{ws:"4-1"},
-    historyDM:null
+    historyDM:{topicId:"topic4_1_foundation"}
   },
   "4-2": {
     title:"조선의 통치 체제 정비",
     timeExplorer:{era:"joseon",stage:2},
     detective:{ws:"4-2"},
-    historyDM:null
+    historyDM:{topicId:"topic4_2_government"}
   },
   "4-3": {
     title:"조선의 대외 관계와 외교 정책",
     timeExplorer:{era:"joseon",stage:3},
     detective:{ws:"4-3"},
-    historyDM:null
+    historyDM:{topicId:"topic4_3_diplomacy"}
   },
   "4-4": {
     title:"사림의 성장과 붕당의 등장",
     timeExplorer:{era:"joseon",stage:4},
     detective:{ws:"4-4"},
-    historyDM:null
+    historyDM:{topicId:"topic4_4_sarim"}
   },
   "4-5": {
     title:"성리학의 확산과 사회 변화",
     timeExplorer:{era:"joseon",stage:5},
     detective:{ws:"4-5"},
-    historyDM:null
+    historyDM:{topicId:"topic4_5_confucian"}
   },
   "4-6": {
     title:"조선 전기의 문화와 과학기술, 예술의 발달",
     timeExplorer:{era:"joseon",stage:6},
     detective:{ws:"4-6"},
-    historyDM:null
+    historyDM:{topicId:"topic4_6_culture"}
   },
   "4-7": {
     title:"왜란의 발발과 극복 및 동아시아 정세 변화",
     timeExplorer:{era:"joseon",stage:7},
     detective:{ws:"4-7"},
-    historyDM:null
+    historyDM:{topicId:"topic4_7_imjin"}
   },
   "4-8": {
     title:"동아시아의 정세 변화 및 호란의 발발과 영향",
     timeExplorer:{era:"joseon",stage:8},
     detective:{ws:"4-8"},
-    historyDM:null
+    historyDM:{topicId:"topic4_8_horan"}
   },
   "5-9": {
     title:"제도의 개편과 붕당 정치의 전개",
@@ -2556,8 +2556,9 @@ function classAppUrl(app){
 
 function coreLearningComplete(){
   const op = getClassOperation();
+  const bundle = getWorksheetBundle();
 
-  if(op.mode === "CLASS" && getWorksheetBundle()){
+  if(op.mode === "CLASS" && bundle){
     const required = [
       worksheetStepComplete("time_explorer"),
       worksheetStepComplete("detective")
@@ -2621,7 +2622,7 @@ function appAccessState(app){
     if(!bundle.historyDM || !bundle.historyDM.topicId){
       return {
         enabled:false,
-        reason:"조선 전기 역사 DM은 현재 연결 준비 중입니다."
+        reason:"이 차시의 역사 DM은 현재 연결 준비 중입니다."
       };
     }
     const ok = worksheetStepComplete("detective");
