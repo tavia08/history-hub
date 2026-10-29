@@ -1964,38 +1964,57 @@ body{
 </style>
 
 
-<style id="palace-hq-signboard-fontscale-v2">
-@media (min-width:821px) and (max-width:1100px){
-  .app-card .app-title{font-size:15px!important;}
+
+
+
+
+
+
+<style id="palace-signboard-svg-v21">
+/*
+  v2.1 SVG 고정 좌표형
+  - 궁궐 장면과 동일한 16:9 좌표계로 글자를 한 장의 벡터 레이어에 배치
+  - 기기별 font-size 계산/미디어쿼리 없음
+  - 화면이 줄어들면 궁궐과 글자가 통째로 같은 비율로 축소
+*/
+.hq-signboard-svg{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:7;
+  pointer-events:none;
+  overflow:visible;
 }
-</style>
 
+.hq-signboard-svg text{
+  fill:#f8e8bd;
+  font-family:"Noto Sans KR","Noto Sans CJK KR","Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+  font-size:22px;
+  font-weight:900;
+  dominant-baseline:middle;
+  text-anchor:middle;
+  paint-order:stroke fill;
+  stroke:rgba(55,34,16,.72);
+  stroke-width:2.4px;
+  stroke-linejoin:round;
+}
 
+.hq-signboard-svg .survival-label{
+  font-size:21px;
+  letter-spacing:-0.8px;
+}
 
+.hq-hotspots{
+  z-index:8!important;
+}
 
-
-<style id="palace-signboard-boardratio-v20">
+/* 실제 표시는 SVG가 담당. HTML title은 접근성/기능 구조만 유지 */
 .app-card .app-title{
-  display:inline-block!important;
-  white-space:nowrap!important;
-  overflow:visible!important;
-  text-overflow:clip!important;
-  max-width:none!important;
-  line-height:1!important;
-  letter-spacing:-0.035em!important;
-  text-shadow:0 2px 4px rgba(48,28,12,.88)!important;
-  transform-origin:center center!important;
-}
-.app-history_survival .app-title{
-  letter-spacing:-0.055em!important;
-}
-.app-detective .app-title{
-  transform:translateX(var(--detective-offset-v20,0px)) rotate(-1.2deg)!important;
-  letter-spacing:-0.045em!important;
-}
-.app-history_sharpshooter .app-title{
-  transform:translateX(var(--sharpshooter-offset-v20,0px)) rotate(1.2deg)!important;
-  letter-spacing:-0.045em!important;
+  opacity:0!important;
+  color:transparent!important;
+  text-shadow:none!important;
+  pointer-events:none!important;
 }
 </style>
 
@@ -2034,6 +2053,37 @@ body{
   <main id="dashboard" class="section dashboard">
     <section class="hq-scene" aria-label="역사 탐험 본부">
       <div class="hq-shade"></div>
+
+      <svg class="hq-signboard-svg"
+           viewBox="0 0 1600 900"
+           preserveAspectRatio="none"
+           aria-hidden="true">
+        <g transform="rotate(-3 276.3 208.8)">
+          <text x="276.3" y="208.8">시간탐험대</text>
+        </g>
+
+        <text class="survival-label" x="800.8" y="168.3">역사에서 살아남는 법</text>
+
+        <g transform="rotate(1 1316.8 209.2)">
+          <text x="1316.8" y="209.2">역사 디펜스</text>
+        </g>
+
+        <g transform="rotate(-1.2 225.9 493.0)">
+          <text x="233.2" y="493.0">역사 탐정사무소</text>
+        </g>
+
+        <g transform="rotate(-0.5 584.2 502.5)">
+          <text x="584.2" y="502.5">역사 DM</text>
+        </g>
+
+        <g transform="rotate(0.7 1029.1 505.4)">
+          <text x="1029.1" y="505.4">역사 찻집</text>
+        </g>
+
+        <g transform="rotate(1.2 1406.7 493.0)">
+          <text x="1414.0" y="493.0">역사 명사수</text>
+        </g>
+      </svg>
 
       <div class="apps hq-hotspots" id="appsGrid"></div>
 
@@ -3326,104 +3376,5 @@ function startClassOperationPolling(){
 
 <script src="assets/hd-hub-launch-v513.js"></script>
 <script src="assets/hs-hub-launch-v13.js"></script>
-
-<script id="palace-signboard-boardratio-js-v20">
-(function(){
-  'use strict';
-
-  /*
-    승인 디자인(1746px 원본)에서 현판 폭과 목표 글자 크기의 비율을 그대로 사용.
-    viewport / device / DPR / media query를 사용하지 않음.
-  */
-  const CFG = {
-    time_explorer:        {ratio:24/175, min:9.5, max:24},
-    history_survival:     {ratio:20/238, min:8.8, max:20},
-    history_defense:      {ratio:24/176, min:9.5, max:24},
-    detective:            {ratio:22/169, min:9.2, max:22, offsetRatio:8/169},
-    history_dm:           {ratio:24/169, min:9.5, max:24},
-    history_tycoon:       {ratio:24/164, min:9.5, max:24},
-    history_sharpshooter: {ratio:22/170, min:9.2, max:22, offsetRatio:8/170}
-  };
-
-  const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
-
-  function appId(card){
-    const cls=[...card.classList].find(x=>x.startsWith('app-')&&x!=='app-card');
-    return cls ? cls.slice(4) : '';
-  }
-
-  function applyOne(card){
-    const id=appId(card);
-    const cfg=CFG[id];
-    const title=card.querySelector('.app-title');
-    if(!cfg || !title) return;
-
-    // 핵심: 각 현판 자체의 실제 렌더링 너비만 사용
-    const w=card.getBoundingClientRect().width;
-    if(!w) return;
-
-    const size=clamp(w*cfg.ratio,cfg.min,cfg.max);
-    title.style.fontSize=size.toFixed(2)+'px';
-
-    if(id==='detective'){
-      document.documentElement.style.setProperty(
-        '--detective-offset-v20',
-        clamp(w*cfg.offsetRatio,2,8).toFixed(2)+'px'
-      );
-    }
-    if(id==='history_sharpshooter'){
-      document.documentElement.style.setProperty(
-        '--sharpshooter-offset-v20',
-        clamp(w*cfg.offsetRatio,2,8).toFixed(2)+'px'
-      );
-    }
-  }
-
-  function applyAll(){
-    document.querySelectorAll('.app-card').forEach(applyOne);
-  }
-
-  let raf=0;
-  function schedule(){
-    cancelAnimationFrame(raf);
-    raf=requestAnimationFrame(applyAll);
-  }
-
-  function install(){
-    applyAll();
-
-    if('ResizeObserver' in window){
-      const ro=new ResizeObserver(schedule);
-      document.querySelectorAll('.app-card').forEach(el=>ro.observe(el));
-    }
-
-    window.addEventListener('resize',schedule,{passive:true});
-    window.addEventListener('orientationchange',()=>{
-      setTimeout(applyAll,100);
-      setTimeout(applyAll,300);
-      setTimeout(applyAll,700);
-    });
-
-    if(window.visualViewport){
-      window.visualViewport.addEventListener('resize',schedule,{passive:true});
-    }
-
-    if(document.fonts && document.fonts.ready){
-      document.fonts.ready.then(applyAll).catch(()=>{});
-    }
-
-    setTimeout(applyAll,50);
-    setTimeout(applyAll,250);
-    setTimeout(applyAll,700);
-  }
-
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',install,{once:true});
-  }else{
-    install();
-  }
-})();
-</script>
-
 </body>
 </html>
