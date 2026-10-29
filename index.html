@@ -3152,12 +3152,7 @@ el("loginBtn").addEventListener("click", async () => {
     // 먼저 학습실을 보여줍니다.
     showDashboard(student);
 
-    // 상세 진행상황은 화면이 열린 뒤 백그라운드에서 갱신합니다.
-    setTimeout(()=>{
-      refreshFullHubStateFromServer().then(ok=>{
-        if(!ok) refreshClassOperationFromServer();
-      });
-    }, 0);
+    // 상세 기록 갱신은 showDashboard()에서 수업정보를 먼저 받은 뒤 1회만 실행합니다.
   }catch(err){
     el("loginMsg").textContent = err.message || "로그인 확인에 실패했습니다.";
     el("loginMsg").className = "login-msg err";
@@ -3290,11 +3285,13 @@ function startClassOperationPolling(){
 }
 
 window.addEventListener("focus", () => {
-  refreshFullHubStateFromServer().then(ok=>{ if(!ok) refreshClassOperationFromServer(); });
+  refreshClassOperationFromServer();
+  setTimeout(()=>refreshFullHubStateFromServer().then(()=>{}),180);
   if(getStudent().studentId) hubTrackAppLocation("history_hub","return");
 });
 window.addEventListener("pageshow", () => {
-  refreshFullHubStateFromServer().then(ok=>{ if(!ok) refreshClassOperationFromServer(); });
+  refreshClassOperationFromServer();
+  setTimeout(()=>refreshFullHubStateFromServer().then(()=>{}),180);
   if(getStudent().studentId) hubTrackAppLocation("history_hub","return");
 });
 document.addEventListener("visibilitychange",()=>{
@@ -3404,10 +3401,8 @@ function renderClassModeBanner(){
 }
 
 function refreshOperationImmediately(){
-  return refreshFullHubStateFromServer().then(ok => {
-    if(ok) return true;
-    return refreshClassOperationFromServer();
-  }).catch(() => false);
+  // v1.2: 교사 수업 설정은 가벼운 classOperation API를 최우선으로 읽습니다.
+  return refreshClassOperationFromServer().catch(() => false);
 }
 
 function showDashboard(student){
@@ -3418,18 +3413,25 @@ function showDashboard(student){
   el("helloName").textContent = student.studentName;
   renderApps();
   hubTrackAppLocation("history_hub","return");
-  refreshOperationImmediately();
+
+  // 1단계: 교사 수업정보를 가장 먼저 받아 오늘 차시/운영모드를 즉시 반영
+  refreshClassOperationFromServer().finally(()=>{
+    // 2단계: 상세 진행기록은 뒤에서 한 번만 갱신
+    setTimeout(()=>refreshFullHubStateFromServer().then(()=>{}), 120);
+  });
+
   startClassOperationPolling();
 }
 
 function startClassOperationPolling(){
   if(classOperationPollTimer) clearInterval(classOperationPollTimer);
-  refreshOperationImmediately();
+  // classOperation은 가벼우므로 3초마다 확인합니다.
+  // 전체 학생 진행기록(loginHub)은 여기서 반복 호출하지 않습니다.
   classOperationPollTimer = setInterval(() => {
     if(document.visibilityState === "visible"){
-      refreshOperationImmediately();
+      refreshClassOperationFromServer();
     }
-  }, 10000);
+  }, 3000);
 }
 </script>
 
