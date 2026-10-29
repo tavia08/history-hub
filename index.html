@@ -1974,12 +1974,12 @@ body{
 
 
 
-<style id="palace-signboard-stable-v18">
+<style id="palace-signboard-adaptive-v19">
 :root{
-  --sign-font-v18:17px;
-  --sign-font-long-v18:14px;
-  --sign-font-mid-v18:15px;
-  --sign-offset-v18:5px;
+  --sign-font-v19:24px;
+  --sign-font-long-v19:20px;
+  --sign-font-mid-v19:22px;
+  --sign-offset-v19:8px;
 }
 .app-card .app-title{
   display:inline-block!important;
@@ -1988,25 +1988,25 @@ body{
   text-overflow:clip!important;
   max-width:none!important;
   line-height:1!important;
-  font-size:var(--sign-font-v18)!important;
+  font-size:var(--sign-font-v19)!important;
   letter-spacing:-0.035em!important;
   text-shadow:0 2px 4px rgba(48,28,12,.88)!important;
   transform-origin:center center!important;
 }
 .app-history_survival .app-title{
-  font-size:var(--sign-font-long-v18)!important;
+  font-size:var(--sign-font-long-v19)!important;
   letter-spacing:-0.055em!important;
 }
 .app-detective .app-title,
 .app-history_sharpshooter .app-title{
-  font-size:var(--sign-font-mid-v18)!important;
+  font-size:var(--sign-font-mid-v19)!important;
   letter-spacing:-0.045em!important;
 }
 .app-detective .app-title{
-  transform:translateX(var(--sign-offset-v18)) rotate(-1.2deg)!important;
+  transform:translateX(var(--sign-offset-v19)) rotate(-1.2deg)!important;
 }
 .app-history_sharpshooter .app-title{
-  transform:translateX(var(--sign-offset-v18)) rotate(1.2deg)!important;
+  transform:translateX(var(--sign-offset-v19)) rotate(1.2deg)!important;
 }
 </style>
 
@@ -3338,36 +3338,76 @@ function startClassOperationPolling(){
 <script src="assets/hd-hub-launch-v513.js"></script>
 <script src="assets/hs-hub-launch-v13.js"></script>
 
-<script id="palace-signboard-stable-js-v18">
+<script id="palace-signboard-adaptive-js-v19">
 (function(){
   'use strict';
-  const DESIGN_WIDTH=1746, BASE=23, LONG=18.5, MID=20.5, OFFSET=8;
-  const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
+  const DESIGN_WIDTH = 1746;
+  const BASE = 24, LONG = 20, MID = 22, OFFSET = 8;
+
+  function clamp(v,min,max){ return Math.max(min,Math.min(max,v)); }
+
+  function adaptiveScale(sceneWidth){
+    if(sceneWidth >= 1350) return 1;
+    if(sceneWidth >= 950){
+      const t = (sceneWidth - 950) / 400;
+      return 0.78 + 0.22 * t;
+    }
+    if(sceneWidth >= 600){
+      const t = (sceneWidth - 600) / 350;
+      return 0.60 + 0.18 * t;
+    }
+    return clamp(sceneWidth / DESIGN_WIDTH, 0.50, 0.60);
+  }
+
   function applyScale(){
     const scene=document.querySelector('.hq-scene');
-    if(!scene)return;
+    if(!scene) return;
     const w=scene.getBoundingClientRect().width;
-    if(!w)return;
-    const scale=w/DESIGN_WIDTH;
+    if(!w) return;
+
+    const scale=adaptiveScale(w);
     const root=document.documentElement.style;
-    root.setProperty('--sign-font-v18',clamp(BASE*scale,11.5,20).toFixed(2)+'px');
-    root.setProperty('--sign-font-long-v18',clamp(LONG*scale,10.2,16.5).toFixed(2)+'px');
-    root.setProperty('--sign-font-mid-v18',clamp(MID*scale,10.8,18).toFixed(2)+'px');
-    root.setProperty('--sign-offset-v18',clamp(OFFSET*scale,2.5,7).toFixed(2)+'px');
+    root.setProperty('--sign-font-v19',(BASE*scale).toFixed(2)+'px');
+    root.setProperty('--sign-font-long-v19',(LONG*scale).toFixed(2)+'px');
+    root.setProperty('--sign-font-mid-v19',(MID*scale).toFixed(2)+'px');
+    root.setProperty('--sign-offset-v19',(OFFSET*scale).toFixed(2)+'px');
   }
+
   let raf=0;
-  const schedule=()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(applyScale)};
+  function schedule(){
+    cancelAnimationFrame(raf);
+    raf=requestAnimationFrame(applyScale);
+  }
+
   function install(){
     applyScale();
     const scene=document.querySelector('.hq-scene');
-    if(scene&&'ResizeObserver' in window){const ro=new ResizeObserver(schedule);ro.observe(scene);}
+    if(scene && 'ResizeObserver' in window){
+      const ro=new ResizeObserver(schedule);
+      ro.observe(scene);
+    }
     window.addEventListener('resize',schedule,{passive:true});
-    window.addEventListener('orientationchange',()=>{setTimeout(applyScale,100);setTimeout(applyScale,300);setTimeout(applyScale,700)});
-    if(window.visualViewport)window.visualViewport.addEventListener('resize',schedule,{passive:true});
-    if(document.fonts&&document.fonts.ready)document.fonts.ready.then(applyScale).catch(()=>{});
-    setTimeout(applyScale,60);setTimeout(applyScale,250);setTimeout(applyScale,700);
+    window.addEventListener('orientationchange',()=>{
+      setTimeout(applyScale,100);
+      setTimeout(applyScale,300);
+      setTimeout(applyScale,700);
+    });
+    if(window.visualViewport){
+      window.visualViewport.addEventListener('resize',schedule,{passive:true});
+    }
+    if(document.fonts && document.fonts.ready){
+      document.fonts.ready.then(applyScale).catch(()=>{});
+    }
+    setTimeout(applyScale,60);
+    setTimeout(applyScale,250);
+    setTimeout(applyScale,700);
   }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',install,{once:true});
+  }else{
+    install();
+  }
 })();
 </script>
 
