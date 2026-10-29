@@ -1970,6 +1970,89 @@ body{
 }
 </style>
 
+
+<style id="palace-hq-device-responsive-font-v12">
+/*
+  기기/화면폭 자동 현판 글자 크기 조절
+  - 현판 좌표/클릭영역/팝업 크기는 변경하지 않음
+  - PC, 노트북, 태블릿 가로/세로, 휴대폰에 따라 글자만 자동 조절
+*/
+
+/* 궁궐 현판형 화면: 821px 이상 */
+@media (min-width:821px){
+  .app-card .app-title{
+    /* 821px 약 11px → 1280px 이상 최대 17px */
+    font-size:clamp(11px,1.33vw,17px)!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+  }
+
+  /* 긴 앱 이름은 현판 폭에 맞춰 한 단계 작게 */
+  .app-history_survival .app-title{
+    font-size:clamp(9.5px,1.15vw,15px)!important;
+    letter-spacing:-0.055em!important;
+  }
+  .app-detective .app-title{
+    font-size:clamp(10px,1.22vw,16px)!important;
+    letter-spacing:-0.045em!important;
+  }
+  .app-history_sharpshooter .app-title{
+    font-size:clamp(10px,1.22vw,16px)!important;
+    letter-spacing:-0.04em!important;
+  }
+}
+
+/* 일반 노트북/가로 태블릿 */
+@media (min-width:821px) and (max-width:1180px){
+  .app-card .app-title{
+    text-shadow:0 1px 3px rgba(55,34,16,.82)!important;
+  }
+}
+
+/* 8~11인치 태블릿에서 자주 사용하는 가로 화면 */
+@media (min-width:821px) and (max-width:1100px) and (orientation:landscape){
+  .app-card .app-title{
+    font-size:clamp(11px,1.42vw,15px)!important;
+  }
+  .app-history_survival .app-title{
+    font-size:clamp(9px,1.18vw,13px)!important;
+  }
+  .app-detective .app-title,
+  .app-history_sharpshooter .app-title{
+    font-size:clamp(9.5px,1.28vw,14px)!important;
+  }
+}
+
+/* 태블릿 세로: 화면 폭이 좁아졌을 때 과도하게 큰 글자 방지 */
+@media (min-width:821px) and (max-width:1000px) and (orientation:portrait){
+  .app-card .app-title{
+    font-size:clamp(10px,1.35vw,13px)!important;
+  }
+  .app-history_survival .app-title{
+    font-size:clamp(8.5px,1.08vw,11px)!important;
+  }
+  .app-detective .app-title,
+  .app-history_sharpshooter .app-title{
+    font-size:clamp(9px,1.18vw,12px)!important;
+  }
+}
+
+/* 820px 이하에서는 기존 카드형 모바일 배치를 유지하되 글자 크기만 최적화 */
+@media (max-width:820px){
+  .app-card .app-title{
+    font-size:clamp(14px,3.3vw,18px)!important;
+    line-height:1.2!important;
+  }
+}
+
+/* 작은 휴대폰 */
+@media (max-width:560px){
+  .app-card .app-title{
+    font-size:clamp(14px,4.2vw,17px)!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
@@ -2689,6 +2772,9 @@ function launchHubApp(app){
     return;
   }
 
+  // v1.3: 어떤 앱이든 실제 입장 버튼을 누르는 순간 관제실 현재 위치를 갱신합니다.
+  hubTrackAppLocation(app.id,"open");
+
   if(app.id === "time_explorer"){
     // 같은 태블릿에 남아 있는 이전 학생의 시간탐험대 identity보다
     // 현재 역사 학습실 로그인 학생을 항상 우선합니다.
@@ -2718,7 +2804,7 @@ function launchHubApp(app){
     // 기존 학생의 탭 세션은 폐기합니다.
     // 시간탐험대가 새 identity에 맞는 세션 토큰을 즉시 다시 생성합니다.
     sessionStorage.removeItem("historyTimeExplorersStudentSessionV1");
-    window.location.href=classAppUrl(app);
+    setTimeout(()=>{ window.location.href=classAppUrl(app); },120);
     return;
   }
 
@@ -2740,11 +2826,10 @@ function launchHubApp(app){
     const handoff=new URL(app.url);
     const h=new URLSearchParams({bridge:"tycoon-s1",no:s.studentNo,name:s.studentName,id:s.studentId,back:location.href});
     handoff.hash=h.toString();
-    hubTrackAppLocation("history_tycoon");
     setTimeout(()=>window.location.assign(handoff.href),250);
     return;
   }
-  window.location.href = classAppUrl(app);
+  setTimeout(()=>{ window.location.href = classAppUrl(app); },120);
 }
 
 function selectHubApp(app){
@@ -2827,11 +2912,32 @@ el("closeInfoPanel").addEventListener("click", ()=>{
 
 // v1.2: 관제실용 마지막 위치 기록. 로그인 검증은 공통 Apps Script에서 다시 수행합니다.
 function hubTrackAppLocation(appId,event='open',orderNo=0){
-  const s=getStudent(); if(!s.studentId)return;
-  const params=new URLSearchParams({action:'recordAppLocation',studentNo:s.studentNo,
-    studentName:s.studentName,studentId:s.studentId,appId,event,orderNo:String(orderNo),_:String(Date.now())});
-  // 이미지 GET을 사용해 페이지 이동 중에도 전송을 시도하며, 응답 내용은 필요하지 않습니다.
-  const img=new Image(); img.src=RECORD_SERVER_URL+'?'+params.toString();
+  const s=getStudent();
+  if(!s.studentId)return;
+
+  const params=new URLSearchParams({
+    action:'recordAppLocation',
+    studentNo:s.studentNo,
+    studentName:s.studentName,
+    studentId:s.studentId,
+    appId,
+    event,
+    orderNo:String(orderNo),
+    _:String(Date.now())
+  });
+
+  const url=RECORD_SERVER_URL+'?'+params.toString();
+
+  // 페이지 이동 직전에도 가능한 한 전송이 유지되도록 keepalive GET을 우선 사용합니다.
+  try{
+    fetch(url,{method:'GET',mode:'no-cors',cache:'no-store',keepalive:true}).catch(()=>{});
+  }catch(e){}
+
+  // 구형 브라우저/일부 태블릿 대비 보조 전송
+  try{
+    const img=new Image();
+    img.src=url;
+  }catch(e){}
 }
 
 function showLogin(message="", ok=true){
@@ -3092,9 +3198,16 @@ function startClassOperationPolling(){
 
 window.addEventListener("focus", () => {
   refreshFullHubStateFromServer().then(ok=>{ if(!ok) refreshClassOperationFromServer(); });
+  if(getStudent().studentId) hubTrackAppLocation("history_hub","return");
 });
 window.addEventListener("pageshow", () => {
   refreshFullHubStateFromServer().then(ok=>{ if(!ok) refreshClassOperationFromServer(); });
+  if(getStudent().studentId) hubTrackAppLocation("history_hub","return");
+});
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="visible" && getStudent().studentId){
+    hubTrackAppLocation("history_hub","return");
+  }
 });
 
 function startFastReturnRefresh(){
