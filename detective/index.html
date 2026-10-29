@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="ko">
 <head>
 <meta charset="utf-8">
@@ -1638,10 +1638,43 @@ document.getElementById('caseFrame')?.addEventListener('load',()=>setTimeout(enh
     });
   };
   window.returnDetectiveToHub=async function(btn){
-    const old=btn?btn.textContent:'';
-    if(btn){btn.disabled=true;btn.textContent='진행상황 저장 중...';}
-    const ok=await window.syncDetectiveToHubServer();
-    if(!ok){if(btn){btn.disabled=false;btn.textContent=old||'저장 다시 시도 →';}if(typeof toast==='function')toast('진행상황 저장을 확인하지 못했습니다. 다시 시도해 주세요.');return false;}
+    if(btn){
+      btn.disabled=true;
+      btn.textContent='저장 후 학습실로 이동 중...';
+    }
+
+    let normalSave=null;
+    try{ normalSave=window.syncDetectiveToHubServer(); }catch(e){}
+
+    if(normalSave){
+      try{
+        await Promise.race([
+          normalSave,
+          new Promise(resolve=>setTimeout(()=>resolve(false),800))
+        ]);
+      }catch(e){}
+    }
+
+    try{
+      const id=hubStudentIdentity();
+      if(id&&id.studentId){
+        const q=new URLSearchParams({
+          action:'saveDetectiveState',
+          studentNo:id.studentNo||'',
+          studentName:id.studentName||'',
+          studentId:id.studentId||'',
+          state:JSON.stringify(buildState()),
+          _:String(Date.now())
+        });
+        fetch(RECORD_SERVER_URL+'?'+q.toString(),{
+          method:'GET',
+          mode:'no-cors',
+          cache:'no-store',
+          keepalive:true
+        }).catch(()=>{});
+      }
+    }catch(e){}
+
     setCompletionHint();
     try{sessionStorage.setItem('historyHubReturnRefreshV1',String(Date.now()))}catch(e){}
     location.href='../index.html?from=detective&refresh='+Date.now();

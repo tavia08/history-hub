@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
@@ -2515,17 +2515,53 @@ function remoteStateHasStage(result,eraId,stageId){
   }catch(e){ return false; }
 }
 function waitMs(ms){return new Promise(resolve=>setTimeout(resolve,ms));}
+
+function saveStudentStateKeepalive(){
+  if(!studentIdentity||!RECORD_SERVER_URL)return false;
+  try{
+    const packet=buildStudentStatePacket();
+    const body=new URLSearchParams({
+      action:'bridgeSave',
+      requestId:'fast_'+Date.now()+'_'+Math.random().toString(36).slice(2),
+      type:'state',
+      studentNo:studentIdentity.studentNo,
+      studentName:studentIdentity.studentName,
+      studentId:studentIdentity.studentId,
+      state:JSON.stringify(packet)
+    });
+    fetch(RECORD_SERVER_URL,{
+      method:'POST',
+      mode:'no-cors',
+      cache:'no-store',
+      keepalive:true,
+      headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
+      body:body.toString()
+    }).catch(()=>{});
+    return true;
+  }catch(e){
+    console.warn('빠른 백업 저장 요청 실패',e);
+    return false;
+  }
+}
 async function saveCurrentHubStageVerified(){
   if(!studentIdentity||!activeEraId||!currentStage)return false;
   saveEra();
   syncStudentStatus();
-  try{
-    const first=saveStudentStateRemote();
-    const ok=await Promise.race([first,waitMs(5000).then(()=>false)]);
-    if(ok)return true;
-  }catch(e){}
-  try{ saveStudentStateRemote(); }catch(e){}
-  await waitMs(900);
+
+  let normalSave=null;
+  try{ normalSave=saveStudentStateRemote(); }catch(e){}
+
+  if(normalSave){
+    try{
+      const ok=await Promise.race([
+        normalSave,
+        waitMs(800).then(()=>false)
+      ]);
+      if(ok)return true;
+    }catch(e){}
+  }
+
+  saveStudentStateKeepalive();
   return true;
 }
 async function bootStudentApp(){
