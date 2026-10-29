@@ -2688,6 +2688,40 @@ function launchHubApp(app){
     showLogin("메인페이지에서 먼저 로그인해주세요.", false);
     return;
   }
+
+  if(app.id === "time_explorer"){
+    // 같은 태블릿에 남아 있는 이전 학생의 시간탐험대 identity보다
+    // 현재 역사 학습실 로그인 학생을 항상 우선합니다.
+    const digits=String(s.studentNo||"").replace(/\D/g,"");
+    let grade=3, classNo="", number="";
+    if(digits.length===5){
+      grade=Number(digits.slice(0,1));
+      classNo=Number(digits.slice(1,3));
+      number=Number(digits.slice(3,5));
+    }else if(digits.length===4){
+      grade=Number(digits.slice(0,1));
+      classNo=Number(digits.slice(1,2));
+      number=Number(digits.slice(2,4));
+    }
+    const currentTimeStudent={
+      grade,
+      classNo,
+      number,
+      studentNo:s.studentNo,
+      studentName:s.studentName,
+      studentId:s.studentId
+    };
+    localStorage.setItem(
+      "historyTimeExplorersStudentIdentityV1",
+      JSON.stringify(currentTimeStudent)
+    );
+    // 기존 학생의 탭 세션은 폐기합니다.
+    // 시간탐험대가 새 identity에 맞는 세션 토큰을 즉시 다시 생성합니다.
+    sessionStorage.removeItem("historyTimeExplorersStudentSessionV1");
+    window.location.href=classAppUrl(app);
+    return;
+  }
+
   if(app.id === "history_survival"){
     if(sessionStorage.getItem("historyHubLoginSessionV1") !== s.studentId){showLogin("로그인 상태를 다시 확인해주세요.",false);return;}
     if(!window.HDSurvivalHubLaunch){alert("서바이벌 로그인 모듈을 불러오지 못했습니다.");return;}
