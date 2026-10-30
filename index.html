@@ -2018,6 +2018,34 @@ body{
 }
 </style>
 
+
+<style id="history-quiz-hub-entry-v1">
+/* 독립 복습 진입구: 궁궐 현판/SVG 좌표 및 기존 로그인 구조 변경 없음 */
+.quiz-hub-entry{
+  display:flex;align-items:center;gap:16px;margin:12px 0 0;padding:14px 20px;
+  border-radius:18px;border:1px solid #d7b98a;
+  background:linear-gradient(110deg,#fff8e9 0%,#fffdf7 65%,#e7f4ee 100%);
+  box-shadow:0 8px 20px rgba(65,44,23,.09);color:#35291d;
+}
+.quiz-hub-mark{width:56px;height:56px;border-radius:17px;flex:none;display:grid;place-items:center;
+  background:#f2e1c6;font-size:31px;box-shadow:inset 0 0 0 2px rgba(185,139,76,.16)}
+.quiz-hub-copy{flex:1;min-width:0}
+.quiz-hub-eyebrow{font-size:11px;color:#926327;font-weight:900;letter-spacing:.04em}
+.quiz-hub-copy h2{margin:3px 0;font-size:21px;font-weight:1000;line-height:1.2}
+.quiz-hub-copy h2 span{font-size:17px}
+.quiz-hub-copy p{margin:0;font-size:12px;color:#736653;line-height:1.5}
+.quiz-hub-button{flex:none;min-height:48px;padding:10px 19px;border:0;border-radius:12px;
+  background:linear-gradient(135deg,#73502c,#443018);color:#fff5dc;font-size:14px;font-weight:950;cursor:pointer}
+.quiz-hub-button:hover{filter:brightness(1.12)}
+.quiz-hub-button:focus-visible{outline:3px solid #a68145;outline-offset:3px}
+@media(max-width:700px){
+  .quiz-hub-entry{gap:10px;padding:11px 12px;flex-wrap:wrap}
+  .quiz-hub-mark{width:45px;height:45px;font-size:25px}
+  .quiz-hub-copy h2{font-size:16px}
+  .quiz-hub-copy p{font-size:11px}
+  .quiz-hub-button{margin-left:auto;min-height:42px;font-size:12px}
+}
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -2113,6 +2141,18 @@ body{
       </div>
     </section>
 
+    <section class="quiz-hub-entry" aria-label="시험 대비 역사 퀴즈 챌린지">
+      <div class="quiz-hub-mark" aria-hidden="true">🐎</div>
+      <div class="quiz-hub-copy">
+        <div class="quiz-hub-eyebrow">시험 대비 · 자유 복습</div>
+        <h2>역사 퀴즈 챌린지 <span>📜</span></h2>
+        <p>파발마가 달리는 동안 정답을 찾아라! · 초심자 10초 / 숙련자 5초</p>
+      </div>
+      <button id="quizHubEntry" class="quiz-hub-button" type="button" aria-label="역사 퀴즈 챌린지 정보 보기">
+        시험장 입장 <span aria-hidden="true">→</span>
+      </button>
+    </section>
+
     <div class="mini hq-guide">
       배경 속 공간을 선택하면 앱 정보와 진행상황을 확인할 수 있어요.
       수업모드에서는 <b>① 시간탐험대 → ② 역사 탐정사무소 → ③ 역사 DM</b> 순서로 진행하고,
@@ -2187,6 +2227,15 @@ const APPS = [
     url: "https://tavia08.github.io/history-tycoon/",
     enabled: true,
     tone: "#fce7ef"
+  },
+  {
+    id: "history_quiz",
+    name: "역사 퀴즈 챌린지",
+    icon: "🐎",
+    description: "파발마와 함께하는 역사 과거시험 · 학기별 시험 대비와 무한 도전",
+    url: "history-quiz/index.html",
+    enabled: true,
+    tone: "#fff0d5"
   },
   {
     id: "history_sharpshooter",
@@ -2632,7 +2681,7 @@ function appAccessState(app){
     };
   }
 
-  const isGame = app.id === "history_defense" || app.id === "history_survival" || app.id === "history_tycoon" || app.id === "history_sharpshooter";
+  const isGame = app.id === "history_defense" || app.id === "history_survival" || app.id === "history_tycoon" || app.id === "history_sharpshooter" || app.id === "history_quiz";
   if(isGame){
     const unlocked = !!op.unlockGamesAfterCore && coreLearningComplete();
     return {
@@ -2810,8 +2859,8 @@ function summarizeAppProgress(appId){
   }
 
   return {
-    label: appId === "history_defense" || appId === "history_survival" || appId === "history_tycoon" || appId === "history_sharpshooter" ? "게임 이용 가능" : "이용 가능",
-    detail: appId === "history_defense" || appId === "history_survival" || appId === "history_tycoon" || appId === "history_sharpshooter" ? "개인 최고점은 게임에 입장하면 조회됩니다." : "",
+    label: appId === "history_defense" || appId === "history_survival" || appId === "history_tycoon" || appId === "history_sharpshooter" || appId === "history_quiz" ? "게임 이용 가능" : "이용 가능",
+    detail: appId === "history_defense" || appId === "history_survival" || appId === "history_tycoon" || appId === "history_sharpshooter" || appId === "history_quiz" ? "개인 최고점은 게임에 입장하면 조회됩니다." : "",
     tone: "ok",
     percent:null,
     recent:"",
@@ -2927,7 +2976,16 @@ function renderApps(){
 
   const op = getClassOperation();
 
+  const quizEntry = el("quizHubEntry");
+  if(quizEntry){
+    const quizApp = APPS.find(app => app.id === "history_quiz");
+    const quizAccess = quizApp && appAccessState(quizApp);
+    quizEntry.textContent = quizAccess && quizAccess.enabled ? "시험장 입장 →" : "이용 안내 보기 →";
+    quizEntry.setAttribute("aria-label", "역사 퀴즈 챌린지 정보 보기");
+  }
+
   APPS.forEach(app => {
+    if(app.id === "history_quiz") return; // 하단 복습 카드로만 진입 (궁궐 7개 현판 보존)
     const access = appAccessState(app);
     const stepNo = op.mode === "CLASS" ? worksheetStepNumber(app.id) : null;
     const stepDone = stepNo ? worksheetStepComplete(app.id) : false;
@@ -2956,6 +3014,15 @@ function renderApps(){
     if(current) selectHubApp(current);
   }
 }
+
+el("quizHubEntry").addEventListener("click", ()=>{
+  const app = APPS.find(item => item.id === "history_quiz");
+  if(app){
+    selectHubApp(app);
+    const scene=document.querySelector(".hq-scene");
+    if(scene) scene.scrollIntoView({block:"center",behavior:"smooth"});
+  }
+});
 
 el("closeInfoPanel").addEventListener("click", ()=>{
   const panel=el("appInfoPanel");
@@ -3009,7 +3076,7 @@ function showDashboard(student){
   el("dashboard").classList.add("show");
   el("userPill").style.display = "flex";
   el("pillText").textContent = `${student.studentNo} ${student.studentName}`;
-  el("helloName").textContent = student.studentName;
+  if(el("helloName")) el("helloName").textContent = student.studentName;
   renderApps();
   hubTrackAppLocation("history_hub","return");
   startClassOperationPolling();
@@ -3411,7 +3478,7 @@ function showDashboard(student){
   el("dashboard").classList.add("show");
   el("userPill").style.display = "flex";
   el("pillText").textContent = `${student.studentNo} ${student.studentName}`;
-  el("helloName").textContent = student.studentName;
+  if(el("helloName")) el("helloName").textContent = student.studentName;
   renderApps();
   hubTrackAppLocation("history_hub","return");
 
