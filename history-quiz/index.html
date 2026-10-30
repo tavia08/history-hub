@@ -16,6 +16,38 @@
 .hub-back:focus-visible{outline:4px solid #ffbe55;outline-offset:3px}
 @media(max-width:680px){.nav-actions{gap:6px}.hub-back{font-size:12px;padding:9px 12px;min-height:42px}}
 @media(max-width:370px){.brand{display:none}}
+
+/* v3.3 과거시험 단계형 설정: 원래 퀴즈 로직과 선택 버튼을 보존 */
+#setup{background:linear-gradient(160deg,#fffef9 0%,#fff9eb 100%);border:2px solid #e7d4af;max-width:1020px;margin-inline:auto}
+#setup .hero{background:linear-gradient(115deg,#234f57,#25817a 80%,#49a59a);border:3px solid #ecd5a3;box-shadow:0 8px 24px #47745d29;margin-bottom:18px}
+#setup .hero-art{background:linear-gradient(140deg,#fff1bf,#f4c075);border-color:#fff9e4}
+.wizard-track{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:12px 0 17px}
+.wizard-marker{border:1px solid #e8d7b9;background:#fff;color:#89755e;padding:10px 3px;border-radius:12px;font-size:12px;font-weight:900;min-width:0;white-space:nowrap}
+.wizard-marker.current{background:#276f66;border-color:#276f66;color:white;box-shadow:0 3px 0 #16463f}
+.wizard-marker.done{background:#e2f3e9;border-color:#b7d9c5;color:#23634b;cursor:pointer}
+.wizard-marker:not(.done):not(.current){cursor:default}
+.wizard-page{display:none;min-height:230px;animation:wizardIn .22s ease-out}
+.wizard-page.active{display:block}
+@keyframes wizardIn{from{opacity:.4;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+.wizard-page>h2:first-child{margin:8px 0 17px;font-size:clamp(21px,3vw,27px);color:#243d38}
+.wizard-hint{font-size:14px;color:#776b56;background:#fff9e8;border:1px solid #efdfba;padding:10px 13px;border-radius:12px;margin:0 0 16px;line-height:1.6}
+#setup .chip.selected,#setup .choice.selected{border-color:#d96548!important;background:#fff0dd!important;color:#813623!important;box-shadow:0 3px 0 #ebba93!important}
+#setup .chip{min-height:49px}
+#setup .choice{min-height:112px}
+.wizard-actions{display:flex;gap:10px;align-items:center;margin:22px 0 0}
+.wizard-actions button{min-height:50px;border-radius:13px;border:1px solid #d6c7a9;background:#fff;color:#4c5348;padding:11px 22px;font-weight:900;font-size:15px;cursor:pointer}
+.wizard-actions #wizardNext{margin-left:auto;background:#23746a;color:#fff;border-color:#23746a;box-shadow:0 4px 0 #175046}
+.wizard-actions button:disabled{opacity:.4;cursor:not-allowed}
+#setup #start{margin-top:16px;background:linear-gradient(110deg,#db5b40,#f17e4e);box-shadow:0 5px 0 #a9422e;color:#fff}
+.wizard-summary{background:#fffaf0;border:2px solid #d7b476;border-radius:20px;padding:21px;margin:12px 0 14px}
+.wizard-summary h3{margin:0 0 14px;color:#513b25;font-size:21px}
+.wizard-summary dl{display:grid;grid-template-columns:110px 1fr;gap:12px;font-size:15px;line-height:1.6;margin:0}
+.wizard-summary dt{color:#826b53;font-weight:900}.wizard-summary dd{margin:0;color:#263f36;font-weight:900;overflow-wrap:anywhere}
+#setup #scopeItems{max-height:37vh;overflow-y:auto;overscroll-behavior:contain;padding:5px;align-content:start}
+#setup #availability{font-size:12px;line-height:1.5}
+@media(max-width:700px){#setup{padding:18px 15px;border-radius:20px}#setup .hero{padding:15px;grid-template-columns:minmax(0,1fr) 104px;margin:-2px -2px 15px}#setup .hero h1{font-size:25px}#setup .hero p{font-size:11px}#setup .hero-art{width:94px;height:94px;border-radius:20px}#setup .hero-art svg{max-width:92px} .wizard-marker{font-size:10px;padding:9px 2px} .wizard-page{min-height:220px} .wizard-summary dl{grid-template-columns:85px 1fr;font-size:13px}}
+@media(max-width:430px){.wizard-track{gap:3px}.wizard-marker{font-size:9px;letter-spacing:-.05em}.wizard-summary{padding:13px}.wizard-page>h2:first-child{font-size:21px}}
+@media(prefers-reduced-motion:reduce){.wizard-page{animation:none}}
 </style></head><body><main><div class="top"><div class="brand">✦ HISTORY QUIZ</div><div class="nav-actions"><button class="home" id="backHome" type="button">처음으로</button><a class="hub-back" id="hubBack" href="../" aria-label="역사 학습실로 돌아가기">⌂ 역사 학습실</a></div></div><section id="setup" class="card"><div class="hero"><div><div class="eyebrow">2026 읽는 역사 · 역사 과거시험</div><h1>역사 퀴즈<br>챌린지!</h1><p>파발마가 도착하기 전에 정답을 선택하세요!<br>역사 지식으로 과거시험에 도전해 보세요.</p></div><div class="hero-art" aria-hidden="true"><svg viewBox="0 0 170 135" class="horse-svg" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><ellipse cx="85" cy="123" rx="58" ry="6" fill="#6f452f" opacity=".18"/><g class="horse-body"><path d="M41 77 Q28 64 19 77 Q26 56 45 58" fill="#593a30" stroke="#593a30" stroke-width="4" stroke-linecap="round"/><ellipse cx="76" cy="73" rx="38" ry="25" fill="#bf7449" stroke="#7c492f" stroke-width="4"/><path d="M94 64 L110 34 Q122 18 140 34 L150 59 Q151 78 134 83 L111 73Z" fill="#c78758" stroke="#7c492f" stroke-width="4" stroke-linejoin="round"/><path d="M112 36 L105 15 L123 23 L132 34Z" fill="#a75c3b" stroke="#7c492f" stroke-width="4" stroke-linejoin="round"/><path d="M131 33 L140 12 L150 29" fill="#c78758" stroke="#7c492f" stroke-width="4" stroke-linejoin="round"/><circle cx="133" cy="50" r="4" fill="#39291e"/><circle cx="137" cy="48" r="1.4" fill="white"/><path d="M141 68 Q149 72 153 66" stroke="#7c492f" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M105 39 Q97 31 108 22 L113 26 L108 41" fill="#53362c"/><path d="M64 51 H88 V65 H64Z" fill="#d8b07d" stroke="#875f36" stroke-width="3"/><path d="M78 51 v-10 h24 v24 h-14" fill="#fff0c7" stroke="#956c47" stroke-width="3"/><path d="M71 42 h24" stroke="#b98b55" stroke-width="3"/><g class="horse-leg-front" stroke="#7c492f" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M92 88 l7 18 l18 -3" fill="none"/><path d="M105 89 l-2 19 l10 10" fill="none"/></g><g class="horse-leg-back" stroke="#7c492f" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M55 88 l-11 22 l-14 2" fill="none"/><path d="M68 91 l-3 18 l14 11" fill="none"/></g><path d="M34 114 h18 M107 119 h12" stroke="#4e3528" stroke-width="5" stroke-linecap="round"/></g></svg></div></div><h2><span class="step">1</span> 학기 선택</h2><div class="pillrow" id="semesters"><button class="chip selected" data-semester="all">전체 학기</button><button class="chip" data-semester="1학기">1학기</button><button class="chip" data-semester="2학기">2학기</button></div><h2 style="margin-top:25px"><span class="step">2</span> 학습 범위</h2><div class="pillrow" id="scopeTypes"><button class="chip selected" data-scope="all">전체 범위</button><button class="chip" data-scope="unit">단원별</button><button class="chip" data-scope="lesson">차시별</button><button class="chip" data-scope="multi">자유 선택</button></div><div id="scopeItems" class="pillrow lesson-list" style="margin:17px 0 26px"></div><h2><span class="step">3</span> 제한 시간</h2><div class="grid" id="difficulties"><button class="choice selected" data-seconds="10"><strong>🌱 초심자</strong><small>문항당 10초</small></button><button class="choice" data-seconds="5"><strong>🔥 숙련자</strong><small>문항당 5초</small></button></div><h2 style="margin-top:28px"><span class="step">4</span> 도전 방식</h2><div class="grid" id="modes"><button class="choice selected" data-mode="normal"><strong>기본 퀴즈</strong><small>10문제 또는 20문제</small></button><button class="choice" data-mode="endless"><strong>♾️ 무한 도전</strong><small>오답 또는 시간 초과 시 종료</small></button></div><div id="countBlock" style="margin-top:15px"><div class="pillrow" id="counts"><button class="chip selected" data-count="10">10문제</button><button class="chip" data-count="20">20문제</button></div></div><div class="notice" id="availability" style="margin-top:20px"></div><button class="primary" id="start">📜 시험장 입장하기</button></section><section id="playing" class="card game-card hide"><div class="statrow"><span id="counter"></span><span id="combo"></span><span class="clock" id="clock">10.0</span></div><div class="race-track" id="raceTrack" role="progressbar" aria-label="남은 시간" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><div class="race-label">출발</div><div class="race-road"><div class="race-fill" id="timeFill"></div><div class="runner" id="horseRunner"><svg viewBox="0 0 170 135" class="horse-svg" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><ellipse cx="85" cy="123" rx="58" ry="6" fill="#6f452f" opacity=".18"/><g class="horse-body"><path d="M41 77 Q28 64 19 77 Q26 56 45 58" fill="#593a30" stroke="#593a30" stroke-width="4" stroke-linecap="round"/><ellipse cx="76" cy="73" rx="38" ry="25" fill="#bf7449" stroke="#7c492f" stroke-width="4"/><path d="M94 64 L110 34 Q122 18 140 34 L150 59 Q151 78 134 83 L111 73Z" fill="#c78758" stroke="#7c492f" stroke-width="4" stroke-linejoin="round"/><path d="M112 36 L105 15 L123 23 L132 34Z" fill="#a75c3b" stroke="#7c492f" stroke-width="4" stroke-linejoin="round"/><path d="M131 33 L140 12 L150 29" fill="#c78758" stroke="#7c492f" stroke-width="4" stroke-linejoin="round"/><circle cx="133" cy="50" r="4" fill="#39291e"/><circle cx="137" cy="48" r="1.4" fill="white"/><path d="M141 68 Q149 72 153 66" stroke="#7c492f" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M105 39 Q97 31 108 22 L113 26 L108 41" fill="#53362c"/><path d="M64 51 H88 V65 H64Z" fill="#d8b07d" stroke="#875f36" stroke-width="3"/><path d="M78 51 v-10 h24 v24 h-14" fill="#fff0c7" stroke="#956c47" stroke-width="3"/><path d="M71 42 h24" stroke="#b98b55" stroke-width="3"/><g class="horse-leg-front" stroke="#7c492f" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M92 88 l7 18 l18 -3" fill="none"/><path d="M105 89 l-2 19 l10 10" fill="none"/></g><g class="horse-leg-back" stroke="#7c492f" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M55 88 l-11 22 l-14 2" fill="none"/><path d="M68 91 l-3 18 l14 11" fill="none"/></g><path d="M34 114 h18 M107 119 h12" stroke="#4e3528" stroke-width="5" stroke-linecap="round"/></g></svg></div></div><div class="race-goal">🏯<small>파발역</small></div></div><div class="eyebrow" id="questionScope"></div><div class="paper-heading">📜 역사 과거시험 · 다음 물음에 답하시오</div><div class="question" id="questionText"></div><div class="grid" id="answers"></div><div class="feedback" id="feedback" role="status" aria-live="polite" aria-live="polite"></div><button class="secondary" id="quit">도전 종료</button></section><section id="result" class="card hide"><div class="eyebrow">🏯 과거시험 합격 발표</div><div class="exam-seal" aria-hidden="true">합격</div><h1 id="resultTitle">도전 완료!</h1><div class="resultnum" id="score"></div><p id="resultDesc"></p><div id="badges"></div><div class="actions" style="margin-top:25px"><button class="primary" id="retry">다시 도전</button><button class="secondary" id="review">틀린 문제 다시 풀기</button><button class="secondary" id="returnSetup">범위 다시 선택</button></div></section></main><script src="questions.js"></script><script>
 (()=>{'use strict';const data=window.HISTORY_QUESTIONS||[], $=x=>document.getElementById(x);const state={semester:'all',scope:'all',selections:[],seconds:10,mode:'normal',count:10,pool:[],queue:[],seen:new Set(),index:0,correct:0,streak:0,bestStreak:0,wrong:[],current:null,started:0,locked:false,reviewOnly:false};const show=id=>{['setup','playing','result'].forEach(x=>$(x).classList.toggle('hide',id!==x));window.scrollTo({top:0,left:0,behavior:'instant'})};// 균등 무작위 섞기
 function mix(items){let a=[...items];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
@@ -32,4 +64,71 @@ function start(review=false){stopTimer();const reviewPool=review?[...state.wrong
 function percentGrade(correct,total){let p=total?correct/total*100:0;return p>=95?'장원급제':p>=80?'급제':p>=60?'소과 합격':'유생'}
 function finish(){stopTimer();show('result');let total=state.correct+state.wrong.length;let endless=state.mode==='endless';$('resultTitle').textContent=endless?'무한 도전 종료!':(percentGrade(state.correct,total));$('score').textContent=endless?`${state.bestStreak}문제 연속 정답`:`${state.correct} / ${total}`;let percent=total?Math.round(state.correct/total*100):0;$('resultDesc').textContent=endless?`${state.seconds}초 모드 · ${total}문제 응답 · 연속 정답 ${state.bestStreak}문제`:`정답률 ${percent}% · ${state.seconds}초 모드`;$('review').disabled=!state.wrong.length;$('review').textContent=`틀린 문제 다시 풀기 (${state.wrong.length})`;let key=`history-quiz-best-${state.seconds}`,best=0;try{best=Number(localStorage.getItem(key)||0);if(endless&&state.bestStreak>best){best=state.bestStreak;localStorage.setItem(key,String(best))}}catch(e){}$('badges').innerHTML=endless?`<span class="tag">이 기기 최고 연속 정답: ${best}</span><span class="tag">${percentGrade(state.correct,total)}</span>`:`<span class="tag">${percent>=95?'어사화와 교지를 받았습니다':percent>=80?'합격 교지를 받았습니다':percent>=60?'소과 합격을 축하합니다':'다시 도전해 장원급제를 노려 보세요'}</span>`}
 $('start').onclick=()=>start();$('retry').onclick=()=>{state.reviewOnly=false;start()};$('review').onclick=()=>{if(state.wrong.length)start(true)};$('backHome').onclick=()=>{stopTimer();show('setup')};$('quit').onclick=()=>{finish()};$('returnSetup').onclick=()=>{stopTimer();show('setup')};$('hubBack').addEventListener('click',e=>{if(!$('playing').classList.contains('hide')){if(!window.confirm('진행 중인 과거시험을 종료하고 역사 학습실로 돌아갈까요?'))e.preventDefault();}});renderScopes();})();
-</script></body></html>
+</script>
+<script id="quiz-wizard-v33">
+(()=>{
+  'use strict';
+  const setup=document.getElementById('setup');
+  if(!setup||setup.dataset.wizardReady)return;
+  setup.dataset.wizardReady='1';
+  const names=['학기','범위','시간','방식','응시표'];
+  const headings=Array.from(setup.children).filter(e=>e.tagName==='H2');
+  if(headings.length!==4){console.warn('설정 화면 구성이 달라 단계형 설정을 적용하지 않았습니다.');return}
+  const steps=[];
+  headings.forEach((head,i)=>{
+    const page=document.createElement('section');page.className='wizard-page';page.dataset.wizardStep=String(i);page.setAttribute('aria-label',names[i]+' 설정');
+    const parts=[head];let cur=head.nextElementSibling;
+    while(cur && cur.tagName!=='H2' && cur.id!=='availability' && cur.id!=='start'){
+      parts.push(cur);cur=cur.nextElementSibling;
+    }
+    parts.forEach(node=>page.appendChild(node));steps.push(page);
+  });
+  const final=document.createElement('section');final.className='wizard-page';final.dataset.wizardStep='4';final.setAttribute('aria-label','응시표 확인');
+  const details=document.createElement('div');details.className='wizard-summary';details.innerHTML='<h3>📜 과거시험 응시표</h3><dl><dt>학기</dt><dd id="wsSemester"></dd><dt>학습 범위</dt><dd id="wsScope"></dd><dt>제한 시간</dt><dd id="wsTime"></dd><dt>도전 방식</dt><dd id="wsMode"></dd></dl>';
+  final.appendChild(details);
+  [document.getElementById('availability'),document.getElementById('start')].forEach(n=>{if(n)final.appendChild(n)});
+  steps.push(final);
+  const track=document.createElement('div');track.className='wizard-track';track.setAttribute('aria-label','응시 설정 진행 단계');
+  const markers=names.map((name,i)=>{const b=document.createElement('button');b.type='button';b.className='wizard-marker';b.textContent=(i+1)+' '+name;track.appendChild(b);return b});
+  const nav=document.createElement('div');nav.className='wizard-actions';
+  const prev=document.createElement('button');prev.type='button';prev.textContent='← 이전 단계';
+  const next=document.createElement('button');next.id='wizardNext';next.type='button';next.textContent='다음 단계 →';
+  nav.append(prev,next);
+  const hero=setup.querySelector('.hero');hero.after(track);track.after(...steps,nav);
+  const hints=['응시할 학기를 선택하세요.','시험 범위를 선택하세요. 여러 차시를 함께 연습할 수도 있어요.','파발마가 달리는 시간을 선택하세요.','시험 문제 수와 도전 방식을 선택하세요.','설정을 확인하고 시험장에 입장하세요.'];
+  steps.forEach((page,i)=>{if(i===4)return;const hint=document.createElement('p');hint.className='wizard-hint';hint.textContent=hints[i];page.insertBefore(hint,page.firstElementChild.nextSibling)});
+  let active=0,furthest=0;
+  const selected=(selector)=>document.querySelector(selector+' .selected');
+  const currentScope=()=>selected('#scopeTypes')?.dataset.scope||'all';
+  function updateSummary(){
+    document.getElementById('wsSemester').textContent=selected('#semesters')?.textContent.trim()||'전체 학기';
+    const type=selected('#scopeTypes')?.textContent.trim()||'전체 범위';
+    const choices=Array.from(document.querySelectorAll('#scopeItems .selected')).map(x=>x.textContent.trim());
+    document.getElementById('wsScope').textContent=currentScope()==='all'?type:type+' · '+(choices.length>3?choices.slice(0,3).join(', ')+' 외 '+(choices.length-3)+'개':choices.join(', '));
+    document.getElementById('wsTime').textContent=selected('#difficulties')?.textContent.trim().replace(/\s+/g,' ')||'초심자 10초';
+    const mode=selected('#modes')?.dataset.mode||'normal';
+    document.getElementById('wsMode').textContent=mode==='endless'?'무한 도전':('기본 퀴즈 · '+(selected('#counts')?.textContent.trim()||'10문제'));
+  }
+  function valid(){return active!==1 || currentScope()==='all'||document.querySelectorAll('#scopeItems .selected').length>0}
+  function showStep(n){
+    active=Math.min(4,Math.max(0,n));furthest=Math.max(furthest,active);
+    steps.forEach((p,i)=>{p.classList.toggle('active',i===active);p.hidden=i!==active});
+    markers.forEach((m,i)=>{m.className='wizard-marker'+(i===active?' current':i<active?' done':'');m.setAttribute('aria-current',i===active?'step':'false');m.disabled=i>active});
+    prev.disabled=active===0;next.hidden=active===4;
+    next.disabled=!valid();next.textContent=active===1?'선택 완료 →':active===3?'응시표 확인 →':'다음 단계 →';
+    if(active===4)updateSummary();
+    setup.scrollIntoView({block:'start',behavior:'instant'});
+  }
+  prev.addEventListener('click',()=>showStep(active-1));next.addEventListener('click',()=>{if(valid())showStep(active+1)});
+  markers.forEach((m,i)=>m.addEventListener('click',()=>{if(i<active)showStep(i)}));
+  document.getElementById('semesters').addEventListener('click',e=>{if(e.target.closest('[data-semester]')&&active===0)requestAnimationFrame(()=>showStep(1))});
+  document.getElementById('scopeTypes').addEventListener('click',e=>{if(e.target.closest('[data-scope]')&&active===1){next.disabled=!valid();if(currentScope()==='all')requestAnimationFrame(()=>showStep(2))}});
+  document.getElementById('scopeItems').addEventListener('click',()=>{if(active===1)requestAnimationFrame(()=>{next.disabled=!valid()})});
+  document.getElementById('difficulties').addEventListener('click',e=>{if(e.target.closest('[data-seconds]')&&active===2)requestAnimationFrame(()=>showStep(3))});
+  document.getElementById('modes').addEventListener('click',e=>{if(e.target.closest('[data-mode]')&&active===3 && selected('#modes')?.dataset.mode==='endless')requestAnimationFrame(()=>showStep(4))});
+  document.getElementById('returnSetup').addEventListener('click',()=>showStep(4));
+  document.getElementById('backHome').addEventListener('click',()=>showStep(0));
+  showStep(0);
+})();
+</script>
+</body></html>
