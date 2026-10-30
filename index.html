@@ -2787,6 +2787,133 @@ body::before{
 }
 </style>
 
+
+<style id="historyhub-polish-login-v32">
+/* v3.2: 상단/학생정보/섹션 타이포 정리 + 로그인 배경 미리보기 */
+
+/* 1. 메인 제목과 보조 타이틀 크기 균형 */
+.warm-room-titleline h1,
+.warm-room-subtitle{
+  font-size:22px!important;
+  line-height:1.2!important;
+  font-weight:950!important;
+}
+.warm-room-titleline h1{color:#fff1c7!important;}
+.warm-room-subtitle{color:#f2d28c!important;}
+
+/* 2. 학생 로그인 정보와 버튼 확대 */
+.warm-room-account{
+  gap:7px!important;
+  padding:8px 10px!important;
+}
+.warm-room-account .account-id{
+  font-size:12px!important;
+  font-weight:950!important;
+}
+.warm-room-account .account-link{
+  font-size:11px!important;
+  font-weight:900!important;
+  padding:7px 9px!important;
+  min-height:31px!important;
+}
+
+/* 3. 헤더와 오늘 수업 상태바 사이 여백 */
+.warm-room-header{margin-bottom:10px!important;}
+.warm-dashboard{margin-top:0!important;}
+
+/* 5, 6. 섹션 제목과 설명을 같은 크기/기준선으로 정렬 */
+.warm-section-head > div:first-child{
+  display:flex!important;
+  align-items:center!important;
+  gap:12px!important;
+}
+.warm-section-kicker,
+.warm-section-head h2{
+  margin:0!important;
+  font-size:16px!important;
+  line-height:1.35!important;
+  font-weight:900!important;
+  white-space:nowrap!important;
+}
+.warm-section-kicker{color:#9b651e!important;}
+.warm-section-head h2{color:#2c241d!important;}
+
+/* 로그인 배경: 로그인 후 보게 될 앱 카드 구성을 흐릿하게 미리 보여줌 */
+.warm-login-card{
+  position:relative!important;
+  overflow:hidden!important;
+  min-height:390px!important;
+  display:flex!important;
+  align-items:flex-start!important;
+  justify-content:center!important;
+  padding-top:38px!important;
+  isolation:isolate!important;
+}
+.login-app-preview{
+  position:absolute!important;
+  inset:18px!important;
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:16px!important;
+  z-index:0!important;
+  filter:blur(5px) saturate(.85)!important;
+  opacity:.28!important;
+  transform:scale(1.025)!important;
+  pointer-events:none!important;
+}
+.login-preview-card{
+  min-height:150px!important;
+  border-radius:18px!important;
+  border:1px solid rgba(114,83,48,.35)!important;
+  box-shadow:0 8px 22px rgba(70,45,25,.13)!important;
+  background-size:cover!important;
+  background-position:center!important;
+  position:relative!important;
+  overflow:hidden!important;
+}
+.login-preview-card::after{
+  content:"";
+  position:absolute!important;
+  left:0;right:0;bottom:0;height:42%!important;
+  background:rgba(255,249,236,.9)!important;
+}
+.lp-time{background-image:url("assets/time-explorer-card.jpg")!important;}
+.lp-detective{background-image:url("assets/detective-card.jpg")!important;}
+.lp-dm{background-image:url("assets/history-dm-card.jpg")!important;}
+.lp-quiz{background-image:url("assets/history-quiz-card.jpg")!important;}
+.lp-defense{background-image:url("assets/history-defense-card.jpg")!important;}
+.lp-survival{background-image:url("assets/history-survival-card.jpg")!important;}
+.login-form-layer{
+  position:relative!important;
+  z-index:2!important;
+  width:min(980px,88%)!important;
+  padding:24px 26px!important;
+  border-radius:20px!important;
+  background:rgba(255,251,242,.88)!important;
+  border:1px solid rgba(211,184,139,.78)!important;
+  box-shadow:0 14px 36px rgba(72,49,27,.16)!important;
+  backdrop-filter:blur(10px)!important;
+}
+.login-form-layer .section-title{font-size:25px!important;}
+.login-form-layer .section-desc{font-size:13px!important;}
+
+@media(max-width:820px){
+  .warm-room-titleline h1,.warm-room-subtitle{font-size:18px!important;}
+  .warm-room-account .account-id{font-size:11px!important;}
+  .warm-room-account .account-link{font-size:10px!important;padding:6px 7px!important;}
+  .warm-section-kicker,.warm-section-head h2{font-size:14px!important;}
+  .login-app-preview{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+  .warm-login-card{min-height:500px!important;}
+}
+@media(max-width:560px){
+  .warm-room-titleline h1,.warm-room-subtitle{font-size:15px!important;}
+  .warm-section-head > div:first-child{flex-wrap:wrap!important;gap:5px 8px!important;}
+  .warm-section-kicker,.warm-section-head h2{font-size:13px!important;white-space:normal!important;}
+  .login-app-preview{grid-template-columns:1fr!important;opacity:.20!important;}
+  .login-form-layer{width:94%!important;padding:18px!important;}
+}
+</style>
+
 </head>
 <body>
 <div class="wrap warm-room-wrap">
@@ -2807,6 +2934,15 @@ body::before{
   </header>
 
   <section id="loginSection" class="section login-card warm-login-card">
+    <div class="login-app-preview" aria-hidden="true">
+      <div class="login-preview-card lp-time"></div>
+      <div class="login-preview-card lp-detective"></div>
+      <div class="login-preview-card lp-dm"></div>
+      <div class="login-preview-card lp-quiz"></div>
+      <div class="login-preview-card lp-defense"></div>
+      <div class="login-preview-card lp-survival"></div>
+    </div>
+    <div class="login-form-layer">
     <h2 class="section-title">학생 로그인</h2>
     <div class="section-desc">학번과 이름을 입력하면 역사 학습실과 연결된 앱에서 같은 로그인 정보를 사용합니다.</div>
     <div class="login-grid">
@@ -2821,6 +2957,7 @@ body::before{
       <button id="loginBtn" class="btn btn-primary">학습 시작</button>
     </div>
     <div id="loginMsg" class="login-msg"></div>
+    </div>
   </section>
 
   <main id="dashboard" class="section dashboard warm-dashboard">
@@ -2835,7 +2972,7 @@ body::before{
     <section class="warm-panel warm-class-panel">
       <div class="warm-section-head">
         <div>
-          <span class="warm-section-kicker">오늘의 역사 수업</span>
+          <span class="warm-section-kicker">📖 오늘의 역사 수업</span>
           <h2>순서대로 활동을 진행해 보세요!</h2>
         </div>
       </div>
@@ -2846,7 +2983,7 @@ body::before{
     <section class="warm-panel warm-free-panel">
       <div class="warm-section-head">
         <div>
-          <span class="warm-section-kicker">자유 학습 · 게임</span>
+          <span class="warm-section-kicker">🎮 자유 학습 · 게임</span>
           <h2>수업을 마쳤다면 원하는 역사 활동을 즐겨보세요!</h2>
         </div>
         <div id="warmGameUnlock" class="warm-unlock-state">핵심 수업 완료 후 이용 가능</div>
