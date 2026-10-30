@@ -2516,6 +2516,163 @@ body::before{
 }
 </style>
 
+
+<style id="historyhub-compact-layout-v29">
+/* v2.9 - 카드 본문 압축: 상태문구 제거, 타이틀+2줄 설명, 버튼 하나로 상태 통일 */
+.warm-card-body.compact-card-body{
+  padding:12px 14px 13px!important;
+  min-height:122px!important;
+  gap:9px!important;
+}
+.compact-card-copy{
+  display:grid!important;
+  grid-template-columns:minmax(105px,.8fr) minmax(0,1.55fr)!important;
+  gap:12px!important;
+  align-items:start!important;
+}
+.compact-card-copy h3{
+  margin:0!important;
+  font-size:18px!important;
+  line-height:1.35!important;
+  min-height:48px!important;
+  display:flex!important;
+  align-items:flex-start!important;
+}
+.compact-card-copy p{
+  margin:0!important;
+  font-size:11px!important;
+  line-height:1.55!important;
+  color:#71665b!important;
+  display:-webkit-box!important;
+  -webkit-line-clamp:2!important;
+  -webkit-box-orient:vertical!important;
+  overflow:hidden!important;
+  min-height:34px!important;
+  max-height:34px!important;
+}
+.warm-card-step{display:none!important;}
+.warm-lock-reason{
+  margin-top:-1px!important;
+  padding:5px 8px!important;
+  min-height:0!important;
+  font-size:9px!important;
+}
+.warm-card-button{
+  height:38px!important;
+  margin-top:auto!important;
+}
+#coreAppsGrid .warm-card-body,
+#freeAppsGrid .warm-card-body{
+  min-height:122px!important;
+}
+
+/* 섹션 제목도 가로 한 줄형으로 압축 */
+.warm-section-head{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:16px!important;
+  margin-bottom:12px!important;
+}
+.warm-section-head > div:first-child{
+  display:flex!important;
+  align-items:center!important;
+  gap:12px!important;
+  min-width:0!important;
+}
+.warm-section-kicker{
+  margin:0!important;
+  white-space:nowrap!important;
+}
+.warm-section-head h2{
+  margin:0!important;
+  font-size:17px!important;
+  line-height:1.4!important;
+}
+.warm-unlock-state{
+  flex:none!important;
+}
+
+/* 상단 '오늘의 역사 수업' 영역도 가로형으로 정리 */
+.warm-status-banner{
+  grid-template-columns:minmax(250px,.72fr) minmax(0,1.5fr)!important;
+  padding:11px 16px!important;
+  min-height:0!important;
+}
+.warm-status-left{
+  display:flex!important;
+  align-items:center!important;
+  gap:12px!important;
+  min-width:0!important;
+}
+.warm-status-left strong{
+  flex:none!important;
+  font-size:17px!important;
+  white-space:nowrap!important;
+}
+.warm-status-left span{
+  margin:0!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+.warm-flow-line{
+  justify-content:flex-end!important;
+  flex-wrap:nowrap!important;
+  overflow-x:auto!important;
+  scrollbar-width:none;
+}
+.warm-flow-line::-webkit-scrollbar{display:none}
+.warm-flow-line i,.warm-flow-line b{flex:none!important}
+
+/* 준비 중 앱은 별도 작은 '연결 준비 중' 문구를 제거하고 버튼 하나로만 표시 */
+.app-history_legion .warm-lock-reason,
+.app-history_sharpshooter .warm-lock-reason{
+  display:none!important;
+}
+
+@media (max-width:900px){
+  .compact-card-copy{
+    grid-template-columns:minmax(98px,.82fr) minmax(0,1.4fr)!important;
+    gap:9px!important;
+  }
+  .compact-card-copy h3{font-size:16px!important}
+  .warm-status-banner{
+    grid-template-columns:1fr!important;
+    gap:8px!important;
+  }
+  .warm-status-left{
+    justify-content:space-between!important;
+  }
+  .warm-flow-line{
+    justify-content:flex-start!important;
+  }
+}
+@media (max-width:640px){
+  .warm-section-head{
+    align-items:flex-start!important;
+    flex-direction:column!important;
+    gap:7px!important;
+  }
+  .warm-section-head > div:first-child{
+    align-items:flex-start!important;
+    flex-direction:column!important;
+    gap:3px!important;
+  }
+  .compact-card-copy{
+    grid-template-columns:1fr!important;
+    gap:3px!important;
+  }
+  .compact-card-copy h3{
+    min-height:0!important;
+    font-size:17px!important;
+  }
+  .compact-card-copy p{
+    min-height:34px!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div class="wrap warm-room-wrap">
@@ -3516,18 +3673,22 @@ function buildWarmCard(app){
   card.className="warm-app-card app-"+app.id+(access.enabled?"":" locked");
   if(stepDone) card.classList.add("completed-target");
 
-  const actionText=!app.enabled ? "준비 중" : (!access.enabled ? "현재 잠김" : (stepDone ? "복습하기" : (progress.started ? "이어하기" : "시작하기")));
-  const statusText=stepNo ? `${stepNo}단계 · ${worksheetStepStatusLabel(app.id)}` : (!app.enabled ? "준비 중" : (access.enabled ? "이용 가능" : "잠김"));
+  const actionText=!app.enabled
+    ? "연결 준비 중"
+    : (!access.enabled
+        ? "현재 잠김"
+        : (stepDone ? "복습하기" : (progress.started ? "이어하기" : "시작하기")));
 
   card.innerHTML=`
     <button class="warm-card-art ${warmArtClass(app.id)}" type="button" aria-label="${app.name} 정보 보기">
       <span class="warm-art-icon">${app.icon}</span>
     </button>
-    <div class="warm-card-body">
-      <span class="warm-card-step">${statusText}</span>
-      <h3>${app.name}</h3>
-      <p>${app.description}</p>
-      ${access.reason ? `<div class="warm-lock-reason">${access.reason}</div>` : ``}
+    <div class="warm-card-body compact-card-body">
+      <div class="compact-card-copy">
+        <h3>${app.name}</h3>
+        <p>${app.description}</p>
+      </div>
+      ${access.reason && app.enabled ? `<div class="warm-lock-reason">${access.reason}</div>` : ``}
       <button class="warm-card-button" type="button" ${access.enabled?"":"disabled"}>${actionText} <b>›</b></button>
     </div>`;
 
