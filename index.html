@@ -2301,6 +2301,85 @@ body::before{
 }
 </style>
 
+
+<style id="warm-room-conflict-fix-v23">
+/* v2.3: legacy palace positioning must never affect the new card layout */
+#coreAppsGrid .warm-app-card,
+#freeAppsGrid .warm-app-card{
+  position:relative!important;
+  left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;
+  width:auto!important;height:auto!important;
+  min-width:0!important;min-height:0!important;max-width:none!important;
+  transform:none!important;margin:0!important;padding:0!important;
+  border-radius:18px!important;overflow:hidden!important;
+  background:#fffaf0!important;border:1px solid #dac5a4!important;
+  box-shadow:0 7px 18px rgba(76,52,27,.11)!important;
+  opacity:1!important;filter:none!important;
+}
+#coreAppsGrid .warm-app-card::before,
+#coreAppsGrid .warm-app-card::after,
+#freeAppsGrid .warm-app-card::before,
+#freeAppsGrid .warm-app-card::after{display:none!important}
+#coreAppsGrid .warm-card-art,
+#freeAppsGrid .warm-card-art{
+  position:relative!important;inset:auto!important;
+  width:100%!important;height:136px!important;min-height:136px!important;
+  transform:none!important;margin:0!important;padding:0!important;
+  border-radius:0!important;opacity:1!important;filter:none!important;
+}
+#coreAppsGrid .warm-card-body,
+#freeAppsGrid .warm-card-body{
+  position:relative!important;inset:auto!important;
+  width:auto!important;height:auto!important;min-height:0!important;
+  transform:none!important;margin:0!important;padding:14px 15px 15px!important;
+  opacity:1!important;filter:none!important;
+}
+#coreAppsGrid .warm-card-body h3,
+#freeAppsGrid .warm-card-body h3{
+  position:static!important;display:block!important;width:auto!important;height:auto!important;
+  transform:none!important;opacity:1!important;color:#251f1a!important;text-shadow:none!important;
+  font-size:18px!important;line-height:1.25!important;white-space:normal!important;
+}
+#coreAppsGrid .warm-card-button,
+#freeAppsGrid .warm-card-button{
+  position:static!important;inset:auto!important;width:100%!important;height:40px!important;
+  transform:none!important;opacity:1!important;filter:none!important;
+}
+#coreAppsGrid .warm-lock-reason,
+#freeAppsGrid .warm-lock-reason{min-height:0!important}
+
+/* Compact, stable classroom layout */
+.warm-room-wrap{max-width:1380px!important}
+.warm-room-header{min-height:74px!important;padding:14px 20px!important}
+.warm-status-banner{padding:12px 16px!important}
+.warm-panel{padding:18px!important}
+.warm-card-body p{min-height:34px!important}
+.warm-class-grid{align-items:stretch!important}
+.warm-static-card{min-height:0!important}
+.warm-worksheet-card .warm-card-art{height:136px!important;min-height:136px!important}
+
+@media(min-width:1101px){
+  .warm-class-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  .warm-class-grid > .warm-static-card{grid-column:auto!important}
+  .warm-class-grid > #coreAppsGrid{display:contents!important}
+  .warm-core-grid{display:contents!important}
+}
+@media(max-width:1100px){
+  .warm-class-grid{grid-template-columns:1fr!important}
+  .warm-core-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  .warm-worksheet-card{display:grid!important;grid-template-columns:190px 1fr!important}
+  .warm-worksheet-card .warm-card-art{height:auto!important;min-height:145px!important}
+}
+@media(max-width:820px){
+  .warm-core-grid,.warm-free-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .warm-worksheet-card{display:flex!important}
+  .warm-worksheet-card .warm-card-art{height:125px!important;min-height:125px!important}
+}
+@media(max-width:560px){
+  .warm-core-grid,.warm-free-grid{grid-template-columns:1fr!important}
+}
+</style>
+
 </head>
 <body>
 <div class="wrap warm-room-wrap">
