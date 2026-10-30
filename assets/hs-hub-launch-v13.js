@@ -1,6 +1,6 @@
-/* History Survival Hub launcher - AutoRegister integrated server */
+/* History Survival Hub launcher - v2.8 auth server fix */
 (()=>{'use strict';
- const OPT={serverUrl:'https://script.google.com/macros/s/AKfycbxjSzjvqHbrKpCjwnUbsGzYvqDvTdfVB8DUxkki5TXp-jX0wqfmlydpC7DWOIB14oLF2A/exec',survivalOrigin:'https://tavia08.github.io'};
+ const OPT={serverUrl:'https://script.google.com/macros/s/AKfycbxaNVvX4B1moP5mlKyk2wUP1NMfOyghLXGtRlWbK7l4x4uKRHOdW-Uj53QvjVYkYHhg/exec',survivalOrigin:'https://tavia08.github.io'};
  const waiters=new Map();
  function jsonp(p){return new Promise((resolve,reject)=>{
   const callback='hs13_'+Date.now()+'_'+Math.random().toString(36).slice(2);

@@ -2461,6 +2461,61 @@ body::before{
 }
 </style>
 
+
+<style id="historyhub-tablet-grid-fix-v26">
+/* 태블릿에서도 노트북과 동일한 세로형 3열 카드 유지 */
+@media (min-width:641px) and (max-width:1100px){
+  .warm-core-grid,
+  .warm-free-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:14px!important;
+  }
+
+  .warm-app-card{
+    display:flex!important;
+    flex-direction:column!important;
+    width:auto!important;
+    min-width:0!important;
+    max-width:none!important;
+    height:auto!important;
+  }
+
+  .warm-card-art{
+    width:100%!important;
+    height:170px!important;
+    min-height:170px!important;
+    flex:none!important;
+  }
+
+  .warm-card-body{
+    width:auto!important;
+    min-height:155px!important;
+    flex:1 1 auto!important;
+  }
+
+  #coreAppsGrid,
+  #freeAppsGrid{
+    width:100%!important;
+  }
+}
+
+/* 작은 태블릿/큰 휴대폰만 2열 */
+@media (min-width:581px) and (max-width:640px){
+  .warm-core-grid,
+  .warm-free-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
+
+/* 휴대폰만 1열 */
+@media (max-width:580px){
+  .warm-core-grid,
+  .warm-free-grid{
+    grid-template-columns:1fr!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div class="wrap warm-room-wrap">
