@@ -2398,6 +2398,69 @@ body::before{
 }
 </style>
 
+
+<style id="historyhub-final-card-images-v25">
+/* v2.5: 확정된 9개 카드 일러스트 */
+.warm-core-grid{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:16px!important;
+}
+.warm-free-grid{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:16px!important;
+}
+.warm-card-art{
+  height:190px!important;
+  min-height:190px!important;
+  background-size:cover!important;
+  background-position:center center!important;
+  background-repeat:no-repeat!important;
+}
+.warm-card-art::before,
+.warm-card-art::after{
+  display:none!important;
+}
+.warm-art-icon{
+  display:none!important;
+}
+.art-time{background-image:url("assets/time-explorer-card.jpg")!important;}
+.art-detective{background-image:url("assets/detective-card.jpg")!important;}
+.art-dm{background-image:url("assets/history-dm-card.jpg")!important;}
+.art-quiz{background-image:url("assets/history-quiz-card.jpg")!important;}
+.art-defense{background-image:url("assets/history-defense-card.jpg")!important;}
+.art-survival{background-image:url("assets/history-survival-card.jpg")!important;}
+.art-tycoon{background-image:url("assets/history-tycoon-card.jpg")!important;}
+.art-legion{
+  background-image:url("assets/history-legion-card.jpg")!important;
+  filter:grayscale(.18) brightness(.82);
+}
+.art-sharpshooter{
+  background-image:url("assets/history-sharpshooter-card.jpg")!important;
+  filter:grayscale(.18) brightness(.82);
+}
+
+/* 학습지 카드를 제거한 뒤 필수 3개를 바로 상단에 배치 */
+.warm-class-panel .warm-section-head{margin-bottom:16px!important;}
+.warm-class-panel{padding-bottom:20px!important;}
+#coreAppsGrid .warm-card-body{min-height:155px!important;}
+#freeAppsGrid .warm-card-body{min-height:170px!important;}
+
+@media(max-width:900px){
+  .warm-core-grid,.warm-free-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
+@media(max-width:580px){
+  .warm-core-grid,.warm-free-grid{
+    grid-template-columns:1fr!important;
+  }
+  .warm-card-art{
+    height:170px!important;
+    min-height:170px!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div class="wrap warm-room-wrap">
@@ -2449,18 +2512,7 @@ body::before{
         </div>
       </div>
 
-      <div class="warm-class-grid">
-        <article class="warm-static-card warm-worksheet-card">
-          <div class="warm-card-art art-worksheet" aria-hidden="true"><span>📖</span></div>
-          <div class="warm-card-body">
-            <span class="warm-card-step">수업 준비</span>
-            <h3>학습지 공부</h3>
-            <p>오늘 배울 내용을 먼저 확인하세요.</p>
-            <div class="warm-static-badge">학습지 먼저 확인</div>
-          </div>
-        </article>
-        <div id="coreAppsGrid" class="warm-app-grid warm-core-grid"></div>
-      </div>
+      <div id="coreAppsGrid" class="warm-app-grid warm-core-grid"></div>
     </section>
 
     <section class="warm-panel warm-free-panel">
