@@ -2673,14 +2673,65 @@ body::before{
 }
 </style>
 
+
+<style id="historyhub-header-title-v30">
+/* v3.0 - 메인 제목 옆에 '즐기는 역사' 보조 타이틀 배치 */
+.warm-room-titleline{
+  display:flex!important;
+  align-items:center!important;
+  gap:14px!important;
+  min-width:0!important;
+}
+.warm-room-titleline h1{
+  margin:0!important;
+  line-height:1.15!important;
+  white-space:nowrap!important;
+}
+.warm-room-subtitle{
+  display:inline-flex!important;
+  align-items:center!important;
+  color:#f2d28c!important;
+  font-size:20px!important;
+  line-height:1.2!important;
+  font-weight:900!important;
+  white-space:nowrap!important;
+  padding-left:14px!important;
+  border-left:1px solid rgba(244,214,150,.45)!important;
+  letter-spacing:-.02em!important;
+}
+.warm-room-kicker{
+  display:none!important;
+}
+@media(max-width:820px){
+  .warm-room-titleline{gap:9px!important}
+  .warm-room-titleline h1{font-size:24px!important}
+  .warm-room-subtitle{
+    font-size:16px!important;
+    padding-left:9px!important;
+  }
+}
+@media(max-width:560px){
+  .warm-room-titleline{
+    flex-wrap:wrap!important;
+    gap:4px 8px!important;
+  }
+  .warm-room-subtitle{
+    font-size:14px!important;
+    padding-left:8px!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div class="wrap warm-room-wrap">
   <header class="hero warm-room-header">
     <div class="brand warm-room-brand">
       <div class="warm-room-titleblock">
-        <div class="warm-room-kicker">즐기는 역사</div>
-        <h1>노선생 역사 학습실</h1>
+        <div class="warm-room-titleline">
+          <h1>노선생 역사 학습실</h1>
+          <span class="warm-room-subtitle">즐기는 역사</span>
+        </div>
       </div>
     </div>
     <div id="userPill" class="user-pill warm-room-account" style="display:none">
