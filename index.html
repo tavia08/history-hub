@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
@@ -2926,6 +2926,82 @@ body::before{
   .warm-section-kicker,.warm-section-head h2{font-size:13px!important;white-space:normal!important;}
   .login-bottom-preview-grid{grid-template-columns:1fr!important;opacity:.22!important;}
   .login-bottom-preview{min-height:280px!important;}
+}
+</style>
+
+
+<style id="historyhub-tablet-orientation-stable-v36">
+/* v3.6
+   패드 가로/세로에서 동일한 3열 카드 구조 유지.
+   구형 데스크톱 warm-class-grid/display:contents 규칙을 최종 무력화한다.
+*/
+
+/* 학습지 카드 제거 후 클래스 영역은 항상 단일 컬럼 컨테이너 */
+.warm-class-grid{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  gap:14px!important;
+  width:100%!important;
+}
+
+/* 핵심 3개 / 자유학습 카드 모두 독립 3열 grid */
+#coreAppsGrid,
+#freeAppsGrid,
+.warm-core-grid,
+.warm-free-grid{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:14px!important;
+  width:100%!important;
+}
+
+/* 구형 desktop 규칙의 display:contents 차단 */
+.warm-class-grid > #coreAppsGrid,
+.warm-class-grid > .warm-core-grid{
+  display:grid!important;
+  grid-column:auto!important;
+}
+
+/* 카드 형태도 방향 전환 시 가로 카드로 변하지 않도록 고정 */
+#coreAppsGrid .warm-app-card,
+#freeAppsGrid .warm-app-card{
+  display:flex!important;
+  flex-direction:column!important;
+  width:auto!important;
+  min-width:0!important;
+  max-width:none!important;
+  height:auto!important;
+}
+
+/* 패드: 방향과 관계없이 3열 */
+@media (min-width:641px){
+  #coreAppsGrid,
+  #freeAppsGrid,
+  .warm-core-grid,
+  .warm-free-grid{
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  }
+}
+
+/* 작은 태블릿 / 큰 휴대폰 */
+@media (min-width:581px) and (max-width:640px){
+  #coreAppsGrid,
+  #freeAppsGrid,
+  .warm-core-grid,
+  .warm-free-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
+
+/* 휴대폰 */
+@media (max-width:580px){
+  #coreAppsGrid,
+  #freeAppsGrid,
+  .warm-core-grid,
+  .warm-free-grid{
+    grid-template-columns:1fr!important;
+  }
 }
 </style>
 
