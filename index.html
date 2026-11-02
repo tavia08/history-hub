@@ -3132,7 +3132,7 @@ const APPS = [
     name: "시간탐험대",
     icon: "⏳",
     description: "핵심 내용을 복습하는 시간여행 퀴즈",
-    url: "time_explorer/index.html",
+    url: "time_explorer/index.html?v=freeunlock-20261102",
     enabled: true,
     tone: "#dbeafe"
   },
@@ -3580,10 +3580,10 @@ function classAppUrl(app){
   if(app.id === "time_explorer"){
     if(op.mode === "CLASS" && bundle){
       const ws = encodeURIComponent(op.worksheetId || "");
-      return `time_explorer/index.html?hubMode=CLASS&hubWorksheet=${ws}`;
+      return `time_explorer/index.html?v=freeunlock-20261102&hubMode=CLASS&hubWorksheet=${ws}`;
     }
     if(op.mode === "FREE" || op.mode === "OPEN"){
-      return `time_explorer/index.html?hubMode=${encodeURIComponent(op.mode)}`;
+      return `time_explorer/index.html?v=freeunlock-20261102&hubMode=${encodeURIComponent(op.mode)}`;
     }
     return app.url;
   }
