@@ -3505,8 +3505,14 @@ function worksheetStepComplete(appId){
     const route = bundle.timeExplorer;
     const state = hub.timeExplorer && hub.timeExplorer.state;
     const era = state && state.eras && state.eras[route.era];
-    const done = era && Array.isArray(era.completedStages) ? era.completedStages : [];
-    return done.includes(route.stage);
+
+    // 자유/전체개방 개인학습 완료와 수업모드 완료를 분리한다.
+    // 구버전 기록은 classCompletedStages가 생기기 전까지 completedStages를 fallback으로 인정한다.
+    const classDone = era && Array.isArray(era.classCompletedStages)
+      ? era.classCompletedStages
+      : (era && Array.isArray(era.completedStages) ? era.completedStages : []);
+
+    return classDone.includes(route.stage);
   }
 
 
@@ -3569,15 +3575,24 @@ function classAppUrl(app){
   const bundle = getWorksheetBundle();
 
 
+  // v1.6: 시간탐험대에는 학습실 운영모드를 명시적으로 전달한다.
+  // CLASS는 교사 지정 차시, FREE/OPEN은 자유 선택 모드로 분리한다.
+  if(app.id === "time_explorer"){
+    if(op.mode === "CLASS" && bundle){
+      const ws = encodeURIComponent(op.worksheetId || "");
+      return `time_explorer/index.html?hubMode=CLASS&hubWorksheet=${ws}`;
+    }
+    if(op.mode === "FREE" || op.mode === "OPEN"){
+      return `time_explorer/index.html?hubMode=${encodeURIComponent(op.mode)}`;
+    }
+    return app.url;
+  }
+
+
   if(op.mode !== "CLASS" || !bundle) return app.url;
 
 
   const ws = encodeURIComponent(op.worksheetId || "");
-
-
-  if(app.id === "time_explorer"){
-    return `time_explorer/index.html?hubWorksheet=${ws}`;
-  }
 
 
   if(app.id === "detective"){
