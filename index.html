@@ -3275,7 +3275,7 @@ function readHubState(){
 function getClassOperation(){
   const hub = readHubState();
   return hub && hub.classOperation ? hub.classOperation : {
-    mode:"OPEN",
+    mode:"WAITING",
     worksheetId:"",
     worksheetTitle:"",
     requiredApps:["time_explorer","detective","history_dm"],
@@ -3643,6 +3643,10 @@ function appAccessState(app){
   }
 
 
+  if(op.mode === "WAITING" || op.mode === "LOADING" || !["CLASS","FREE","OPEN"].includes(op.mode)){
+    return {enabled:false, reason:op.mode === "LOADING" ? "수업 운영정보를 확인하고 있어요." : "선생님이 수업을 준비하고 있습니다."};
+  }
+
   if(op.mode === "OPEN"){
     return {enabled:true, reason:""};
   }
@@ -3911,6 +3915,10 @@ let selectedHubAppId = "";
 
 
 function launchHubApp(app){
+  if(!appAccessState(app).enabled){
+    alert("현재 이용할 수 없는 학습활동입니다. 선생님의 수업 설정을 확인해주세요.");
+    return;
+  }
   const s=getStudent();
   if(!s.studentId){
     showLogin("메인페이지에서 먼저 로그인해주세요.", false);
@@ -4074,7 +4082,7 @@ function updateWarmUnlock(){
   const badge=el("warmGameUnlock");
   if(!badge) return;
   const op=getClassOperation();
-  const open=op.mode!=="CLASS" || coreLearningComplete();
+  const open=(op.mode==="FREE" || op.mode==="OPEN" || (op.mode==="CLASS" && coreLearningComplete()));
   badge.textContent=open ? "자유 활동 이용 가능 ✓" : "핵심 수업 완료 후 이용 가능";
   badge.classList.toggle("open",open);
 }
@@ -4368,6 +4376,29 @@ el("logoutBtn").addEventListener("click", () => {
 
 
 
+
+// 2026-11-04: 운영모드 검증 및 안전한 대기 상태. 서버에서도 날짜별 초기화가 필요합니다.
+function hubWaitingOperation(){
+  return {mode:"WAITING",worksheetId:"",worksheetTitle:"",requiredApps:["time_explorer","detective","history_dm"],unlockGamesAfterCore:true,enabled:false};
+}
+function hubKoreanDateKey(value){
+  if(value === undefined || value === null || value === "") return "";
+  const d = new Date(value);
+  if(!Number.isFinite(d.getTime())) return "";
+  return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit"}).format(d);
+}
+function hubSafeOperation(operation){
+  if(!operation || typeof operation !== "object") return hubWaitingOperation();
+  if(!["CLASS","FREE","OPEN"].includes(operation.mode)) return hubWaitingOperation();
+  const stamp=operation.operationDate || operation.dateKey || operation.setDate || operation.modeDate || operation.updatedAt || operation.setAt;
+  if(stamp){
+    const today=hubKoreanDateKey(Date.now());
+    const day=/^\d{4}-\d{2}-\d{2}$/.test(String(stamp)) ? String(stamp) : hubKoreanDateKey(stamp);
+    if(day && day!==today) return hubWaitingOperation();
+  }
+  return operation;
+}
+
 let classOperationPollTimer = null;
 let classOperationJsonpSeq = 0;
 let hubStateRefreshSeq = 0;
@@ -4391,6 +4422,7 @@ function refreshFullHubStateFromServer(){
     window[callbackName]=payload=>{
       if(finished)return; cleanup();
       if(payload && payload.status==="ok" && payload.hubState){
+        payload.hubState.classOperation = hubSafeOperation(payload.hubState.classOperation);
         localStorage.setItem("historyHubStateV1",JSON.stringify(payload.hubState));
         localStorage.setItem("historyHubStateStudentId",String(payload.student?.studentId||""));
         renderApps(); resolve(true);
@@ -4434,7 +4466,7 @@ function refreshClassOperationFromServer(){
       if(payload && payload.status === "ok" && payload.operation){
         const latestHub = readHubState();
         if(latestHub){
-          latestHub.classOperation = payload.operation;
+          latestHub.classOperation = hubSafeOperation(payload.operation);
           latestHub.loadedAt = Date.now();
           localStorage.setItem("historyHubStateV1", JSON.stringify(latestHub));
           renderApps();
@@ -4551,8 +4583,8 @@ document.querySelector(".hq-scene")?.addEventListener("click",(e)=>{
 <script id="palace-hq-operation-mode-fix-v1">
 function getClassOperation(){
   const hub = readHubState();
-  return hub && hub.classOperation ? hub.classOperation : {
-    mode:"LOADING",
+  return hub && hub.classOperation ? (hub.classOperation.mode === "LOADING" ? hub.classOperation : hubSafeOperation(hub.classOperation)) : {
+    mode:"WAITING",
     worksheetId:"",
     worksheetTitle:"",
     requiredApps:["time_explorer","detective","history_dm"],
@@ -4574,6 +4606,11 @@ function renderClassModeBanner(){
   if(op.mode === "LOADING"){
     lesson.textContent = "수업 운영정보를 불러오는 중입니다.";
     flow.innerHTML = `<i class="now">교사 수업모드를 확인하고 있어요.</i>`;
+    return;
+  }
+  if(op.mode === "WAITING"){
+    lesson.textContent = "선생님이 수업을 준비하고 있습니다.";
+    flow.innerHTML = `<i class="lock">수업이 시작되면 학습활동을 이용할 수 있어요.</i>`;
     return;
   }
   if(op.mode === "FREE"){

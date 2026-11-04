@@ -568,7 +568,7 @@ function render(data){
   const op=data.operation||{};
   const session=data.activeSession;
   
-  const modeLabel = {CLASS:"📘 수업 모드", FREE:"🎮 자유 모드", OPEN:"🔓 전체 개방"}[op.mode] || op.mode || "-";
+  const modeLabel = {WAITING:"⏳ 수업 대기", CLASS:"📘 수업 모드", FREE:"🎮 자유 모드", OPEN:"🔓 전체 개방"}[op.mode] || op.mode || "-";
   $("modeBadge").textContent = "현재: " + modeLabel;
   document.querySelectorAll("[data-mode]").forEach(btn=>{
     btn.classList.toggle("active", btn.dataset.mode === op.mode);
